@@ -1,27 +1,27 @@
 # Visual Studio
 .vs/
-*.user
-*.suo
 
-# Build
+# Build folders
 bin/
 obj/
 
-# Rider
-.idea/
+# User files
+*.user
+*.suo
 
-# VS Code
-.vscode/
+# Rider / VSCode
+.idea/
+.vscode/    
 
 # Logs
 *.log
 
-# NuGet
-*.nupkg
-
 # ASP.NET
-wwwroot/lib/
+*.cache
+
+# NuGet
+packages/
 
 # OS
-.DS_Store
 Thumbs.db
+.DS_Store
