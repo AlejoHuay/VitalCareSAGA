@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MSProductos.Aplicacion\MSProductos.Aplicacion.csproj" />
+    <ProjectReference Include="..\MSProductos.Domain\MSProductos.Dominio.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Conexion\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Repositorios\" />
+  </ItemGroup>
+
+</Project>

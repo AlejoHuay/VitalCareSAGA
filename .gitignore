@@ -1,0 +1,27 @@
+# Visual Studio
+.vs/
+
+# Build folders
+bin/
+obj/
+
+# User files
+*.user
+*.suo
+
+# Rider / VSCode
+.idea/
+.vscode/    
+
+# Logs
+*.log
+
+# ASP.NET
+*.cache
+
+# NuGet
+packages/
+
+# OS
+Thumbs.db
+.DS_Store
