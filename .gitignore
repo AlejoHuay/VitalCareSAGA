@@ -1,6 +1,3 @@
-# Visual Studio
-.vs/
-
 # Build folders
 bin/
 obj/
@@ -11,13 +8,13 @@ obj/
 
 # Rider / VSCode
 .idea/
-.vscode/    
+.vscode/
 
 # Logs
 *.log
 
 # ASP.NET
-*.cache
+.cache/
 
 # NuGet
 packages/
@@ -25,3 +22,20 @@ packages/
 # OS
 Thumbs.db
 .DS_Store
+
+# Secrets / local config
+.env
+.env.*
+appsettings.Local.json
+appsettings.*.local.json
+
+# Visual Studio
+.vs/
+
+# Test results
+TestResults/
+*.trx
+
+# Publish output
+publish/
+wwwroot/lib/
