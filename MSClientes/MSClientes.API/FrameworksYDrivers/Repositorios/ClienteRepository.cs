@@ -17,6 +17,7 @@ namespace MSClientes.API.FrameworksYDrivers.Repositorios
             MongoClient clienteMongo = new MongoClient(configuracion.CadenaConexion);
             IMongoDatabase baseDatos = clienteMongo.GetDatabase(configuracion.NombreBaseDatos);
             clientes = baseDatos.GetCollection<Cliente>(configuracion.NombreColeccionClientes);
+            CrearIndices();
         }
 
         public int Insert(Cliente cliente)
@@ -115,6 +116,27 @@ namespace MSClientes.API.FrameworksYDrivers.Repositorios
                                                  Builders<Cliente>.Filter.Regex(c => c.CorreoElectronico, expresion);
 
             return activos & busqueda;
+        }
+
+        private void CrearIndices()
+        {
+            IEnumerable<CreateIndexModel<Cliente>> indices = new[]
+            {
+                new CreateIndexModel<Cliente>(
+                    Builders<Cliente>.IndexKeys.Ascending(c => c.IdCliente),
+                    new CreateIndexOptions { Unique = true, Name = "ux_clientes_id_cliente" }),
+                new CreateIndexModel<Cliente>(
+                    Builders<Cliente>.IndexKeys.Ascending(c => c.Nit),
+                    new CreateIndexOptions { Name = "ix_clientes_nit" }),
+                new CreateIndexModel<Cliente>(
+                    Builders<Cliente>.IndexKeys.Ascending(c => c.Estado),
+                    new CreateIndexOptions { Name = "ix_clientes_estado" }),
+                new CreateIndexModel<Cliente>(
+                    Builders<Cliente>.IndexKeys.Ascending(c => c.RazonSocial),
+                    new CreateIndexOptions { Name = "ix_clientes_razon_social" })
+            };
+
+            clientes.Indexes.CreateMany(indices);
         }
     }
 }
