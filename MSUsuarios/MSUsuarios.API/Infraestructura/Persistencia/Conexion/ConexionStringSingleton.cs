@@ -1,6 +1,6 @@
 using DotNetEnv;
 
-namespace ServicioUsuarios.Infraestructura.Persistencia.Conexion
+namespace MSUsuarios.Infraestructura.Persistencia.Conexion
 {
     public class ConexionStringSingleton
     {
