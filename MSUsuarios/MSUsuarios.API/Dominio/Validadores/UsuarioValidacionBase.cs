@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace ServicioUsuarios.Dominio.Validadores
+namespace MSUsuarios.Dominio.Validadores
 {
     public abstract class UsuarioValidacionBase
     {

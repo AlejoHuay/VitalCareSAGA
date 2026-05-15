@@ -1,7 +1,7 @@
-using ServicioUsuarios.App.DTOs;
-using ServicioUsuarios.Dominio.Validadores;
+using MSUsuarios.App.DTOs;
+using MSUsuarios.Dominio.Validadores;
 
-namespace ServicioUsuarios.App.Interfaces
+namespace MSUsuarios.App.Interfaces
 {
     public interface IAuthService
     {

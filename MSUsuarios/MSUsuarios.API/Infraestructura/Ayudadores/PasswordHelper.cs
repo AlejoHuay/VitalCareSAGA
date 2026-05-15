@@ -1,4 +1,4 @@
-namespace ServicioUsuarios.Infraestructura.Ayudadores
+namespace MSUsuarios.Infraestructura.Ayudadores
 {
     public static class PasswordHelper
     {

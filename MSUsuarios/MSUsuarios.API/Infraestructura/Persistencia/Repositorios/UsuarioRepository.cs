@@ -1,10 +1,10 @@
 using MySql.Data.MySqlClient;
-using ServicioUsuarios.Dominio.Modelos;
-using ServicioUsuarios.Dominio.Puertos.PuertoSalida;
-using ServicioUsuarios.Infraestructura.Ayudadores;
-using ServicioUsuarios.Infraestructura.Persistencia.Conexion;
+using MSUsuarios.Dominio.Modelos;
+using MSUsuarios.Dominio.Puertos.PuertoSalida;
+using MSUsuarios.Infraestructura.Ayudadores;
+using MSUsuarios.Infraestructura.Persistencia.Conexion;
 
-namespace ServicioUsuarios.Infraestructura.Persistencia.Repositorios
+namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
 {
     public class UsuarioRepository : IUsuarioRepository
     {

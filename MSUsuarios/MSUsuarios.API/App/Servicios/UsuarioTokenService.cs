@@ -1,11 +1,11 @@
-using ServicioUsuarios.App.DTOs;
-using ServicioUsuarios.App.Interfaces;
-using ServicioUsuarios.Dominio.Modelos;
-using ServicioUsuarios.Dominio.Puertos.PuertoSalida;
-using ServicioUsuarios.Dominio.Validadores;
-using ServicioUsuarios.Infraestructura.Ayudadores;
+using MSUsuarios.App.DTOs;
+using MSUsuarios.App.Interfaces;
+using MSUsuarios.Dominio.Modelos;
+using MSUsuarios.Dominio.Puertos.PuertoSalida;
+using MSUsuarios.Dominio.Validadores;
+using MSUsuarios.Infraestructura.Ayudadores;
 
-namespace ServicioUsuarios.App.Servicios
+namespace MSUsuarios.App.Servicios
 {
     public class UsuarioTokenService : IUsuarioTokenService
     {

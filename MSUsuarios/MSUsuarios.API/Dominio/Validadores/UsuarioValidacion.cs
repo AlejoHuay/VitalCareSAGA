@@ -1,9 +1,9 @@
 using System.Text.RegularExpressions;
-using ServicioUsuarios.App.DTOs;
-using ServicioUsuarios.Dominio.Modelos;
-using ServicioUsuarios.Dominio.Puertos.PuertoSalida;
+using MSUsuarios.App.DTOs;
+using MSUsuarios.Dominio.Modelos;
+using MSUsuarios.Dominio.Puertos.PuertoSalida;
 
-namespace ServicioUsuarios.Dominio.Validadores
+namespace MSUsuarios.Dominio.Validadores
 {
     public class UsuarioValidacionGeneral : UsuarioValidacionBase
     {

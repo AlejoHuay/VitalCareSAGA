@@ -1,6 +1,6 @@
-using ServicioUsuarios.Dominio.Modelos;
+using MSUsuarios.Dominio.Modelos;
 
-namespace ServicioUsuarios.Dominio.Puertos.PuertoSalida
+namespace MSUsuarios.Dominio.Puertos.PuertoSalida
 {
     public interface IUsuarioRepository : IRepository<Usuario>
     {

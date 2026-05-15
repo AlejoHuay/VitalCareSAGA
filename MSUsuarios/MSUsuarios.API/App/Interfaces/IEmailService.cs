@@ -1,6 +1,6 @@
-using ServicioUsuarios.Dominio.Validadores;
+using MSUsuarios.Dominio.Validadores;
 
-namespace ServicioUsuarios.App.Interfaces
+namespace MSUsuarios.App.Interfaces
 {
     public interface IEmailService
     {

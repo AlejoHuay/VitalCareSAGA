@@ -1,4 +1,4 @@
-namespace ServicioUsuarios.Dominio.Modelos
+namespace MSUsuarios.Dominio.Modelos
 {
     public class UsuarioToken
     {

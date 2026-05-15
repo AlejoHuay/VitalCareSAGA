@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Mail;
-using ServicioUsuarios.App.Interfaces;
-using ServicioUsuarios.Dominio.Modelos;
-using ServicioUsuarios.Dominio.Validadores;
+using MSUsuarios.App.Interfaces;
+using MSUsuarios.Dominio.Modelos;
+using MSUsuarios.Dominio.Validadores;
 
-namespace ServicioUsuarios.App.Servicios
+namespace MSUsuarios.App.Servicios
 {
     public class EmailService : IEmailService
     {

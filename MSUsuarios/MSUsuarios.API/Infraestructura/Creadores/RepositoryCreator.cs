@@ -1,6 +1,6 @@
 using MSUsuarios.Dominio.Puertos.PuertoSalida;
 
-namespace MSUsuarios.API.Infraestructura.Creadores
+namespace MSUsuarios.Infraestructura.Creadores
 {
     public abstract class RepositoryCreator<T>
     {

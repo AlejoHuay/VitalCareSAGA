@@ -1,6 +1,6 @@
-using ServicioUsuarios.Dominio.Validadores;
+using MSUsuarios.Dominio.Validadores;
 
-namespace ServicioUsuarios.Infraestructura.Ayudadores
+namespace MSUsuarios.Infraestructura.Ayudadores
 {
     public static class FiltroHelper
     {

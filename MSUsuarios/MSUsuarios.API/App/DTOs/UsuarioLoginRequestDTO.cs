@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ServicioUsuarios.App.DTOs
+namespace MSUsuarios.App.DTOs
 {
     public class UsuarioLoginRequestDto
     {

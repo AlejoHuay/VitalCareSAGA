@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ServicioUsuarios.Infraestructura.Ayudadores
+namespace MSUsuarios.Infraestructura.Ayudadores
 {
     public static class CredencialesHelper
     {

@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ServicioUsuarios.App.DTOs;
-using ServicioUsuarios.App.Interfaces;
-using ServicioUsuarios.Dominio.Validadores;
-using ServicioUsuarios.Infraestructura.Ayudadores;
-namespace ServicioUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
+using MSUsuarios.App.DTOs;
+using MSUsuarios.App.Interfaces;
+using MSUsuarios.Dominio.Validadores;
+using MSUsuarios.Infraestructura.Ayudadores;
+
+namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
 {
     [ApiController]
     [Route("api/usuarios")]

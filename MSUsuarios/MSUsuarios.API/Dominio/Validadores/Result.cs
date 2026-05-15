@@ -1,4 +1,4 @@
-namespace ServicioUsuarios.Dominio.Validadores
+namespace MSUsuarios.Dominio.Validadores
 {
     public class Result
     {

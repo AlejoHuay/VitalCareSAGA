@@ -1,4 +1,4 @@
-namespace ServicioUsuarios.App.DTOs
+namespace MSUsuarios.App.DTOs
 {
     public class UsuarioActualizarDto
     {
