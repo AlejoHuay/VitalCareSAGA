@@ -23,6 +23,7 @@ namespace MSUsuarios.Dominio.Validadores
             string? apellidoPaterno = LimpiarTexto(dto.ApellidoPaterno);
             string? apellidoMaterno = LimpiarTexto(dto.ApellidoMaterno);
             string? ci = LimpiarTexto(dto.Ci);
+            string? ciExtension = LimpiarTexto(dto.CiExtencion);
             string? telefono = LimpiarTexto(dto.Telefono);
             string? email = LimpiarTexto(dto.Email);
             string? userName = LimpiarTexto(dto.UserName);
@@ -30,6 +31,7 @@ namespace MSUsuarios.Dominio.Validadores
 
             Result? resultado = ValidarCamposObligatorios(nombres, apellidoPaterno, apellidoMaterno, email)
                 ?? ValidarCi(ci)
+                ?? ValidarCiExtension(ciExtension)
                 ?? ValidarTelefono(telefono)
                 ?? ValidarEmail(email)
                 ?? ValidarPassword(password)
@@ -51,11 +53,13 @@ namespace MSUsuarios.Dominio.Validadores
             string? apellidoPaterno = LimpiarTexto(dto.ApellidoPaterno);
             string? apellidoMaterno = LimpiarTexto(dto.ApellidoMaterno);
             string? ci = LimpiarTexto(dto.Ci);
+            string? ciExtension = LimpiarTexto(dto.CiExtencion);
             string? telefono = LimpiarTexto(dto.Telefono);
             string? email = LimpiarTexto(dto.Email);
 
             Result? resultado = ValidarCamposObligatorios(nombres, apellidoPaterno, apellidoMaterno, email)
                 ?? ValidarCi(ci)
+                ?? ValidarCiExtension(ciExtension)
                 ?? ValidarTelefono(telefono)
                 ?? ValidarEmail(email);
 
@@ -97,8 +101,19 @@ namespace MSUsuarios.Dominio.Validadores
             if (ci!.Contains(' '))
                 return Result.Fail("El numero de carnet no debe contener espacios.");
 
-            if (!Regex.IsMatch(ci, @"^\d{8}(?:-[A-Za-z0-9]{1,2})?$"))
-                return Result.Fail("El CI debe tener 8 digitos y un complemento opcional de hasta dos caracteres (Ej. 10000000-1B).");
+            if (!Regex.IsMatch(ci, @"^\d{8}$"))
+                return Result.Fail("El CI debe tener exactamente 8 digitos numericos.");
+
+            return null;
+        }
+
+        private Result? ValidarCiExtension(string? ciExtension)
+        {
+            if (string.IsNullOrWhiteSpace(ciExtension))
+                return Result.Fail("La extension del CI es obligatoria.");
+
+            if (!ExtensionesValidas.Contains(ciExtension!))
+                return Result.Fail("La extension del CI no es valida.");
 
             return null;
         }

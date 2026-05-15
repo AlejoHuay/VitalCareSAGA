@@ -1,4 +1,5 @@
 using DotNetEnv;
+using Microsoft.Extensions.Configuration;
 
 namespace MSUsuarios.Infraestructura.Persistencia.Conexion
 {
@@ -16,10 +17,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Conexion
                 {
                     lock (bloqueo)
                     {
-                        if (instancia == null)
-                        {
-                            instancia = new ConexionStringSingleton();
-                        }
+                        instancia ??= new ConexionStringSingleton();
                     }
                 }
 
@@ -31,21 +29,30 @@ namespace MSUsuarios.Infraestructura.Persistencia.Conexion
         {
             Env.Load("../.env");
 
-            string? cadenaConexionCompleta = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION");
-            if (!string.IsNullOrWhiteSpace(cadenaConexionCompleta))
-            {
-                cadenaConexion = cadenaConexionCompleta;
-                return;
-            }
+            string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+            IConfigurationRoot configuracion = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{environmentName}.local.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
 
+            cadenaConexion = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION")
+                ?? configuracion.GetConnectionString("PostgresConnection")
+                ?? ConstruirCadenaConexionDesdeVariables();
+        }
+
+        private static string ConstruirCadenaConexionDesdeVariables()
+        {
             string host = ObtenerVariableObligatoria("POSTGRES_HOST");
             string port = ObtenerVariableObligatoria("POSTGRES_PORT");
             string database = ObtenerVariableObligatoria("POSTGRES_DB");
             string user = ObtenerVariableObligatoria("POSTGRES_USER");
             string password = ObtenerVariableObligatoria("POSTGRES_PASSWORD");
 
-            cadenaConexion =
-                $"Host={host};Port={port};Database={database};Username={user};Password={password};";
+            return $"Host={host};Port={port};Database={database};Username={user};Password={password};";
         }
 
         private static string ObtenerVariableObligatoria(string nombre)

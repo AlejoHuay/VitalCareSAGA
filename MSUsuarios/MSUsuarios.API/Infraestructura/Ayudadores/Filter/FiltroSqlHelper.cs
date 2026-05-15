@@ -1,4 +1,3 @@
-using MySql.Data.MySqlClient;
 using Npgsql;
 using System.Text;
 
@@ -21,7 +20,7 @@ namespace MSUsuarios.Infraestructura.Ayudadores
 
                 for (int j = 0; j < columnas.Length; j++)
                 {
-                    condicion.Append($"REPLACE({columnas[j]}, ' ', '') LIKE @valor{i}");
+                    condicion.Append($"REPLACE(COALESCE(({columnas[j]})::text, ''), ' ', '') ILIKE @valor{i}");
 
                     if (j < columnas.Length - 1)
                         condicion.Append(" OR ");
@@ -31,17 +30,6 @@ namespace MSUsuarios.Infraestructura.Ayudadores
             }
 
             return condicion.ToString();
-        }
-
-        public static void AgregarParametrosLike(MySqlCommand command, string filtro)
-        {
-            string[] partes = FiltroHelper.ObtenerPartes(filtro);
-
-            for (int i = 0; i < partes.Length; i++)
-            {
-                string valor = StringHelper.QuitarEspacios(partes[i]);
-                command.Parameters.AddWithValue($"@valor{i}", $"%{valor}%");
-            }
         }
 
         public static void AgregarParametrosLike(NpgsqlCommand command, string filtro)
