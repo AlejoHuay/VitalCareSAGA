@@ -1,7 +1,15 @@
+using FrontendVCare.Adaptadores;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddHttpClient<ClienteApiAdapter>(client =>
+{
+    string baseUrl = builder.Configuration["ApiUrls:MSClientes"]
+        ?? "http://localhost:5055/";
+    client.BaseAddress = new Uri(baseUrl);
+});
 
 var app = builder.Build();
 

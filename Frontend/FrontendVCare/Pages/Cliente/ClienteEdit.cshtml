@@ -1,0 +1,98 @@
+@page "{id:int?}"
+@model FrontendVCare.Pages.ClienteEditModel
+@{
+    ViewData["Title"] = "Actualizar Cliente";
+}
+
+<section class="client-form-page">
+    <div class="form-shell">
+        <div class="form-header bg-success text-white">
+            <h1>Actualizar Cliente</h1>
+            <p>Modifica los datos del cliente seleccionado.</p>
+        </div>
+
+        <form method="post" asp-page-handler="ActualizarCliente" class="form-body">
+            <input type="hidden" asp-for="Cliente.IdCliente" />
+
+            <div class="mb-4">
+                <label class="form-label fw-bold text-muted d-block mb-3">Tipo de registro</label>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="choice-box" for="tipoClienteFormal">
+                            <input asp-for="Cliente.EsConsumidorFinal" id="tipoClienteFormal" type="radio" value="false" class="form-check-input me-2" />
+                            <span class="fw-semibold d-block mb-1">Cliente con datos fiscales</span>
+                            <span class="text-muted small">Permite editar NIT, razon social y correo.</span>
+                        </label>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="choice-box" for="tipoConsumidorFinal">
+                            <input asp-for="Cliente.EsConsumidorFinal" id="tipoConsumidorFinal" type="radio" value="true" class="form-check-input me-2" />
+                            <span class="fw-semibold d-block mb-1">Consumidor Final</span>
+                            <span class="text-muted small">Actualiza automaticamente a NIT = CF.</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bloqueConsumidorFinal" class="alert alert-success border-0 mb-4" style="display:none;">
+                Este cliente se guardara como <strong>Consumidor Final</strong>.
+            </div>
+
+            <div id="datosClienteFiscal">
+                <div class="form-floating mb-3">
+                    <input asp-for="Cliente.Nit" class="form-control" placeholder="NIT" inputmode="numeric" />
+                    <label>NIT / CI</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Cliente.RazonSocial" class="form-control" placeholder="Razon Social" minlength="3" maxlength="45" required />
+                    <label>Razon Social / Nombre Completo</label>
+                </div>
+
+                <div id="correoElectronicoGroup" class="form-floating mb-3">
+                    <input asp-for="Cliente.CorreoElectronico" type="email" class="form-control" placeholder="Correo Electronico" maxlength="45" />
+                    <label>Correo Electronico oficial</label>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.MensajeError))
+            {
+                <div class="alert alert-danger">@Model.MensajeError</div>
+            }
+
+            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                <a asp-page="Cliente" class="btn btn-secondary px-4">Volver</a>
+                <button type="submit" class="btn btn-success px-5 fw-bold">
+                    Actualizar
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const opcionFormal = document.getElementById('tipoClienteFormal');
+            const opcionConsumidorFinal = document.getElementById('tipoConsumidorFinal');
+            const bloqueInformativo = document.getElementById('bloqueConsumidorFinal');
+            const contenedor = document.getElementById('datosClienteFiscal');
+            const correoGroup = document.getElementById('correoElectronicoGroup');
+            const razonSocial = document.getElementById('Cliente_RazonSocial');
+
+            const actualizarFormulario = () => {
+                const esConsumidorFinal = opcionConsumidorFinal.checked;
+                bloqueInformativo.style.display = esConsumidorFinal ? '' : 'none';
+                contenedor.style.display = esConsumidorFinal ? 'none' : '';
+                correoGroup.style.display = esConsumidorFinal ? 'none' : '';
+                razonSocial.required = !esConsumidorFinal;
+            };
+
+            opcionFormal.addEventListener('change', actualizarFormulario);
+            opcionConsumidorFinal.addEventListener('change', actualizarFormulario);
+            actualizarFormulario();
+        })();
+    </script>
+}
