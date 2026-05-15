@@ -3,11 +3,11 @@ using MSUsuarios.Infraestructura.Persistencia.Repositorios;
 
 namespace MSUsuarios.Infraestructura.Creadores
 {
-    public class TokenRepositoryCreator
+    public class UsuarioRepositoryCreator
     {
-        public ITokenRepository CreateRepo()
+        public IUsuarioRepository CreateRepo()
         {
-            return new TokenRepository();
+            return new UsuarioRepository();
         }
     }
 }

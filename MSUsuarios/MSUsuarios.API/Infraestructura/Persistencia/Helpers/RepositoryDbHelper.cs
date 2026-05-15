@@ -1,14 +1,14 @@
-using Npgsql;
+using MySql.Data.MySqlClient;
 using System.Data;
 
 namespace MSUsuarios.Infraestructura.Persistencia.Helpers
 {
     public static class RepositoryDbHelper
     {
-        public static int ExecuteNonQuery(string connectionString, string query, params NpgsqlParameter[] parameters)
+        public static int ExecuteNonQuery(string connectionString, string query, params MySqlParameter[] parameters)
         {
-            using var conn = new NpgsqlConnection(connectionString);
-            using var cmd = new NpgsqlCommand(query, conn);
+            using var conn = new MySqlConnection(connectionString);
+            using var cmd = new MySqlCommand(query, conn);
 
             if (parameters != null)
                 cmd.Parameters.AddRange(parameters);
@@ -17,26 +17,26 @@ namespace MSUsuarios.Infraestructura.Persistencia.Helpers
             return cmd.ExecuteNonQuery();
         }
 
-        public static int ExecuteNonQuery(string connectionString, NpgsqlCommand command)
+        public static int ExecuteNonQuery(string connectionString, MySqlCommand command)
         {
-            using var connection = new NpgsqlConnection(connectionString);
+            using var connection = new MySqlConnection(connectionString);
             command.Connection = connection;
             connection.Open();
             return command.ExecuteNonQuery();
         }
 
-        public static object? ExecuteScalar(string connectionString, NpgsqlCommand command)
+        public static object? ExecuteScalar(string connectionString, MySqlCommand command)
         {
-            using var connection = new NpgsqlConnection(connectionString);
+            using var connection = new MySqlConnection(connectionString);
             command.Connection = connection;
             connection.Open();
             return command.ExecuteScalar();
         }
 
-        public static NpgsqlDataReader ExecuteReader(string connectionString, string query, params NpgsqlParameter[] parameters)
+        public static MySqlDataReader ExecuteReader(string connectionString, string query, params MySqlParameter[] parameters)
         {
-            var conn = new NpgsqlConnection(connectionString);
-            var cmd = new NpgsqlCommand(query, conn);
+            var conn = new MySqlConnection(connectionString);
+            var cmd = new MySqlCommand(query, conn);
 
             if (parameters != null)
                 cmd.Parameters.AddRange(parameters);
@@ -45,9 +45,9 @@ namespace MSUsuarios.Infraestructura.Persistencia.Helpers
             return cmd.ExecuteReader(CommandBehavior.CloseConnection);
         }
 
-        public static T? ExecuteReaderSingle<T>(string connectionString, NpgsqlCommand command, Func<NpgsqlDataReader, T> mapper)
+        public static T? ExecuteReaderSingle<T>(string connectionString, MySqlCommand command, Func<MySqlDataReader, T> mapper)
         {
-            using var connection = new NpgsqlConnection(connectionString);
+            using var connection = new MySqlConnection(connectionString);
             command.Connection = connection;
             connection.Open();
 

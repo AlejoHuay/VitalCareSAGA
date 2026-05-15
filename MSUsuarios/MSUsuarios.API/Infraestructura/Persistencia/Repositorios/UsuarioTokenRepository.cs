@@ -22,37 +22,64 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
                 (
                     usuario_id,
                     token_hash,
+                    fecha_creacion,
                     tipo_token,
+                    revocado,
+                    usado,
+                    fecha_uso,
+                    fecha_revocacion,
                     fecha_expiracion
                 )
                 VALUES
                 (
                     @usuario_id,
                     @token_hash,
+                    @fecha_creacion,
                     @tipo_token,
+                    @revocado,
+                    @usado,
+                    @fecha_uso,
+                    @fecha_revocacion,
                     @fecha_expiracion
                 )";
 
             NpgsqlCommand command = new NpgsqlCommand(query);
             command.Parameters.AddWithValue("@usuario_id", token.UsuarioIdUsuario);
             command.Parameters.AddWithValue("@token_hash", token.TokenHash);
+            command.Parameters.AddWithValue("@fecha_creacion", AsegurarUtc(token.FechaCreacion));
             command.Parameters.AddWithValue("@tipo_token", token.TipoToken);
-            command.Parameters.AddWithValue("@fecha_expiracion", token.FechaExpiracion);
+            command.Parameters.AddWithValue("@revocado", token.Revocado == 1);
+            command.Parameters.AddWithValue("@usado", token.Usado == 1);
+            command.Parameters.AddWithValue("@fecha_uso", token.FechaUso.HasValue ? AsegurarUtc(token.FechaUso.Value) : DBNull.Value);
+            command.Parameters.AddWithValue("@fecha_revocacion", token.FechaRevocacion.HasValue ? AsegurarUtc(token.FechaRevocacion.Value) : DBNull.Value);
+            command.Parameters.AddWithValue("@fecha_expiracion", AsegurarUtc(token.FechaExpiracion));
 
             return RepositoryDbHelper.ExecuteNonQuery(_connectionString, command);
+        }
+
+        public UsuarioToken? GetByTokenHash(string tokenHash)
+        {
+            const string query = @"
+                SELECT *
+                FROM usuario_token
+                WHERE token_hash = @token_hash
+                LIMIT 1";
+
+            NpgsqlCommand command = new NpgsqlCommand(query);
+            command.Parameters.AddWithValue("@token_hash", tokenHash);
+
+            return RepositoryDbHelper.ExecuteReaderSingle(_connectionString, command, MapearUsuarioToken);
         }
 
         public UsuarioToken? GetTokenActivo(string tokenHash, string tipoToken)
         {
             const string query = @"
-                SELECT id, usuario_id, token_hash, tipo_token, fecha_creacion, fecha_expiracion, 
-                       revocado, usado, fecha_uso, fecha_revocacion
+                SELECT *
                 FROM usuario_token
                 WHERE token_hash = @token_hash
                   AND tipo_token = @tipo_token
-                  AND revocado = 0
-                  AND usado = 0
-                  AND fecha_expiracion > CURRENT_TIMESTAMP
+                  AND revocado = FALSE
+                  AND usado = FALSE
                 LIMIT 1";
 
             NpgsqlCommand command = new NpgsqlCommand(query);
@@ -66,7 +93,8 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
         {
             const string query = @"
                 UPDATE usuario_token
-                SET usado = 1, fecha_uso = CURRENT_TIMESTAMP
+                SET usado = TRUE,
+                    fecha_uso = CURRENT_TIMESTAMP
                 WHERE id = @id";
 
             NpgsqlCommand command = new NpgsqlCommand(query);
@@ -79,12 +107,12 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
         {
             const string query = @"
                 UPDATE usuario_token
-                SET revocado = 1, fecha_revocacion = CURRENT_TIMESTAMP
+                SET revocado = TRUE,
+                    fecha_revocacion = CURRENT_TIMESTAMP
                 WHERE usuario_id = @usuario_id
                   AND tipo_token = @tipo_token
-                  AND revocado = 0
-                  AND usado = 0
-                  AND fecha_expiracion > CURRENT_TIMESTAMP";
+                  AND revocado = FALSE
+                  AND usado = FALSE";
 
             NpgsqlCommand command = new NpgsqlCommand(query);
             command.Parameters.AddWithValue("@usuario_id", idUsuario);
@@ -101,8 +129,8 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             const string query = @"
                 DELETE FROM usuario_token
                 WHERE fecha_expiracion < CURRENT_TIMESTAMP - (@dias * INTERVAL '1 day')
-                   OR (usado = 1 AND fecha_uso IS NOT NULL AND fecha_uso < CURRENT_TIMESTAMP - (@dias * INTERVAL '1 day'))
-                   OR (revocado = 1 AND fecha_revocacion IS NOT NULL AND fecha_revocacion < CURRENT_TIMESTAMP - (@dias * INTERVAL '1 day'))";
+                   OR (usado = TRUE AND fecha_uso IS NOT NULL AND fecha_uso < CURRENT_TIMESTAMP - (@dias * INTERVAL '1 day'))
+                   OR (revocado = TRUE AND fecha_revocacion IS NOT NULL AND fecha_revocacion < CURRENT_TIMESTAMP - (@dias * INTERVAL '1 day'))";
 
             NpgsqlCommand command = new NpgsqlCommand(query);
             command.Parameters.AddWithValue("@dias", dias);
@@ -118,16 +146,26 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
                 UsuarioIdUsuario = reader.GetInt32(reader.GetOrdinal("usuario_id")),
                 TokenHash = reader.GetString(reader.GetOrdinal("token_hash")),
                 TipoToken = reader.GetString(reader.GetOrdinal("tipo_token")),
-                FechaCreacion = reader.GetDateTime(reader.GetOrdinal("fecha_creacion")),
-                FechaExpiracion = reader.GetDateTime(reader.GetOrdinal("fecha_expiracion")),
+                FechaCreacion = AsegurarUtc(reader.GetDateTime(reader.GetOrdinal("fecha_creacion"))),
+                FechaExpiracion = AsegurarUtc(reader.GetDateTime(reader.GetOrdinal("fecha_expiracion"))),
                 Revocado = (sbyte)(reader.GetBoolean(reader.GetOrdinal("revocado")) ? 1 : 0),
                 Usado = (sbyte)(reader.GetBoolean(reader.GetOrdinal("usado")) ? 1 : 0),
                 FechaUso = reader.IsDBNull(reader.GetOrdinal("fecha_uso"))
                     ? null
-                    : reader.GetDateTime(reader.GetOrdinal("fecha_uso")),
+                    : AsegurarUtc(reader.GetDateTime(reader.GetOrdinal("fecha_uso"))),
                 FechaRevocacion = reader.IsDBNull(reader.GetOrdinal("fecha_revocacion"))
                     ? null
-                    : reader.GetDateTime(reader.GetOrdinal("fecha_revocacion"))
+                    : AsegurarUtc(reader.GetDateTime(reader.GetOrdinal("fecha_revocacion")))
+            };
+        }
+
+        private static DateTime AsegurarUtc(DateTime fecha)
+        {
+            return fecha.Kind switch
+            {
+                DateTimeKind.Utc => fecha,
+                DateTimeKind.Unspecified => DateTime.SpecifyKind(fecha, DateTimeKind.Utc),
+                _ => fecha.ToUniversalTime()
             };
         }
     }

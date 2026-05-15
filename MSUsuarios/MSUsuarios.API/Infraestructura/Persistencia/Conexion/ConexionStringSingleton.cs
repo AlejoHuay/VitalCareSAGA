@@ -16,7 +16,10 @@ namespace MSUsuarios.Infraestructura.Persistencia.Conexion
                 {
                     lock (bloqueo)
                     {
-                        instancia ??= new ConexionStringSingleton();
+                        if (instancia == null)
+                        {
+                            instancia = new ConexionStringSingleton();
+                        }
                     }
                 }
 
@@ -26,7 +29,14 @@ namespace MSUsuarios.Infraestructura.Persistencia.Conexion
 
         private ConexionStringSingleton()
         {
-            Env.Load();
+            Env.Load("../.env");
+
+            string? cadenaConexionCompleta = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION");
+            if (!string.IsNullOrWhiteSpace(cadenaConexionCompleta))
+            {
+                cadenaConexion = cadenaConexionCompleta;
+                return;
+            }
 
             string host = ObtenerVariableObligatoria("POSTGRES_HOST");
             string port = ObtenerVariableObligatoria("POSTGRES_PORT");
@@ -38,21 +48,18 @@ namespace MSUsuarios.Infraestructura.Persistencia.Conexion
                 $"Host={host};Port={port};Database={database};Username={user};Password={password};";
         }
 
-        public string CadenaConexion
-        {
-            get { return cadenaConexion; }
-        }
-
         private static string ObtenerVariableObligatoria(string nombre)
         {
             string? valor = Environment.GetEnvironmentVariable(nombre);
 
             if (string.IsNullOrWhiteSpace(valor))
             {
-                throw new Exception($"No se encontró la variable de entorno '{nombre}'.");
+                throw new Exception($"No se encontro la variable de entorno '{nombre}'.");
             }
 
             return valor;
         }
+
+        public string CadenaConexion => cadenaConexion;
     }
 }
