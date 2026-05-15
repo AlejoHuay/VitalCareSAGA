@@ -8,6 +8,7 @@ using MSUsuarios.Infraestructura.Ayudadores;
 namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
 {
     [ApiController]
+    [Authorize]
     [Route("api/usuarios")]
     public class UsuariosController : ControllerBase
     {

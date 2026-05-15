@@ -31,6 +31,7 @@ appsettings.*.local.json
 
 # Visual Studio
 .vs/
+*.lscache
 
 # Test results
 TestResults/
@@ -39,3 +40,6 @@ TestResults/
 # Publish output
 publish/
 wwwroot/lib/
+
+# Local analysis artifacts
+_zip_analysis/
