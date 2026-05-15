@@ -61,7 +61,9 @@ namespace MSUsuarios.Dominio.Validadores
                 ?? ValidarCi(ci)
                 ?? ValidarCiExtension(ciExtension)
                 ?? ValidarTelefono(telefono)
-                ?? ValidarEmail(email);
+                ?? ValidarEmail(email)
+                ?? ValidarEmailDuplicadoEnActualizacion(dto.IdUsuario, email!)
+                ?? ValidarUserNameDuplicadoEnActualizacion(dto.IdUsuario, dto.UserName);
 
             return resultado ?? Result.Ok();
         }
@@ -180,6 +182,28 @@ namespace MSUsuarios.Dominio.Validadores
         private Result? ValidarUserNameDuplicado(string userName)
         {
             if (_repository.ExisteUserName(userName))
+                return Result.Fail("El nombre de usuario ya esta registrado en el sistema.");
+
+            return null;
+        }
+
+        private Result? ValidarEmailDuplicadoEnActualizacion(int idUsuario, string email)
+        {
+            Usuario? usuario = _repository.GetByEmail(email);
+            if (usuario != null && usuario.IdUsuario != idUsuario)
+                return Result.Fail("El email ya esta registrado en el sistema.");
+
+            return null;
+        }
+
+        private Result? ValidarUserNameDuplicadoEnActualizacion(int idUsuario, string? userName)
+        {
+            userName = LimpiarTexto(userName);
+            if (string.IsNullOrWhiteSpace(userName))
+                return null;
+
+            Usuario? usuario = _repository.GetByUserName(userName);
+            if (usuario != null && usuario.IdUsuario != idUsuario)
                 return Result.Fail("El nombre de usuario ya esta registrado en el sistema.");
 
             return null;

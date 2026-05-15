@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using MSUsuarios.App.DTOs;
 using MSUsuarios.App.Interfaces;
 using MSUsuarios.Dominio.Validadores;
@@ -71,7 +72,11 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
 
             dto.Password = CredencialesHelper.GenerarPasswordTemporal();
 
-             Result resultado = _usuarioService.CrearUsuario(dto, dto.Role?? "Bioquiimico", null);
+            int? idUsuarioSesion = ObtenerIdUsuarioSesion();
+            if (idUsuarioSesion == null)
+                return Unauthorized(new { mensaje = "No se pudo identificar al usuario autenticado." });
+
+            Result resultado = _usuarioService.CrearUsuario(dto, dto.Role ?? "Bioquimico", idUsuarioSesion);
 
             if (!resultado.IsSuccess)
                 return BadRequest(new { mensaje = resultado.Error, StatusCode = 400 });
@@ -80,22 +85,21 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             {
                 mensaje = "Usuario registrado correctamente. Revisa tu correo electronico para activar la cuenta.", StatusCode = 201
             });
-        } 
+        }
+
         [HttpDelete("EliminarUsuario")]
-        public IActionResult EliminarUsuario([FromQuery] string idUsuario, [FromQuery] string idUsuarioSesion)
+        public IActionResult EliminarUsuario([FromQuery] string idUsuario, [FromQuery] string? idUsuarioSesion)
         {
             if (!int.TryParse(idUsuario, out int idUsuarioInt))
                 return BadRequest(new { mensaje = "Id de usuario invalido.", StatusCode = 400 });
 
-            int? idUsuarioSesionInt = null;
-            if (!string.IsNullOrWhiteSpace(idUsuarioSesion))
-            {
-                if (!int.TryParse(idUsuarioSesion, out int idSesion))
-                    return BadRequest(new { mensaje = "Id de usuario de sesion invalido.", StatusCode = 400 });
+            if (!TryResolverIdUsuarioSesion(idUsuarioSesion, out int? idUsuarioSesionInt, out string? errorSesion))
+                return BadRequest(new { mensaje = errorSesion, StatusCode = 400 });
 
-                idUsuarioSesionInt = idSesion;
-            }
-             Result resultado = _usuarioService.EliminarUsuario(idUsuarioInt, idUsuarioSesionInt);
+            if (idUsuarioSesionInt == null)
+                return Unauthorized(new { mensaje = "No se pudo identificar al usuario autenticado." });
+
+            Result resultado = _usuarioService.EliminarUsuario(idUsuarioInt, idUsuarioSesionInt);
 
             if (!resultado.IsSuccess)
                 return BadRequest(new { mensaje = resultado.Error, StatusCode = 400 });
@@ -107,21 +111,45 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
         [HttpPut("actualizarUsuario")]
         public IActionResult ActualizarUsuario([FromBody] UsuarioActualizarDto dto, [FromQuery] string? idUsuarioSesion)
         {
-            int? idUsuarioSesionInt = null;
-            if (!string.IsNullOrWhiteSpace(idUsuarioSesion))
-            {
-                if (!int.TryParse(idUsuarioSesion, out int idSesion))
-                    return BadRequest(new { mensaje = "Id de usuario de sesion invalido.", StatusCode = 400 });
+            if (!TryResolverIdUsuarioSesion(idUsuarioSesion, out int? idUsuarioSesionInt, out string? errorSesion))
+                return BadRequest(new { mensaje = errorSesion, StatusCode = 400 });
 
-                idUsuarioSesionInt = idSesion;
-            }
+            if (idUsuarioSesionInt == null)
+                return Unauthorized(new { mensaje = "No se pudo identificar al usuario autenticado." });
 
-             Result resultado = _usuarioService.ActualizarUsuario(dto, idUsuarioSesionInt);
+            Result resultado = _usuarioService.ActualizarUsuario(dto, idUsuarioSesionInt);
 
             if (!resultado.IsSuccess)
                 return BadRequest(new { mensaje = resultado.Error, StatusCode = 400 });
 
             return Ok(new { mensaje = "Usuario actualizado correctamente.", StatusCode = 200 });
+        }
+
+        private bool TryResolverIdUsuarioSesion(string? idUsuarioSesion, out int? idSesion, out string? error)
+        {
+            error = null;
+
+            if (!string.IsNullOrWhiteSpace(idUsuarioSesion))
+            {
+                if (!int.TryParse(idUsuarioSesion, out int idSesionParseado))
+                {
+                    idSesion = null;
+                    error = "Id de usuario de sesion invalido.";
+                    return false;
+                }
+
+                idSesion = idSesionParseado;
+                return true;
+            }
+
+            idSesion = ObtenerIdUsuarioSesion();
+            return true;
+        }
+
+        private int? ObtenerIdUsuarioSesion()
+        {
+            string? idUsuarioClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(idUsuarioClaim, out int idSesion) ? idSesion : null;
         }
     }
 
