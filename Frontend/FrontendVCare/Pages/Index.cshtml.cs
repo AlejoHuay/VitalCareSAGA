@@ -12,5 +12,5 @@ namespace ProyectoArqSoft.Pages
             Usuario = HttpContext.Session.GetString("UserName");
             Role = HttpContext.Session.GetString("Role")?.Trim() ?? "Usuario";
         }
-    }
+    }   
 }
