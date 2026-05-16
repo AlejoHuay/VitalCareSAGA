@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS usuario
     fecha_registro TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     ultima_actualizacion TIMESTAMPTZ,
     usuario_auditoria_id INTEGER,
+    CONSTRAINT uq_usuario_ci UNIQUE (ci),
     CONSTRAINT uq_usuario_email UNIQUE (email),
     CONSTRAINT uq_usuario_user_name UNIQUE (user_name),
     CONSTRAINT fk_usuario_auditoria

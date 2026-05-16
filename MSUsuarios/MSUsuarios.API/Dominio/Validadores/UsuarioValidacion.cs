@@ -32,6 +32,7 @@ namespace MSUsuarios.Dominio.Validadores
             Result? resultado = ValidarCamposObligatorios(nombres, apellidoPaterno, apellidoMaterno, email)
                 ?? ValidarCi(ci)
                 ?? ValidarCiExtension(ciExtension)
+                ?? ValidarCiDuplicado(ci!)
                 ?? ValidarTelefono(telefono)
                 ?? ValidarEmail(email)
                 ?? ValidarPassword(password)
@@ -60,6 +61,7 @@ namespace MSUsuarios.Dominio.Validadores
             Result? resultado = ValidarCamposObligatorios(nombres, apellidoPaterno, apellidoMaterno, email)
                 ?? ValidarCi(ci)
                 ?? ValidarCiExtension(ciExtension)
+                ?? ValidarCiDuplicadoEnActualizacion(dto.IdUsuario, ci!)
                 ?? ValidarTelefono(telefono)
                 ?? ValidarEmail(email)
                 ?? ValidarEmailDuplicadoEnActualizacion(dto.IdUsuario, email!)
@@ -179,6 +181,14 @@ namespace MSUsuarios.Dominio.Validadores
             return null;
         }
 
+        private Result? ValidarCiDuplicado(string ci)
+        {
+            if (_repository.ExisteCi(ci))
+                return Result.Fail("El CI ya esta registrado en el sistema.");
+
+            return null;
+        }
+
         private Result? ValidarUserNameDuplicado(string userName)
         {
             if (_repository.ExisteUserName(userName))
@@ -192,6 +202,15 @@ namespace MSUsuarios.Dominio.Validadores
             Usuario? usuario = _repository.GetByEmail(email);
             if (usuario != null && usuario.IdUsuario != idUsuario)
                 return Result.Fail("El email ya esta registrado en el sistema.");
+
+            return null;
+        }
+
+        private Result? ValidarCiDuplicadoEnActualizacion(int idUsuario, string ci)
+        {
+            Usuario? usuario = _repository.GetByCi(ci);
+            if (usuario != null && usuario.IdUsuario != idUsuario)
+                return Result.Fail("El CI ya esta registrado en el sistema.");
 
             return null;
         }
