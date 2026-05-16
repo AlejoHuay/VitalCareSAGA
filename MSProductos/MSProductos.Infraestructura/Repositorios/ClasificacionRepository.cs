@@ -106,7 +106,7 @@ namespace MSProductos.Infraestructura.Repositorios
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                connection.Open();
+                connection.Open();  
 
                 string query = ConstruirQuery(filtro);
                 MySqlCommand command = new MySqlCommand(query, connection);

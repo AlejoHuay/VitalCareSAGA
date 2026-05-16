@@ -1,12 +1,16 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace FrontendVCare.Pages;
-
-public class IndexModel : PageModel
+namespace ProyectoArqSoft.Pages
 {
-    public IActionResult OnGet()
+    public class IndexModel : PageModel
     {
-        return RedirectToPage("/Cliente/Cliente");
-    }
+        public string? Usuario { get; private set; }
+        public string? Role { get; private set; }
+
+        public void OnGet()
+        {
+            Usuario = HttpContext.Session.GetString("UserName");
+            Role = HttpContext.Session.GetString("Role")?.Trim() ?? "Usuario";
+        }
+    }   
 }
