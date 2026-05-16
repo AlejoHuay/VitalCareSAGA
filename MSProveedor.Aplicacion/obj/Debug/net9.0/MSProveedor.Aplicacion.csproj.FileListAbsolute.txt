@@ -1,0 +1,15 @@
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\bin\Debug\net9.0\MSProveedor.Aplicacion.deps.json
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\bin\Debug\net9.0\MSProveedor.Aplicacion.dll
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\bin\Debug\net9.0\MSProveedor.Aplicacion.pdb
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\bin\Debug\net9.0\MSProveedor.Dominio.dll
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\bin\Debug\net9.0\MSProveedor.Dominio.pdb
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\obj\Debug\net9.0\MSProveedor.Aplicacion.csproj.AssemblyReference.cache
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\obj\Debug\net9.0\MSProveedor.Aplicacion.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\obj\Debug\net9.0\MSProveedor.Aplicacion.AssemblyInfoInputs.cache
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\obj\Debug\net9.0\MSProveedor.Aplicacion.AssemblyInfo.cs
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\obj\Debug\net9.0\MSProveedor.Aplicacion.csproj.CoreCompileInputs.cache
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\obj\Debug\net9.0\MSProvee.6D30C266.Up2Date
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\obj\Debug\net9.0\MSProveedor.Aplicacion.dll
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\obj\Debug\net9.0\refint\MSProveedor.Aplicacion.dll
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\obj\Debug\net9.0\MSProveedor.Aplicacion.pdb
+C:\Users\Asus\Documents\MSProveedores_Farmacia\MSProveedor.Aplicacion\obj\Debug\net9.0\ref\MSProveedor.Aplicacion.dll

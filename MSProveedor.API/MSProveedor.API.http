@@ -1,0 +1,10 @@
+POST http://localhost:5297/api/proveedor
+Content-Type: application/json
+
+{
+  "nombre": "Bayer",
+  "telefono": "123456789",
+  "correoElectronico": "contacto@bayer.com",
+  "direccion": "Av. Principal 123",
+  "idUsuario": 1
+}

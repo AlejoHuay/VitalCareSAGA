@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "MSProveedor.Dominio/1.0.0": {
+        "runtime": {
+          "MSProveedor.Dominio.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "MSProveedor.Dominio/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
