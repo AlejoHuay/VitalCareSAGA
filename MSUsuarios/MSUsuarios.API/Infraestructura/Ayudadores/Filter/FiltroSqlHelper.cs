@@ -1,4 +1,5 @@
 using MySql.Data.MySqlClient;
+using Npgsql;
 using System.Text;
 
 namespace MSUsuarios.Infraestructura.Ayudadores
@@ -33,6 +34,17 @@ namespace MSUsuarios.Infraestructura.Ayudadores
         }
 
         public static void AgregarParametrosLike(MySqlCommand command, string filtro)
+        {
+            string[] partes = FiltroHelper.ObtenerPartes(filtro);
+
+            for (int i = 0; i < partes.Length; i++)
+            {
+                string valor = StringHelper.QuitarEspacios(partes[i]);
+                command.Parameters.AddWithValue($"@valor{i}", $"%{valor}%");
+            }
+        }
+
+        public static void AgregarParametrosLike(NpgsqlCommand command, string filtro)
         {
             string[] partes = FiltroHelper.ObtenerPartes(filtro);
 
