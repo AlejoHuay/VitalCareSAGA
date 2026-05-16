@@ -10,7 +10,7 @@ using MSUsuarios.Infraestructura.Persistencia.Repositorios;
 var builder = WebApplication.CreateBuilder(args);
 
 // Cargar variables del archivo .env
-Env.Load();
+Env.Load("../.env");
 
 // Servicios
 builder.Services.AddControllers();
@@ -59,16 +59,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-string jwtKey = builder.Configuration["Jwt:Key"]
-    ?? throw new InvalidOperationException("No se encontro Jwt:Key en la configuracion.");
-string jwtIssuer = builder.Configuration["Jwt:Issuer"]
-    ?? throw new InvalidOperationException("No se encontro Jwt:Issuer en la configuracion.");
-string jwtAudience = builder.Configuration["Jwt:Audience"]
-    ?? throw new InvalidOperationException("No se encontro Jwt:Audience en la configuracion.");
-
-Environment.SetEnvironmentVariable("JWT_KEY", jwtKey);
-Environment.SetEnvironmentVariable("JWT_ISSUER", jwtIssuer);
-Environment.SetEnvironmentVariable("JWT_AUDIENCE", jwtAudience);
+string jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
+    ?? throw new InvalidOperationException("No se encontro JWT_KEY en las variables de entorno.");
+string jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+    ?? throw new InvalidOperationException("No se encontro JWT_ISSUER en las variables de entorno.");
+string jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+    ?? throw new InvalidOperationException("No se encontro JWT_AUDIENCE en las variables de entorno.");
 
 // Registro de Repositorios
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
