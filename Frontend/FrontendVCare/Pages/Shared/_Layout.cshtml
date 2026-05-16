@@ -1,55 +1,204 @@
+
+@{
+    // MODO PRUEBA TEMPORAL
+    string usuarioSesion = "Jose";
+    string roleSesion = "Admin";
+
+    bool estaAutenticado = true;
+    bool esAdministrador = true;
+    //string usuarioSesion = Context.Session.GetString("UserName") ?? string.Empty;
+    //string roleSesion = Context.Session.GetString("Role")?.Trim() ?? string.Empty;
+    //bool estaAutenticado = !string.IsNullOrWhiteSpace(usuarioSesion);
+    //bool esAdministrador = roleSesion.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - VitalCare</title>
-    <script type="importmap"></script>
+
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico?v=1" />
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FrontendVCare.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/VitalCare.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/medicamento-form.css" asp-append-version="true" />
 </head>
-<body>
+
+<body class="d-flex flex-column min-vh-100">
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-success border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top shadow">
             <div class="container">
-                <a class="navbar-brand fw-semibold" asp-area="" asp-page="/Index">VitalCare</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+
+                <a class="navbar-brand d-flex align-items-center" asp-page="/Index">
+                    <img src="~/images/vitalcare.png" alt="Logotipo de VitalCare" height="40" class="me-2" />
+                    VitalCare
+                </a>
+
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#navbarVitalCare"
+                        aria-controls="navbarVitalCare"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div class="collapse navbar-collapse" id="navbarVitalCare">
+                    <ul class="navbar-nav ms-auto">
+
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-page="/Index">Inicio</a>
+                            <a class="nav-link" asp-page="/Index">Inicio</a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-page="/Cliente/Cliente">Clientes</a>
+                            <a class="nav-link" asp-page="/Privacy">Privacidad</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-page="/Privacy">Privacidad</a>
-                        </li>
+
+                        @if (estaAutenticado)
+                        {
+                            if (esAdministrador)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle fw-bold text-warning"
+                                       href="#"
+                                       id="usuariosDropdown"
+                                       role="button"
+                                       data-bs-toggle="dropdown"
+                                       aria-expanded="false">
+                                        Usuarios
+                                    </a>
+                                    <ul class="dropdown-menu shadow" aria-labelledby="usuariosDropdown">
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Usuario/Usuario">
+                                                Gestionar Usuarios
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Bioquimico/Bioquimico">
+                                                Gestionar Bioquímicos
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle"
+                                   href="#"
+                                   id="medicamentosDropdown"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    Medicamentos
+                                </a>
+                                <ul class="dropdown-menu shadow" aria-labelledby="medicamentosDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-page="/Medicamento/Medicamento">
+                                            Gestionar Medicamentos
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-page="/Clasificacion/Clasificacion">
+                                            Gestionar Clasificación
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle"
+                                   href="#"
+                                   id="ventasDropdown"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    Ventas
+                                </a>
+                                <ul class="dropdown-menu shadow" aria-labelledby="ventasDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-page="/Cliente/Cliente">
+                                            Gestionar Clientes
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-page="/Ventas/Venta">
+                                            Gestionar Ventas
+                                        </a>
+                                    </li>
+                                    @if (esAdministrador)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Ventas/ReporteVentasPorRol">
+                                                Reporte por Rol
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+
+                            <li class="nav-item">
+                                <span class="nav-link text-light">Hola, <b>@usuarioSesion (@roleSesion)</b></span>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-warning fw-bold" asp-page="/Auth/Logout">
+                                    Cerrar Sesión
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Auth/Login">
+                                    Login
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-page="/Auth/Register">
+                                    Registro
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - VitalCare - <a asp-area="" asp-page="/Privacy">Privacidad</a>
+    <main role="main" class="flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <footer class="bg-dark py-4 text-white mt-auto">
+        <div class="container text-center">
+            <p class="mb-0">
+                &copy; 2026 Farmacia VitalCare - Sistema de Gestión Farmacéutica
+            </p>
         </div>
     </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        window.addEventListener("scroll", function () {
+            let navbar = document.querySelector(".navbar");
+            navbar.classList.toggle("scrolled", window.scrollY > 50);
+        });
+    </script>
+
+    <script src="~/js/adapters/clasificacionAdapter.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
 </body>
+
 </html>
