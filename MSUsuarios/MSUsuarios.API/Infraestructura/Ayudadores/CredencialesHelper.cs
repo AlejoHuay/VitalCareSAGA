@@ -9,10 +9,9 @@ namespace MSUsuarios.Infraestructura.Ayudadores
         public static string GenerarUserName(string nombres, string apellidoPaterno, string ci)
         {
             string nombre = ObtenerPrimerNombre(nombres);
-            string apellido = apellidoPaterno;
             string ciNormalizado = NormalizarCi(ci);
 
-            string baseUser = $"{nombre}.{apellido}.{ciNormalizado}".ToLower();
+            string baseUser = $"{nombre}.{ciNormalizado}".ToLower();
 
             baseUser = QuitarTildes(baseUser);
             baseUser = Regex.Replace(baseUser, @"[^a-z0-9\.]", "");

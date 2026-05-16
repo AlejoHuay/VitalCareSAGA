@@ -1,8 +1,9 @@
-using MySql.Data.MySqlClient;
+using Npgsql;
 using MSUsuarios.Dominio.Modelos;
 using MSUsuarios.Dominio.Puertos.PuertoSalida;
 using MSUsuarios.Infraestructura.Ayudadores;
 using MSUsuarios.Infraestructura.Persistencia.Conexion;
+using MSUsuarios.Infraestructura.Persistencia.Helpers;
 
 namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
 {
@@ -20,61 +21,59 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             const string query = @"INSERT INTO usuario
                                    (
                                        nombres,
-                                       apellido_materno,
-                                       apellido_paterno,
+                                       primer_apellido,
+                                       segundo_apellido,
                                        ci,
+                                       ci_extension,
                                        telefono,
-                                       activo,
-                                       fecha_registro,
-                                       ultima_actualizacion,
-                                       id_usuario,
-                                       ci_extencion,
                                        email,
                                        user_name,
                                        password_hash,
                                        role,
-                                       must_change_password
+                                       must_change_password,
+                                       activo,
+                                       fecha_registro,
+                                       ultima_actualizacion,
+                                       usuario_auditoria_id
                                    )
                                    VALUES
                                    (
                                        @nombres,
-                                       @apellido_materno,
-                                       @apellido_paterno,
+                                       @primer_apellido,
+                                       @segundo_apellido,
                                        @ci,
+                                       @ci_extension,
                                        @telefono,
-                                       @activo,
-                                       @fecha_registro,
-                                       @ultima_actualizacion,
-                                       @id_usuario,
-                                       @ci_extencion,
                                        @email,
                                        @user_name,
                                        @password_hash,
                                        @role,
-                                       @must_change_password
+                                       @must_change_password,
+                                       @activo,
+                                       @fecha_registro,
+                                       @ultima_actualizacion,
+                                       @usuario_auditoria_id
                                    )";
 
-            using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand(query, conn);
+            NpgsqlCommand cmd = new NpgsqlCommand(query);
 
             cmd.Parameters.AddWithValue("@nombres", usuario.Nombres);
-            cmd.Parameters.AddWithValue("@apellido_materno", (object?)usuario.ApellidoMaterno ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@apellido_paterno", usuario.ApellidoPaterno);
+            cmd.Parameters.AddWithValue("@primer_apellido", usuario.ApellidoPaterno);
+            cmd.Parameters.AddWithValue("@segundo_apellido", (object?)usuario.ApellidoMaterno ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@ci", usuario.Ci);
+            cmd.Parameters.AddWithValue("@ci_extension", usuario.CiExtencion);
             cmd.Parameters.AddWithValue("@telefono", usuario.Telefono);
-            cmd.Parameters.AddWithValue("@activo", usuario.Activo);
-            cmd.Parameters.AddWithValue("@fecha_registro", usuario.FechaRegistro);
-            cmd.Parameters.AddWithValue("@ultima_actualizacion", (object?)usuario.UltimaActualizacion ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@id_usuario", (object?)usuario.IdUsuarioCreador ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@ci_extencion", usuario.CiExtencion);
             cmd.Parameters.AddWithValue("@email", usuario.Email);
             cmd.Parameters.AddWithValue("@user_name", usuario.UserName);
             cmd.Parameters.AddWithValue("@password_hash", usuario.PasswordHash);
             cmd.Parameters.AddWithValue("@role", usuario.Role);
-            cmd.Parameters.AddWithValue("@must_change_password", usuario.MustChangePassword);
+            cmd.Parameters.AddWithValue("@must_change_password", usuario.MustChangePassword == 1);
+            cmd.Parameters.AddWithValue("@activo", usuario.Activo == 1);
+            cmd.Parameters.AddWithValue("@fecha_registro", usuario.FechaRegistro);
+            cmd.Parameters.AddWithValue("@ultima_actualizacion", (object?)usuario.UltimaActualizacion ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@usuario_auditoria_id", (object?)usuario.IdUsuarioCreador ?? DBNull.Value);
 
-            conn.Open();
-            return cmd.ExecuteNonQuery();
+            return RepositoryDbHelper.ExecuteNonQuery(_connectionString, cmd);
         }
 
         public int Update(Usuario usuario)
@@ -86,35 +85,35 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
         {
             const string query = @"UPDATE usuario
                                    SET nombres = @nombres,
-                                       apellido_materno = @apellido_materno,
-                                       apellido_paterno = @apellido_paterno,
+                                       primer_apellido = @primer_apellido,
+                                       segundo_apellido = @segundo_apellido,
                                        ci = @ci,
+                                       ci_extension = @ci_extension,
                                        telefono = @telefono,
-                                       ultima_actualizacion = NOW(),
-                                       ci_extencion = @ci_extencion,
                                        email = @email,
                                        user_name = @user_name,
                                        role = @role,
-                                       must_change_password = @must_change_password
+                                       must_change_password = @must_change_password,
+                                       ultima_actualizacion = CURRENT_TIMESTAMP,
+                                       usuario_auditoria_id = @usuario_auditoria_id
                                    WHERE id = @id";
 
-            using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand(query, conn);
+            NpgsqlCommand cmd = new NpgsqlCommand(query);
 
             cmd.Parameters.AddWithValue("@id", usuario.IdUsuario);
             cmd.Parameters.AddWithValue("@nombres", usuario.Nombres);
-            cmd.Parameters.AddWithValue("@apellido_materno", (object?)usuario.ApellidoMaterno ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@apellido_paterno", usuario.ApellidoPaterno);
+            cmd.Parameters.AddWithValue("@primer_apellido", usuario.ApellidoPaterno);
+            cmd.Parameters.AddWithValue("@segundo_apellido", (object?)usuario.ApellidoMaterno ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@ci", usuario.Ci);
+            cmd.Parameters.AddWithValue("@ci_extension", usuario.CiExtencion);
             cmd.Parameters.AddWithValue("@telefono", usuario.Telefono);
-            cmd.Parameters.AddWithValue("@ci_extencion", usuario.CiExtencion);
             cmd.Parameters.AddWithValue("@email", usuario.Email);
             cmd.Parameters.AddWithValue("@user_name", usuario.UserName);
             cmd.Parameters.AddWithValue("@role", usuario.Role);
-            cmd.Parameters.AddWithValue("@must_change_password", usuario.MustChangePassword);
+            cmd.Parameters.AddWithValue("@must_change_password", usuario.MustChangePassword == 1);
+            cmd.Parameters.AddWithValue("@usuario_auditoria_id", (object?)idUsuarioSesion ?? DBNull.Value);
 
-            conn.Open();
-            return cmd.ExecuteNonQuery();
+            return RepositoryDbHelper.ExecuteNonQuery(_connectionString, cmd);
         }
 
         public int Delete(Usuario usuario)
@@ -129,121 +128,106 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
 
         public IEnumerable<Usuario> GetAll(string filtro)
         {
-            List<Usuario> usuarios = new List<Usuario>();
-
-            using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand();
-
-            string query = @"SELECT id, nombres, apellido_materno, apellido_paterno, ci, telefono, activo,
-                                    fecha_registro, ultima_actualizacion, id_usuario, ci_extencion,
-                                    email, user_name, password_hash, role, must_change_password
+            string query = @"SELECT id, nombres, primer_apellido, segundo_apellido, ci, ci_extension,
+                                    telefono, email, user_name, password_hash, role,
+                                    must_change_password, activo, fecha_registro,
+                                    ultima_actualizacion, usuario_auditoria_id
                              FROM usuario
-                             WHERE activo = 1";
+                             WHERE activo = TRUE";
 
             string where = FiltroSqlHelper.ConstruirCondicionLike(
                 filtro,
                 "nombres",
-                "apellido_paterno",
-                "apellido_materno",
+                "primer_apellido",
+                "segundo_apellido",
                 "ci",
                 "telefono",
-                "ci_extencion",
+                "ci_extension",
                 "email",
                 "user_name",
                 "role"
             );
 
-            cmd.CommandText = query + where + " ORDER BY nombres, apellido_paterno, apellido_materno";
-            cmd.Connection = conn;
+            NpgsqlCommand cmd = new NpgsqlCommand(query + where + " ORDER BY nombres, primer_apellido, segundo_apellido");
             FiltroSqlHelper.AgregarParametrosLike(cmd, filtro);
 
-            conn.Open();
-
-            using var reader = cmd.ExecuteReader();
+            using var reader = RepositoryDbHelper.ExecuteReader(_connectionString, cmd.CommandText, cmd.Parameters.Cast<NpgsqlParameter>().ToArray());
+            var usuarios = new List<Usuario>();
             while (reader.Read())
             {
                 usuarios.Add(MapearUsuario(reader));
             }
-
             return usuarios;
         }
 
         public Usuario? GetById(int id)
         {
-            const string query = @"SELECT id, nombres, apellido_materno, apellido_paterno, ci, telefono, activo,
-                                          fecha_registro, ultima_actualizacion, id_usuario, ci_extencion,
-                                          email, user_name, password_hash, role, must_change_password
+            const string query = @"SELECT id, nombres, primer_apellido, segundo_apellido, ci, ci_extension,
+                                          telefono, email, user_name, password_hash, role,
+                                          must_change_password, activo, fecha_registro,
+                                          ultima_actualizacion, usuario_auditoria_id
                                    FROM usuario
                                    WHERE id = @id
                                    LIMIT 1";
 
-            using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand(query, conn);
+            NpgsqlCommand cmd = new NpgsqlCommand(query);
             cmd.Parameters.AddWithValue("@id", id);
-            conn.Open();
 
-            using var reader = cmd.ExecuteReader();
-            return reader.Read() ? MapearUsuario(reader) : null;
+            return RepositoryDbHelper.ExecuteReaderSingle(_connectionString, cmd, MapearUsuario);
         }
 
         public Usuario? GetByEmail(string email)
         {
-            const string query = @"SELECT id, nombres, apellido_materno, apellido_paterno, ci, telefono, activo,
-                                          fecha_registro, ultima_actualizacion, id_usuario, ci_extencion,
-                                          email, user_name, password_hash, role, must_change_password
+            const string query = @"SELECT id, nombres, primer_apellido, segundo_apellido, ci, ci_extension,
+                                          telefono, email, user_name, password_hash, role,
+                                          must_change_password, activo, fecha_registro,
+                                          ultima_actualizacion, usuario_auditoria_id
                                    FROM usuario
                                    WHERE email = @email
                                    LIMIT 1";
 
-            using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand(query, conn);
+            NpgsqlCommand cmd = new NpgsqlCommand(query);
             cmd.Parameters.AddWithValue("@email", email.Trim());
-            conn.Open();
 
-            using var reader = cmd.ExecuteReader();
-            return reader.Read() ? MapearUsuario(reader) : null;
+            return RepositoryDbHelper.ExecuteReaderSingle(_connectionString, cmd, MapearUsuario);
         }
 
         public Usuario? GetByUserName(string userName)
         {
-            const string query = @"SELECT id, nombres, apellido_materno, apellido_paterno, ci, telefono, activo,
-                                          fecha_registro, ultima_actualizacion, id_usuario, ci_extencion,
-                                          email, user_name, password_hash, role, must_change_password
+            const string query = @"SELECT id, nombres, primer_apellido, segundo_apellido, ci, ci_extension,
+                                          telefono, email, user_name, password_hash, role,
+                                          must_change_password, activo, fecha_registro,
+                                          ultima_actualizacion, usuario_auditoria_id
                                    FROM usuario
                                    WHERE user_name = @user_name
                                    LIMIT 1";
 
-            using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand(query, conn);
+            NpgsqlCommand cmd = new NpgsqlCommand(query);
             cmd.Parameters.AddWithValue("@user_name", userName.Trim());
-            conn.Open();
 
-            using var reader = cmd.ExecuteReader();
-            return reader.Read() ? MapearUsuario(reader) : null;
+            return RepositoryDbHelper.ExecuteReaderSingle(_connectionString, cmd, MapearUsuario);
         }
 
         public bool ExisteEmail(string email)
         {
             const string query = @"SELECT COUNT(1) FROM usuario WHERE email = @email";
 
-            using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand(query, conn);
+            NpgsqlCommand cmd = new NpgsqlCommand(query);
             cmd.Parameters.AddWithValue("@email", email.Trim());
-            conn.Open();
 
-            return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+            var resultado = RepositoryDbHelper.ExecuteScalar(_connectionString, cmd);
+            return resultado != null && Convert.ToInt32(resultado) > 0;
         }
 
         public bool ExisteUserName(string userName)
         {
             const string query = @"SELECT COUNT(1) FROM usuario WHERE user_name = @user_name";
 
-            using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand(query, conn);
+            NpgsqlCommand cmd = new NpgsqlCommand(query);
             cmd.Parameters.AddWithValue("@user_name", userName.Trim());
-            conn.Open();
 
-            return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+            var resultado = RepositoryDbHelper.ExecuteScalar(_connectionString, cmd);
+            return resultado != null && Convert.ToInt32(resultado) > 0;
         }
 
         public int CambiarPassword(int idUsuario, string nuevoPasswordHash, bool mustChangePassword)
@@ -251,17 +235,15 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             const string query = @"UPDATE usuario
                                    SET password_hash = @password_hash,
                                        must_change_password = @must_change_password,
-                                       ultima_actualizacion = NOW()
+                                       ultima_actualizacion = CURRENT_TIMESTAMP
                                    WHERE id = @id";
 
-            using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand(query, conn);
+            NpgsqlCommand cmd = new NpgsqlCommand(query);
             cmd.Parameters.AddWithValue("@id", idUsuario);
             cmd.Parameters.AddWithValue("@password_hash", nuevoPasswordHash);
-            cmd.Parameters.AddWithValue("@must_change_password", mustChangePassword ? 1 : 0);
-            conn.Open();
+            cmd.Parameters.AddWithValue("@must_change_password", mustChangePassword);
 
-            return cmd.ExecuteNonQuery();
+            return RepositoryDbHelper.ExecuteNonQuery(_connectionString, cmd);
         }
 
         public int UpdateDatosEdicion(Usuario usuario, int? idUsuarioSesion)
@@ -273,48 +255,51 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
         {
             const string query = @"SELECT COUNT(1) FROM usuario";
 
-            using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand(query, conn);
-            conn.Open();
+            NpgsqlCommand cmd = new NpgsqlCommand(query);
 
-            return Convert.ToInt32(cmd.ExecuteScalar());
+            var resultado = RepositoryDbHelper.ExecuteScalar(_connectionString, cmd);
+            return resultado != null ? Convert.ToInt32(resultado) : 0;
         }
 
         public int SoftDelete(Usuario usuario, int? idUsuarioSesion)
         {
             const string query = @"UPDATE usuario
-                                   SET activo = 0,
-                                       ultima_actualizacion = NOW()
+                                   SET activo = FALSE,
+                                       ultima_actualizacion = CURRENT_TIMESTAMP,
+                                       usuario_auditoria_id = @usuario_auditoria_id
                                    WHERE id = @id";
 
-            using var conn = new MySqlConnection(_connectionString);
-            using var cmd = new MySqlCommand(query, conn);
+            NpgsqlCommand cmd = new NpgsqlCommand(query);
             cmd.Parameters.AddWithValue("@id", usuario.IdUsuario);
-            conn.Open();
+            cmd.Parameters.AddWithValue("@usuario_auditoria_id", (object?)idUsuarioSesion ?? DBNull.Value);
 
-            return cmd.ExecuteNonQuery();
+            return RepositoryDbHelper.ExecuteNonQuery(_connectionString, cmd);
         }
 
-        private static Usuario MapearUsuario(MySqlDataReader reader)
+        private static Usuario MapearUsuario(NpgsqlDataReader reader)
         {
             return new Usuario
             {
                 IdUsuario = Convert.ToInt32(reader["id"]),
                 Nombres = reader["nombres"]?.ToString() ?? string.Empty,
-                ApellidoMaterno = reader["apellido_materno"] == DBNull.Value ? null : reader["apellido_materno"]?.ToString(),
-                ApellidoPaterno = reader["apellido_paterno"]?.ToString() ?? string.Empty,
+                ApellidoPaterno = reader["primer_apellido"]?.ToString() ?? string.Empty,
+                ApellidoMaterno = reader["segundo_apellido"] == DBNull.Value ? null : reader["segundo_apellido"]?.ToString(),
                 Ci = reader["ci"]?.ToString() ?? string.Empty,
+                CiExtencion = reader["ci_extension"]?.ToString() ?? string.Empty,
                 Telefono = reader["telefono"]?.ToString() ?? string.Empty,
-                Activo = Convert.ToSByte(reader["activo"]),
-                FechaRegistro = Convert.ToDateTime(reader["fecha_registro"]),
-                UltimaActualizacion = reader["ultima_actualizacion"] == DBNull.Value ? null : Convert.ToDateTime(reader["ultima_actualizacion"]),
-                IdUsuarioCreador = reader["id_usuario"] == DBNull.Value ? null : Convert.ToInt32(reader["id_usuario"]),
-                CiExtencion = reader["ci_extencion"]?.ToString() ?? string.Empty,
                 Email = reader["email"]?.ToString() ?? string.Empty,
                 UserName = reader["user_name"]?.ToString() ?? string.Empty,
                 PasswordHash = reader["password_hash"]?.ToString() ?? string.Empty,
                 Role = reader["role"]?.ToString() ?? string.Empty,
-                MustChangePassword = Convert.ToSByte(reader["must_change_password"])
+                MustChangePassword = Convert.ToBoolean(reader["must_change_password"]) ? (sbyte)1 : (sbyte)0,
+                Activo = Convert.ToBoolean(reader["activo"]) ? (sbyte)1 : (sbyte)0,
+                FechaRegistro = Convert.ToDateTime(reader["fecha_registro"]),
+                UltimaActualizacion = reader["ultima_actualizacion"] == DBNull.Value
+                    ? null
+                    : Convert.ToDateTime(reader["ultima_actualizacion"]),
+                IdUsuarioCreador = reader["usuario_auditoria_id"] == DBNull.Value
+                    ? null
+                    : Convert.ToInt32(reader["usuario_auditoria_id"])
             };
         }
     }
