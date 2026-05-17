@@ -16,7 +16,10 @@ namespace MSUsuarios.Infraestructura.Persistencia.Conexion
                 {
                     lock (bloqueo)
                     {
-                        instancia ??= new ConexionStringSingleton();
+                        if (instancia == null)
+                        {
+                            instancia = new ConexionStringSingleton();
+                        }
                     }
                 }
 
