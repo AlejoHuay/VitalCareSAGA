@@ -9,16 +9,16 @@ public class ConexionStringSingleton
 
     private ConexionStringSingleton()
     {
-        // 1. Buscamos el archivo appsettings.json en el proyecto API
         var builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
 
         IConfiguration configuracion = builder.Build();
 
-        // 2. Leemos la cadena de conexión por su nombre exacto
-        CadenaConexion = configuracion.GetConnectionString("PostgresConnection") 
-                         ?? throw new Exception("No se encontró la cadena de conexión en appsettings.json");
+        CadenaConexion = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
+                         ?? configuracion.GetConnectionString("PostgresConnection")
+                         ?? throw new Exception("No se encontro la cadena de conexion 'PostgresConnection' ni la variable 'POSTGRES_CONNECTION_STRING'.");
     }
 
     public static ConexionStringSingleton Instancia
@@ -29,6 +29,7 @@ public class ConexionStringSingleton
             {
                 _instancia = new ConexionStringSingleton();
             }
+
             return _instancia;
         }
     }
