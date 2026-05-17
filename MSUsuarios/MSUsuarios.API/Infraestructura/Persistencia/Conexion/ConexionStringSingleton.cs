@@ -1,5 +1,4 @@
 using DotNetEnv;
-using Microsoft.Extensions.Configuration;
 
 namespace MSUsuarios.Infraestructura.Persistencia.Conexion
 {
@@ -29,18 +28,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Conexion
         {
             Env.Load("../.env");
 
-            string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-            IConfigurationRoot configuracion = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
-                .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{environmentName}.local.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
-
             cadenaConexion = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION")
-                ?? configuracion.GetConnectionString("PostgresConnection")
                 ?? ConstruirCadenaConexionDesdeVariables();
         }
 
