@@ -1,0 +1,41 @@
+# Build folders
+bin/
+obj/
+
+# User files
+*.user
+*.suo
+
+# Rider / VSCode
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# ASP.NET
+.cache/
+
+# NuGet
+packages/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Secrets / local config
+.env
+.env.*
+appsettings.Local.json
+appsettings.*.local.json
+
+# Visual Studio
+.vs/
+
+# Test results
+TestResults/
+*.trx
+
+# Publish output
+publish/
+wwwroot/lib/

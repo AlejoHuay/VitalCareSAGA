@@ -1,0 +1,6 @@
+@MSClientes.API_HostAddress = http://localhost:5055
+
+GET {{MSClientes.API_HostAddress}}/api/clientes
+Accept: application/json
+
+###

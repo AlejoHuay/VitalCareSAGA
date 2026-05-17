@@ -1,0 +1,136 @@
+@page
+@model FrontendVCare.Pages.ClienteModel
+@{
+    ViewData["Title"] = "Clientes";
+    var modalId = "confirmarEliminarClienteModal";
+}
+
+<section class="client-page">
+    <div class="client-toolbar">
+        <div>
+            <p class="section-kicker">MSClientes</p>
+            <h1>Clientes</h1>
+        </div>
+
+        <a asp-page="ClienteCreate" class="btn btn-success">
+            Nuevo Cliente
+        </a>
+    </div>
+
+    <form method="get" class="search-panel">
+        <div class="input-group">
+            <input type="text"
+                   name="filtro"
+                   class="form-control"
+                   placeholder="Buscar por NIT, razon social o correo..."
+                   value="@Model.FiltroActual" />
+
+            <button type="submit" class="btn btn-success">
+                Buscar
+            </button>
+
+            <a asp-page="Cliente" class="btn btn-outline-secondary">
+                Limpiar
+            </a>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrEmpty(Model.Mensaje))
+    {
+        <div class="alert alert-success">@Model.Mensaje</div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger">@Model.MensajeError</div>
+    }
+
+    <div class="table-shell">
+        <table class="table table-hover align-middle mb-0">
+            <caption class="visually-hidden">Tabla de clientes registrados con NIT, razon social, correo electronico y acciones.</caption>
+            <thead>
+                <tr>
+                    <th>NIT</th>
+                    <th>Razon Social</th>
+                    <th>Correo Electronico</th>
+                    <th class="actions-column">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Clientes.Count > 0)
+                {
+                    @foreach (var cliente in Model.Clientes)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@cliente.Nit</td>
+                            <td>@cliente.RazonSocial</td>
+                            <td>@cliente.CorreoElectronico</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a asp-page="ClienteEdit"
+                                       asp-route-id="@cliente.IdCliente"
+                                       class="btn btn-warning btn-sm">
+                                        Editar
+                                    </a>
+
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#@modalId"
+                                            data-id="@cliente.IdCliente"
+                                            data-nombre="@cliente.RazonSocial">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">No se encontraron clientes.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="@(modalId)Label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-white bg-success">
+                    <h5 class="modal-title" id="@(modalId)Label">Confirmar eliminacion</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Seguro que deseas eliminar este cliente?</p>
+                    <p class="fw-semibold mb-0" id="clienteEliminarNombre"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form method="post" asp-page-handler="EliminarClienteLogicamente">
+                        <input type="hidden" name="id" id="clienteEliminarId" />
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const modal = document.getElementById('@modalId');
+            if (!modal) return;
+
+            modal.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                modal.querySelector('#clienteEliminarId').value = button.getAttribute('data-id');
+                modal.querySelector('#clienteEliminarNombre').textContent = button.getAttribute('data-nombre');
+            });
+        })();
+    </script>
+}
