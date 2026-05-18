@@ -1,5 +1,6 @@
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Adaptadores.Auth;
+using FrontendVCare.Dto;
 using FrontendVCare.Dto.ClasificacionDtos;
 using FrontendVCare.Servicios;
 
@@ -39,6 +40,14 @@ builder.Services.AddHttpClient<ProveedorApiAdapter>(client =>
 
 // Registrar HttpClient para AuthClient
 builder.Services.AddHttpClient<AuthClient>(client =>
+{
+    string baseUrl = builder.Configuration["ApiUrls:MSAuth"]
+        ?? "http://localhost:5086/";
+    client.BaseAddress = new Uri(baseUrl);
+});
+
+// Registrar HttpClient para Usuarios
+builder.Services.AddHttpClient<UsuarioAdapter>(client =>
 {
     string baseUrl = builder.Configuration["ApiUrls:MSAuth"]
         ?? "http://localhost:5086/";

@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="~/css/modal.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/VitalCare.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/medicamento-form.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -143,14 +145,33 @@
                                 </ul>
                             </li>
 
-                            <li class="nav-item">
-                                <span class="nav-link text-light">Hola, <b>@usuarioSesion (@roleSesion)</b></span>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-warning fw-bold" asp-page="/Auth/Logout">
-                                    Cerrar Sesión
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-warning fw-bold"
+                                   href="#"
+                                   id="usuarioDropdown"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-person-circle"></i> @usuarioSesion
                                 </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="usuarioDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-page="/Account/Profile">
+                                            <i class="bi bi-person-vcard"></i> Mi Cuenta
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-page="/Account/Profile#security">
+                                            <i class="bi bi-lock-fill"></i> Seguridad
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" asp-page="/Auth/Logout">
+                                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
