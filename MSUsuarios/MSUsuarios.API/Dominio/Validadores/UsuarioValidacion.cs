@@ -23,6 +23,7 @@ namespace MSUsuarios.Dominio.Validadores
             string? apellidoPaterno = LimpiarTexto(dto.ApellidoPaterno);
             string? apellidoMaterno = LimpiarTexto(dto.ApellidoMaterno);
             string? ci = LimpiarTexto(dto.Ci);
+            string? ciExtension = LimpiarTexto(dto.CiExtencion);
             string? telefono = LimpiarTexto(dto.Telefono);
             string? email = LimpiarTexto(dto.Email);
             string? userName = LimpiarTexto(dto.UserName);
@@ -30,6 +31,8 @@ namespace MSUsuarios.Dominio.Validadores
 
             Result? resultado = ValidarCamposObligatorios(nombres, apellidoPaterno, apellidoMaterno, email)
                 ?? ValidarCi(ci)
+                ?? ValidarCiExtension(ciExtension)
+                ?? ValidarCiDuplicado(ci!)
                 ?? ValidarTelefono(telefono)
                 ?? ValidarEmail(email)
                 ?? ValidarPassword(password)
@@ -51,13 +54,18 @@ namespace MSUsuarios.Dominio.Validadores
             string? apellidoPaterno = LimpiarTexto(dto.ApellidoPaterno);
             string? apellidoMaterno = LimpiarTexto(dto.ApellidoMaterno);
             string? ci = LimpiarTexto(dto.Ci);
+            string? ciExtension = LimpiarTexto(dto.CiExtencion);
             string? telefono = LimpiarTexto(dto.Telefono);
             string? email = LimpiarTexto(dto.Email);
 
             Result? resultado = ValidarCamposObligatorios(nombres, apellidoPaterno, apellidoMaterno, email)
                 ?? ValidarCi(ci)
+                ?? ValidarCiExtension(ciExtension)
+                ?? ValidarCiDuplicadoEnActualizacion(dto.IdUsuario, ci!)
                 ?? ValidarTelefono(telefono)
-                ?? ValidarEmail(email);
+                ?? ValidarEmail(email)
+                ?? ValidarEmailDuplicadoEnActualizacion(dto.IdUsuario, email!)
+                ?? ValidarUserNameDuplicadoEnActualizacion(dto.IdUsuario, dto.UserName);
 
             return resultado ?? Result.Ok();
         }
@@ -97,8 +105,19 @@ namespace MSUsuarios.Dominio.Validadores
             if (ci!.Contains(' '))
                 return Result.Fail("El numero de carnet no debe contener espacios.");
 
-            if (!Regex.IsMatch(ci, @"^\d{8}(?:-[A-Za-z0-9]{1,2})?$"))
-                return Result.Fail("El CI debe tener 8 digitos y un complemento opcional de hasta dos caracteres (Ej. 10000000-1B).");
+            if (!Regex.IsMatch(ci, @"^\d{8}$"))
+                return Result.Fail("El CI debe tener exactamente 8 digitos numericos.");
+
+            return null;
+        }
+
+        private Result? ValidarCiExtension(string? ciExtension)
+        {
+            if (string.IsNullOrWhiteSpace(ciExtension))
+                return Result.Fail("La extension del CI es obligatoria.");
+
+            if (!ExtensionesValidas.Contains(ciExtension!))
+                return Result.Fail("La extension del CI no es valida.");
 
             return null;
         }
@@ -162,9 +181,48 @@ namespace MSUsuarios.Dominio.Validadores
             return null;
         }
 
+        private Result? ValidarCiDuplicado(string ci)
+        {
+            if (_repository.ExisteCi(ci))
+                return Result.Fail("El CI ya esta registrado en el sistema.");
+
+            return null;
+        }
+
         private Result? ValidarUserNameDuplicado(string userName)
         {
             if (_repository.ExisteUserName(userName))
+                return Result.Fail("El nombre de usuario ya esta registrado en el sistema.");
+
+            return null;
+        }
+
+        private Result? ValidarEmailDuplicadoEnActualizacion(int idUsuario, string email)
+        {
+            Usuario? usuario = _repository.GetByEmail(email);
+            if (usuario != null && usuario.IdUsuario != idUsuario)
+                return Result.Fail("El email ya esta registrado en el sistema.");
+
+            return null;
+        }
+
+        private Result? ValidarCiDuplicadoEnActualizacion(int idUsuario, string ci)
+        {
+            Usuario? usuario = _repository.GetByCi(ci);
+            if (usuario != null && usuario.IdUsuario != idUsuario)
+                return Result.Fail("El CI ya esta registrado en el sistema.");
+
+            return null;
+        }
+
+        private Result? ValidarUserNameDuplicadoEnActualizacion(int idUsuario, string? userName)
+        {
+            userName = LimpiarTexto(userName);
+            if (string.IsNullOrWhiteSpace(userName))
+                return null;
+
+            Usuario? usuario = _repository.GetByUserName(userName);
+            if (usuario != null && usuario.IdUsuario != idUsuario)
                 return Result.Fail("El nombre de usuario ya esta registrado en el sistema.");
 
             return null;

@@ -35,14 +35,14 @@ namespace MSUsuarios.Infraestructura.Persistencia.Helpers
 
         public static NpgsqlDataReader ExecuteReader(string connectionString, string query, params NpgsqlParameter[] parameters)
         {
-            var conn = new NpgsqlConnection(connectionString);
-            var cmd = new NpgsqlCommand(query, conn);
+            var connection = new NpgsqlConnection(connectionString);
+            var command = new NpgsqlCommand(query, connection);
 
             if (parameters != null)
-                cmd.Parameters.AddRange(parameters);
+                command.Parameters.AddRange(parameters);
 
-            conn.Open();
-            return cmd.ExecuteReader(CommandBehavior.CloseConnection);
+            connection.Open();
+            return command.ExecuteReader(CommandBehavior.CloseConnection);
         }
 
         public static T? ExecuteReaderSingle<T>(string connectionString, NpgsqlCommand command, Func<NpgsqlDataReader, T> mapper)

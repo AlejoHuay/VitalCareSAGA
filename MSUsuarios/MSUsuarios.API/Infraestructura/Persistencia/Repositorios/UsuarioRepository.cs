@@ -1,14 +1,31 @@
-using Npgsql;
 using MSUsuarios.Dominio.Modelos;
 using MSUsuarios.Dominio.Puertos.PuertoSalida;
 using MSUsuarios.Infraestructura.Ayudadores;
 using MSUsuarios.Infraestructura.Persistencia.Conexion;
-using MSUsuarios.Infraestructura.Persistencia.Helpers;
+using Npgsql;
 
 namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
 {
     public class UsuarioRepository : IUsuarioRepository
     {
+        private const string ColumnasSeleccionUsuario = @"
+            id,
+            nombres,
+            primer_apellido,
+            segundo_apellido,
+            ci,
+            ci_extension,
+            telefono,
+            email,
+            user_name,
+            password_hash,
+            role,
+            must_change_password,
+            activo,
+            fecha_registro,
+            ultima_actualizacion,
+            usuario_auditoria_id";
+
         private readonly string _connectionString;
 
         public UsuarioRepository()
@@ -18,62 +35,50 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
 
         public int Insert(Usuario usuario)
         {
-            const string query = @"INSERT INTO usuario
-                                   (
-                                       nombres,
-                                       primer_apellido,
-                                       segundo_apellido,
-                                       ci,
-                                       ci_extension,
-                                       telefono,
-                                       email,
-                                       user_name,
-                                       password_hash,
-                                       role,
-                                       must_change_password,
-                                       activo,
-                                       fecha_registro,
-                                       ultima_actualizacion,
-                                       usuario_auditoria_id
-                                   )
-                                   VALUES
-                                   (
-                                       @nombres,
-                                       @primer_apellido,
-                                       @segundo_apellido,
-                                       @ci,
-                                       @ci_extension,
-                                       @telefono,
-                                       @email,
-                                       @user_name,
-                                       @password_hash,
-                                       @role,
-                                       @must_change_password,
-                                       @activo,
-                                       @fecha_registro,
-                                       @ultima_actualizacion,
-                                       @usuario_auditoria_id
-                                   )";
+            const string query = @"
+                INSERT INTO usuario
+                (
+                    nombres,
+                    primer_apellido,
+                    segundo_apellido,
+                    ci,
+                    ci_extension,
+                    telefono,
+                    email,
+                    user_name,
+                    password_hash,
+                    role,
+                    must_change_password,
+                    activo,
+                    fecha_registro,
+                    ultima_actualizacion,
+                    usuario_auditoria_id
+                )
+                VALUES
+                (
+                    @nombres,
+                    @primer_apellido,
+                    @segundo_apellido,
+                    @ci,
+                    @ci_extension,
+                    @telefono,
+                    @email,
+                    @user_name,
+                    @password_hash,
+                    @role,
+                    @must_change_password,
+                    @activo,
+                    @fecha_registro,
+                    @ultima_actualizacion,
+                    @usuario_auditoria_id
+                )";
 
-            NpgsqlCommand cmd = new NpgsqlCommand(query);
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
 
-            cmd.Parameters.AddWithValue("@nombres", usuario.Nombres);
-            cmd.Parameters.AddWithValue("@primer_apellido", usuario.ApellidoPaterno);
-            cmd.Parameters.AddWithValue("@segundo_apellido", (object?)usuario.ApellidoMaterno ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@ci", usuario.Ci);
-            cmd.Parameters.AddWithValue("@ci_extension", usuario.CiExtencion);
-            cmd.Parameters.AddWithValue("@telefono", usuario.Telefono);
-            cmd.Parameters.AddWithValue("@email", usuario.Email);
-            cmd.Parameters.AddWithValue("@user_name", usuario.UserName);
-            cmd.Parameters.AddWithValue("@password_hash", usuario.PasswordHash);
-            cmd.Parameters.AddWithValue("@role", usuario.Role);
-            cmd.Parameters.AddWithValue("@must_change_password", usuario.MustChangePassword == 1);
-            cmd.Parameters.AddWithValue("@activo", usuario.Activo == 1);
-            cmd.Parameters.AddWithValue("@fecha_registro", usuario.FechaRegistro);
-            cmd.Parameters.AddWithValue("@ultima_actualizacion", (object?)usuario.UltimaActualizacion ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@usuario_auditoria_id", (object?)usuario.IdUsuarioCreador ?? DBNull.Value);
-
-            return RepositoryDbHelper.ExecuteNonQuery(_connectionString, cmd);
+            AgregarParametrosUsuario(cmd, usuario, incluirPasswordHash: true);
+            conn.Open();
+            return cmd.ExecuteNonQuery();
         }
 
         public int Update(Usuario usuario)
@@ -83,37 +88,31 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
 
         public int Update(Usuario usuario, int? idUsuarioSesion)
         {
-            const string query = @"UPDATE usuario
-                                   SET nombres = @nombres,
-                                       primer_apellido = @primer_apellido,
-                                       segundo_apellido = @segundo_apellido,
-                                       ci = @ci,
-                                       ci_extension = @ci_extension,
-                                       telefono = @telefono,
-                                       email = @email,
-                                       user_name = @user_name,
-                                       role = @role,
-                                       must_change_password = @must_change_password,
-                                       ultima_actualizacion = CURRENT_TIMESTAMP,
-                                       usuario_auditoria_id = @usuario_auditoria_id
-                                   WHERE id = @id";
+            const string query = @"
+                UPDATE usuario
+                SET nombres = @nombres,
+                    primer_apellido = @primer_apellido,
+                    segundo_apellido = @segundo_apellido,
+                    ci = @ci,
+                    ci_extension = @ci_extension,
+                    telefono = @telefono,
+                    email = @email,
+                    user_name = @user_name,
+                    role = @role,
+                    must_change_password = @must_change_password,
+                    ultima_actualizacion = @ultima_actualizacion,
+                    usuario_auditoria_id = COALESCE(@usuario_auditoria_id, usuario_auditoria_id)
+                WHERE id = @id";
 
-            NpgsqlCommand cmd = new NpgsqlCommand(query);
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
 
-            cmd.Parameters.AddWithValue("@id", usuario.IdUsuario);
-            cmd.Parameters.AddWithValue("@nombres", usuario.Nombres);
-            cmd.Parameters.AddWithValue("@primer_apellido", usuario.ApellidoPaterno);
-            cmd.Parameters.AddWithValue("@segundo_apellido", (object?)usuario.ApellidoMaterno ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@ci", usuario.Ci);
-            cmd.Parameters.AddWithValue("@ci_extension", usuario.CiExtencion);
-            cmd.Parameters.AddWithValue("@telefono", usuario.Telefono);
-            cmd.Parameters.AddWithValue("@email", usuario.Email);
-            cmd.Parameters.AddWithValue("@user_name", usuario.UserName);
-            cmd.Parameters.AddWithValue("@role", usuario.Role);
-            cmd.Parameters.AddWithValue("@must_change_password", usuario.MustChangePassword == 1);
-            cmd.Parameters.AddWithValue("@usuario_auditoria_id", (object?)idUsuarioSesion ?? DBNull.Value);
-
-            return RepositoryDbHelper.ExecuteNonQuery(_connectionString, cmd);
+            usuario.IdUsuarioCreador = idUsuarioSesion ?? usuario.IdUsuarioCreador;
+            usuario.UltimaActualizacion = DateTime.UtcNow;
+            cmd.Parameters.AddWithValue("id", usuario.IdUsuario);
+            AgregarParametrosUsuario(cmd, usuario, incluirPasswordHash: false);
+            conn.Open();
+            return cmd.ExecuteNonQuery();
         }
 
         public int Delete(Usuario usuario)
@@ -128,12 +127,15 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
 
         public IEnumerable<Usuario> GetAll(string filtro)
         {
-            string query = @"SELECT id, nombres, primer_apellido, segundo_apellido, ci, ci_extension,
-                                    telefono, email, user_name, password_hash, role,
-                                    must_change_password, activo, fecha_registro,
-                                    ultima_actualizacion, usuario_auditoria_id
-                             FROM usuario
-                             WHERE activo = TRUE";
+            List<Usuario> usuarios = new List<Usuario>();
+
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand();
+
+            string query = $@"
+                SELECT {ColumnasSeleccionUsuario}
+                FROM usuario
+                WHERE activo = TRUE";
 
             string where = FiltroSqlHelper.ConstruirCondicionLike(
                 filtro,
@@ -148,11 +150,12 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
                 "role"
             );
 
-            NpgsqlCommand cmd = new NpgsqlCommand(query + where + " ORDER BY nombres, primer_apellido, segundo_apellido");
+            cmd.CommandText = query + where + " ORDER BY nombres, primer_apellido, segundo_apellido";
+            cmd.Connection = conn;
             FiltroSqlHelper.AgregarParametrosLike(cmd, filtro);
+            conn.Open();
 
-            using var reader = RepositoryDbHelper.ExecuteReader(_connectionString, cmd.CommandText, cmd.Parameters.Cast<NpgsqlParameter>().ToArray());
-            var usuarios = new List<Usuario>();
+            using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
                 usuarios.Add(MapearUsuario(reader));
@@ -162,88 +165,126 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
 
         public Usuario? GetById(int id)
         {
-            const string query = @"SELECT id, nombres, primer_apellido, segundo_apellido, ci, ci_extension,
-                                          telefono, email, user_name, password_hash, role,
-                                          must_change_password, activo, fecha_registro,
-                                          ultima_actualizacion, usuario_auditoria_id
-                                   FROM usuario
-                                   WHERE id = @id
-                                   LIMIT 1";
+            string query = $@"
+                SELECT {ColumnasSeleccionUsuario}
+                FROM usuario
+                WHERE id = @id
+                LIMIT 1";
 
-            NpgsqlCommand cmd = new NpgsqlCommand(query);
-            cmd.Parameters.AddWithValue("@id", id);
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("id", id);
+            conn.Open();
 
-            return RepositoryDbHelper.ExecuteReaderSingle(_connectionString, cmd, MapearUsuario);
+            using var reader = cmd.ExecuteReader();
+            return reader.Read() ? MapearUsuario(reader) : null;
         }
 
         public Usuario? GetByEmail(string email)
         {
-            const string query = @"SELECT id, nombres, primer_apellido, segundo_apellido, ci, ci_extension,
-                                          telefono, email, user_name, password_hash, role,
-                                          must_change_password, activo, fecha_registro,
-                                          ultima_actualizacion, usuario_auditoria_id
-                                   FROM usuario
-                                   WHERE email = @email
-                                   LIMIT 1";
+            string query = $@"
+                SELECT {ColumnasSeleccionUsuario}
+                FROM usuario
+                WHERE LOWER(email) = LOWER(@email)
+                LIMIT 1";
 
-            NpgsqlCommand cmd = new NpgsqlCommand(query);
-            cmd.Parameters.AddWithValue("@email", email.Trim());
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("email", email.Trim());
+            conn.Open();
 
-            return RepositoryDbHelper.ExecuteReaderSingle(_connectionString, cmd, MapearUsuario);
+            using var reader = cmd.ExecuteReader();
+            return reader.Read() ? MapearUsuario(reader) : null;
+        }
+
+        public Usuario? GetByCi(string ci)
+        {
+            string query = $@"
+                SELECT {ColumnasSeleccionUsuario}
+                FROM usuario
+                WHERE ci = @ci
+                LIMIT 1";
+
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("ci", ObtenerCiNumerico(ci));
+            conn.Open();
+
+            using var reader = cmd.ExecuteReader();
+            return reader.Read() ? MapearUsuario(reader) : null;
         }
 
         public Usuario? GetByUserName(string userName)
         {
-            const string query = @"SELECT id, nombres, primer_apellido, segundo_apellido, ci, ci_extension,
-                                          telefono, email, user_name, password_hash, role,
-                                          must_change_password, activo, fecha_registro,
-                                          ultima_actualizacion, usuario_auditoria_id
-                                   FROM usuario
-                                   WHERE user_name = @user_name
-                                   LIMIT 1";
+            string query = $@"
+                SELECT {ColumnasSeleccionUsuario}
+                FROM usuario
+                WHERE LOWER(user_name) = LOWER(@user_name)
+                LIMIT 1";
 
-            NpgsqlCommand cmd = new NpgsqlCommand(query);
-            cmd.Parameters.AddWithValue("@user_name", userName.Trim());
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("user_name", userName.Trim());
+            conn.Open();
 
-            return RepositoryDbHelper.ExecuteReaderSingle(_connectionString, cmd, MapearUsuario);
+            using var reader = cmd.ExecuteReader();
+            return reader.Read() ? MapearUsuario(reader) : null;
+        }
+
+        public bool ExisteCi(string ci)
+        {
+            const string query = "SELECT COUNT(1) FROM usuario WHERE ci = @ci";
+
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("ci", ObtenerCiNumerico(ci));
+            conn.Open();
+
+            return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
         }
 
         public bool ExisteEmail(string email)
         {
-            const string query = @"SELECT COUNT(1) FROM usuario WHERE email = @email";
+            const string query = "SELECT COUNT(1) FROM usuario WHERE LOWER(email) = LOWER(@email)";
 
-            NpgsqlCommand cmd = new NpgsqlCommand(query);
-            cmd.Parameters.AddWithValue("@email", email.Trim());
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("email", email.Trim());
+            conn.Open();
 
-            var resultado = RepositoryDbHelper.ExecuteScalar(_connectionString, cmd);
-            return resultado != null && Convert.ToInt32(resultado) > 0;
+            return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
         }
 
         public bool ExisteUserName(string userName)
         {
-            const string query = @"SELECT COUNT(1) FROM usuario WHERE user_name = @user_name";
+            const string query = "SELECT COUNT(1) FROM usuario WHERE LOWER(user_name) = LOWER(@user_name)";
 
-            NpgsqlCommand cmd = new NpgsqlCommand(query);
-            cmd.Parameters.AddWithValue("@user_name", userName.Trim());
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("user_name", userName.Trim());
+            conn.Open();
 
-            var resultado = RepositoryDbHelper.ExecuteScalar(_connectionString, cmd);
-            return resultado != null && Convert.ToInt32(resultado) > 0;
+            return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
         }
 
         public int CambiarPassword(int idUsuario, string nuevoPasswordHash, bool mustChangePassword)
         {
-            const string query = @"UPDATE usuario
-                                   SET password_hash = @password_hash,
-                                       must_change_password = @must_change_password,
-                                       ultima_actualizacion = CURRENT_TIMESTAMP
-                                   WHERE id = @id";
+            const string query = @"
+                UPDATE usuario
+                SET password_hash = @password_hash,
+                    must_change_password = @must_change_password,
+                    ultima_actualizacion = @ultima_actualizacion
+                WHERE id = @id";
 
-            NpgsqlCommand cmd = new NpgsqlCommand(query);
-            cmd.Parameters.AddWithValue("@id", idUsuario);
-            cmd.Parameters.AddWithValue("@password_hash", nuevoPasswordHash);
-            cmd.Parameters.AddWithValue("@must_change_password", mustChangePassword);
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("id", idUsuario);
+            cmd.Parameters.AddWithValue("password_hash", nuevoPasswordHash);
+            cmd.Parameters.AddWithValue("must_change_password", mustChangePassword);
+            cmd.Parameters.AddWithValue("ultima_actualizacion", DateTime.UtcNow);
+            conn.Open();
 
-            return RepositoryDbHelper.ExecuteNonQuery(_connectionString, cmd);
+            return cmd.ExecuteNonQuery();
         }
 
         public int UpdateDatosEdicion(Usuario usuario, int? idUsuarioSesion)
@@ -253,53 +294,106 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
 
         public int Count()
         {
-            const string query = @"SELECT COUNT(1) FROM usuario";
+            const string query = "SELECT COUNT(1) FROM usuario";
 
-            NpgsqlCommand cmd = new NpgsqlCommand(query);
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
+            conn.Open();
 
-            var resultado = RepositoryDbHelper.ExecuteScalar(_connectionString, cmd);
-            return resultado != null ? Convert.ToInt32(resultado) : 0;
+            return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
         public int SoftDelete(Usuario usuario, int? idUsuarioSesion)
         {
-            const string query = @"UPDATE usuario
-                                   SET activo = FALSE,
-                                       ultima_actualizacion = CURRENT_TIMESTAMP,
-                                       usuario_auditoria_id = @usuario_auditoria_id
-                                   WHERE id = @id";
+            const string query = @"
+                UPDATE usuario
+                SET activo = FALSE,
+                    ultima_actualizacion = @ultima_actualizacion,
+                    usuario_auditoria_id = COALESCE(@usuario_auditoria_id, usuario_auditoria_id)
+                WHERE id = @id";
 
-            NpgsqlCommand cmd = new NpgsqlCommand(query);
-            cmd.Parameters.AddWithValue("@id", usuario.IdUsuario);
-            cmd.Parameters.AddWithValue("@usuario_auditoria_id", (object?)idUsuarioSesion ?? DBNull.Value);
+            using var conn = new NpgsqlConnection(_connectionString);
+            using var cmd = new NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("id", usuario.IdUsuario);
+            cmd.Parameters.AddWithValue("ultima_actualizacion", DateTime.UtcNow);
+            AgregarParametroNullable(cmd, "usuario_auditoria_id", idUsuarioSesion);
+            conn.Open();
 
-            return RepositoryDbHelper.ExecuteNonQuery(_connectionString, cmd);
+            return cmd.ExecuteNonQuery();
+        }
+
+        private static void AgregarParametrosUsuario(NpgsqlCommand cmd, Usuario usuario, bool incluirPasswordHash)
+        {
+            cmd.Parameters.AddWithValue("nombres", usuario.Nombres.Trim());
+            cmd.Parameters.AddWithValue("primer_apellido", usuario.ApellidoPaterno.Trim());
+            AgregarParametroNullable(cmd, "segundo_apellido", usuario.ApellidoMaterno);
+            cmd.Parameters.AddWithValue("ci", ObtenerCiNumerico(usuario.Ci));
+            cmd.Parameters.AddWithValue("ci_extension", usuario.CiExtencion.Trim().ToUpperInvariant());
+            cmd.Parameters.AddWithValue("telefono", usuario.Telefono.Trim());
+            cmd.Parameters.AddWithValue("email", usuario.Email.Trim().ToLowerInvariant());
+            cmd.Parameters.AddWithValue("user_name", usuario.UserName.Trim().ToLowerInvariant());
+            cmd.Parameters.AddWithValue("role", usuario.Role.Trim());
+            cmd.Parameters.AddWithValue("must_change_password", usuario.MustChangePassword == 1);
+            cmd.Parameters.AddWithValue("activo", usuario.Activo == 1);
+            cmd.Parameters.AddWithValue("fecha_registro", AsegurarUtc(usuario.FechaRegistro == default ? DateTime.UtcNow : usuario.FechaRegistro));
+            AgregarParametroNullable(cmd, "ultima_actualizacion", usuario.UltimaActualizacion.HasValue ? AsegurarUtc(usuario.UltimaActualizacion.Value) : null);
+            AgregarParametroNullable(cmd, "usuario_auditoria_id", usuario.IdUsuarioCreador);
+
+            if (incluirPasswordHash)
+                cmd.Parameters.AddWithValue("password_hash", usuario.PasswordHash);
+        }
+
+        private static void AgregarParametroNullable(NpgsqlCommand cmd, string nombre, object? valor)
+        {
+            cmd.Parameters.AddWithValue(nombre, valor ?? DBNull.Value);
+        }
+
+        private static int ObtenerCiNumerico(string ci)
+        {
+            string ciNormalizado = ci?.Trim() ?? string.Empty;
+
+            if (!int.TryParse(ciNormalizado, out int ciNumerico))
+                throw new InvalidOperationException("El valor de CI debe ser numerico para persistirse en PostgreSQL.");
+
+            return ciNumerico;
+        }
+
+        private static DateTime AsegurarUtc(DateTime fecha)
+        {
+            return fecha.Kind switch
+            {
+                DateTimeKind.Utc => fecha,
+                DateTimeKind.Unspecified => DateTime.SpecifyKind(fecha, DateTimeKind.Utc),
+                _ => fecha.ToUniversalTime()
+            };
         }
 
         private static Usuario MapearUsuario(NpgsqlDataReader reader)
         {
             return new Usuario
             {
-                IdUsuario = Convert.ToInt32(reader["id"]),
-                Nombres = reader["nombres"]?.ToString() ?? string.Empty,
-                ApellidoPaterno = reader["primer_apellido"]?.ToString() ?? string.Empty,
-                ApellidoMaterno = reader["segundo_apellido"] == DBNull.Value ? null : reader["segundo_apellido"]?.ToString(),
-                Ci = reader["ci"]?.ToString() ?? string.Empty,
-                CiExtencion = reader["ci_extension"]?.ToString() ?? string.Empty,
-                Telefono = reader["telefono"]?.ToString() ?? string.Empty,
-                Email = reader["email"]?.ToString() ?? string.Empty,
-                UserName = reader["user_name"]?.ToString() ?? string.Empty,
-                PasswordHash = reader["password_hash"]?.ToString() ?? string.Empty,
-                Role = reader["role"]?.ToString() ?? string.Empty,
-                MustChangePassword = Convert.ToBoolean(reader["must_change_password"]) ? (sbyte)1 : (sbyte)0,
-                Activo = Convert.ToBoolean(reader["activo"]) ? (sbyte)1 : (sbyte)0,
-                FechaRegistro = Convert.ToDateTime(reader["fecha_registro"]),
-                UltimaActualizacion = reader["ultima_actualizacion"] == DBNull.Value
+                IdUsuario = reader.GetInt32(reader.GetOrdinal("id")),
+                Nombres = reader.GetString(reader.GetOrdinal("nombres")),
+                ApellidoPaterno = reader.GetString(reader.GetOrdinal("primer_apellido")),
+                ApellidoMaterno = reader.IsDBNull(reader.GetOrdinal("segundo_apellido"))
                     ? null
-                    : Convert.ToDateTime(reader["ultima_actualizacion"]),
-                IdUsuarioCreador = reader["usuario_auditoria_id"] == DBNull.Value
+                    : reader.GetString(reader.GetOrdinal("segundo_apellido")),
+                Ci = reader.GetInt32(reader.GetOrdinal("ci")).ToString(),
+                CiExtencion = reader.GetString(reader.GetOrdinal("ci_extension")),
+                Telefono = reader.GetString(reader.GetOrdinal("telefono")),
+                Email = reader.GetString(reader.GetOrdinal("email")),
+                UserName = reader.GetString(reader.GetOrdinal("user_name")),
+                PasswordHash = reader.GetString(reader.GetOrdinal("password_hash")),
+                Role = reader.GetString(reader.GetOrdinal("role")),
+                MustChangePassword = reader.GetBoolean(reader.GetOrdinal("must_change_password")) ? (sbyte)1 : (sbyte)0,
+                Activo = reader.GetBoolean(reader.GetOrdinal("activo")) ? (sbyte)1 : (sbyte)0,
+                FechaRegistro = AsegurarUtc(reader.GetDateTime(reader.GetOrdinal("fecha_registro"))),
+                UltimaActualizacion = reader.IsDBNull(reader.GetOrdinal("ultima_actualizacion"))
                     ? null
-                    : Convert.ToInt32(reader["usuario_auditoria_id"])
+                    : AsegurarUtc(reader.GetDateTime(reader.GetOrdinal("ultima_actualizacion"))),
+                IdUsuarioCreador = reader.IsDBNull(reader.GetOrdinal("usuario_auditoria_id"))
+                    ? null
+                    : reader.GetInt32(reader.GetOrdinal("usuario_auditoria_id"))
             };
         }
     }

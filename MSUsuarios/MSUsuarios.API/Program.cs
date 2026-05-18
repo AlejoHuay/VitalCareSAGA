@@ -1,3 +1,6 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using DotNetEnv;
 using Microsoft.OpenApi.Models;
 using MSUsuarios.App.Interfaces;
@@ -5,21 +8,17 @@ using MSUsuarios.App.Servicios;
 using MSUsuarios.Dominio.Puertos.PuertoSalida;
 using MSUsuarios.Dominio.Validadores;
 using MSUsuarios.Infraestructura.Creadores;
-using MSUsuarios.Infraestructura.Persistencia.Repositorios;
 
+Env.Load("../.env");
 var builder = WebApplication.CreateBuilder(args);
 
-// Cargar variables del archivo .env
-Env.Load("../.env");
-
-// Servicios
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "ServicioUsuarios API",
+        Title = "MSUsuarios API",
         Version = "v1"
     });
 
@@ -51,63 +50,79 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    string[] allowedOrigins = builder.Configuration
+        .GetSection("Cors:AllowedOrigins")
+        .Get<string[]>() ?? ["http://localhost:5081"];
+
+    options.AddPolicy("FrontendClients", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
 string jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
-    ?? throw new InvalidOperationException("No se encontro JWT_KEY en las variables de entorno.");
+    ?? builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("No se encontro JWT_KEY en variables de entorno ni Jwt:Key en configuracion.");
 string jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
-    ?? throw new InvalidOperationException("No se encontro JWT_ISSUER en las variables de entorno.");
+    ?? builder.Configuration["Jwt:Issuer"]
+    ?? throw new InvalidOperationException("No se encontro JWT_ISSUER en variables de entorno ni Jwt:Issuer en configuracion.");
 string jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
-    ?? throw new InvalidOperationException("No se encontro JWT_AUDIENCE en las variables de entorno.");
+    ?? builder.Configuration["Jwt:Audience"]
+    ?? throw new InvalidOperationException("No se encontro JWT_AUDIENCE en variables de entorno ni Jwt:Audience en configuracion.");
 
-// Registro de Repositorios
-builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<UsuarioRepositoryCreator>();
+builder.Services.AddScoped<UsuarioTokenRepositoryCreator>();
 
-builder.Services.AddScoped<TokenRepositoryCreator>();
-builder.Services.AddScoped<ITokenRepository>(provider =>
+builder.Services.AddScoped<IUsuarioRepository>(provider =>
 {
-    TokenRepositoryCreator creator = provider.GetRequiredService<TokenRepositoryCreator>();
+    UsuarioRepositoryCreator creator = provider.GetRequiredService<UsuarioRepositoryCreator>();
     return creator.CreateRepo();
 });
 
-builder.Services.AddScoped<UsuarioTokenRepositoryCreator>();
 builder.Services.AddScoped<IUsuarioTokenRepository>(provider =>
 {
     UsuarioTokenRepositoryCreator creator = provider.GetRequiredService<UsuarioTokenRepositoryCreator>();
     return creator.CreateRepo();
 });
 
-// Registro de Validadores
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IUsuarioTokenService, UsuarioTokenService>();
 builder.Services.AddScoped<UsuarioValidacionGeneral>();
 
-// Registro de Servicios
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IUsuarioTokenService, UsuarioTokenService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
-// Pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseCors("FrontendClients");
 app.UseHttpsRedirection();
-
-app.UseCors("AllowAll");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

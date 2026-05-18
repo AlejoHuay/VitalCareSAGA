@@ -4,6 +4,8 @@ using MSUsuarios.Dominio.Modelos;
 using MSUsuarios.Dominio.Puertos.PuertoSalida;
 using MSUsuarios.Dominio.Validadores;
 using MSUsuarios.Infraestructura.Ayudadores;
+using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 namespace MSUsuarios.App.Servicios
 {
@@ -13,17 +15,21 @@ namespace MSUsuarios.App.Servicios
         private readonly UsuarioValidacionGeneral _validacionGeneral;
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
+        private readonly string _frontendBaseUrl;
 
         public UsuarioService(
             IUsuarioRepository repository,
             UsuarioValidacionGeneral validacionGeneral,
             ITokenService tokenService,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguration configuration)
         {
             _repository = repository;
             _validacionGeneral = validacionGeneral;
             _tokenService = tokenService;
             _emailService = emailService;
+            _frontendBaseUrl = configuration["Frontend:BaseUrl"]?.TrimEnd('/')
+                ?? "http://localhost:5081";
         }
 
         public Result CrearUsuario(UsuarioRegistroDto dto, string role, int? idUsuarioSesion)
@@ -37,7 +43,16 @@ namespace MSUsuarios.App.Servicios
 
             Usuario usuario = ConstruirUsuarioNuevo(dto, role, passwordHash, idUsuarioSesion);
 
-            int filasAfectadas = _repository.Insert(usuario);
+            int filasAfectadas;
+            try
+            {
+                filasAfectadas = _repository.Insert(usuario);
+            }
+            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                return Result.Fail(MapearViolacionUnica(ex.ConstraintName));
+            }
+
             if (filasAfectadas <= 0)
                 return Result.Fail("No se pudo registrar el usuario.");
 
@@ -56,8 +71,7 @@ namespace MSUsuarios.App.Servicios
             if (!resultadoToken.IsSuccess)
                 return resultadoToken;
 
-            string tokenSeguro = Uri.EscapeDataString(tokenParaUrl);
-            string enlaceActivacion = $"http://localhost:5051/Auth/ActivarCuenta?token={tokenSeguro}";
+            string enlaceActivacion = ConstruirEnlaceFrontend("/Auth/ActivarCuenta", tokenParaUrl);
 
             return _emailService.EnviarCorreoActivacionCuenta(
                 usuarioRegistrado.Email,
@@ -80,7 +94,16 @@ namespace MSUsuarios.App.Servicios
 
             AplicarActualizacion(usuarioActual, dto);
 
-            int filasAfectadas = _repository.Update(usuarioActual, idUsuarioSesion);
+            int filasAfectadas;
+            try
+            {
+                filasAfectadas = _repository.Update(usuarioActual, idUsuarioSesion);
+            }
+            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                return Result.Fail(MapearViolacionUnica(ex.ConstraintName));
+            }
+
             return filasAfectadas > 0
                 ? Result.Ok()
                 : Result.Fail("No se pudo actualizar el usuario.");
@@ -219,8 +242,7 @@ namespace MSUsuarios.App.Servicios
             if (!resultadoToken.IsSuccess)
                 return resultadoToken;
 
-            string tokenSeguro = Uri.EscapeDataString(tokenParaUrl);
-            string enlaceRecuperacion = $"http://localhost:5051/Auth/RecuperarContrasena?token={tokenSeguro}";
+            string enlaceRecuperacion = ConstruirEnlaceFrontend("/Auth/RecuperarContrasena", tokenParaUrl);
 
             return _emailService.EnviarCorreoRecuperacionContrasena(
                 usuario.Email,
@@ -291,18 +313,19 @@ namespace MSUsuarios.App.Servicios
         {
             return new Usuario
             {
-                Nombres = dto.Nombres,
-                ApellidoPaterno = dto.ApellidoPaterno,
-                ApellidoMaterno = dto.ApellidoMaterno,
-                Ci = dto.Ci,
-                CiExtencion = dto.CiExtencion,
-                Telefono = dto.Telefono,
-                Email = dto.Email,
-                UserName = dto.UserName,
+                Nombres = StringHelper.LimpiarTexto(dto.Nombres),
+                ApellidoPaterno = StringHelper.LimpiarTexto(dto.ApellidoPaterno),
+                ApellidoMaterno = StringHelper.LimpiarTexto(dto.ApellidoMaterno),
+                Ci = StringHelper.SoloNumeros(dto.Ci),
+                CiExtencion = StringHelper.LimpiarTextoMayus(dto.CiExtencion),
+                Telefono = StringHelper.SoloNumeros(dto.Telefono),
+                Email = StringHelper.LimpiarTextoMinus(dto.Email),
+                UserName = StringHelper.LimpiarTextoMinus(dto.UserName),
                 PasswordHash = passwordHash,
                 Role = StringHelper.LimpiarTexto(role),
                 Activo = 1,
                 MustChangePassword = 1,
+                FechaRegistro = DateTime.UtcNow,
                 IdUsuarioCreador = idUsuarioSesion
             };
         }
@@ -310,17 +333,17 @@ namespace MSUsuarios.App.Servicios
         private void AplicarActualizacion(Usuario usuario, UsuarioActualizarDto dto)
         {
             if (!string.IsNullOrWhiteSpace(dto.Nombres))
-                usuario.Nombres = dto.Nombres;
+                usuario.Nombres = StringHelper.LimpiarTexto(dto.Nombres);
 
-            usuario.ApellidoPaterno = dto.ApellidoPaterno;
-            usuario.ApellidoMaterno = dto.ApellidoMaterno;
-            usuario.Ci = dto.Ci;
-            usuario.CiExtencion = dto.CiExtencion;
-            usuario.Telefono = dto.Telefono;
-            usuario.Email = dto.Email;
+            usuario.ApellidoPaterno = StringHelper.LimpiarTexto(dto.ApellidoPaterno);
+            usuario.ApellidoMaterno = StringHelper.LimpiarTexto(dto.ApellidoMaterno);
+            usuario.Ci = StringHelper.SoloNumeros(dto.Ci);
+            usuario.CiExtencion = StringHelper.LimpiarTextoMayus(dto.CiExtencion);
+            usuario.Telefono = StringHelper.SoloNumeros(dto.Telefono);
+            usuario.Email = StringHelper.LimpiarTextoMinus(dto.Email);
 
             if (!string.IsNullOrWhiteSpace(dto.Role))
-                usuario.Role = dto.Role;
+                usuario.Role = StringHelper.LimpiarTexto(dto.Role);
         }
 
         private UsuarioDto? ObtenerYMapear(Func<Usuario?> obtenerUsuario)
@@ -348,5 +371,21 @@ namespace MSUsuarios.App.Servicios
             };
         }
 
+        private string ConstruirEnlaceFrontend(string rutaRelativa, string tokenPlano)
+        {
+            string tokenSeguro = Uri.EscapeDataString(tokenPlano);
+            return $"{_frontendBaseUrl}{rutaRelativa}?token={tokenSeguro}";
+        }
+
+        private static string MapearViolacionUnica(string? constraintName)
+        {
+            return constraintName switch
+            {
+                "usuario_ci_key" => "El CI ya esta registrado en el sistema.",
+                "usuario_email_key" => "El email ya esta registrado en el sistema.",
+                "usuario_user_name_key" => "El nombre de usuario ya esta registrado en el sistema.",
+                _ => "Ya existe un registro con datos unicos duplicados."
+            };
+        }
     }
 }

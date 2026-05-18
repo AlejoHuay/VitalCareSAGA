@@ -16,7 +16,10 @@ namespace MSUsuarios.Infraestructura.Persistencia.Conexion
                 {
                     lock (bloqueo)
                     {
-                        instancia ??= new ConexionStringSingleton();
+                        if (instancia == null)
+                        {
+                            instancia = new ConexionStringSingleton();
+                        }
                     }
                 }
 
@@ -26,21 +29,21 @@ namespace MSUsuarios.Infraestructura.Persistencia.Conexion
 
         private ConexionStringSingleton()
         {
-            Env.Load();
+            Env.Load("../.env");
 
+            cadenaConexion = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION")
+                ?? ConstruirCadenaConexionDesdeVariables();
+        }
+
+        private static string ConstruirCadenaConexionDesdeVariables()
+        {
             string host = ObtenerVariableObligatoria("POSTGRES_HOST");
             string port = ObtenerVariableObligatoria("POSTGRES_PORT");
             string database = ObtenerVariableObligatoria("POSTGRES_DB");
             string user = ObtenerVariableObligatoria("POSTGRES_USER");
             string password = ObtenerVariableObligatoria("POSTGRES_PASSWORD");
 
-            cadenaConexion =
-                $"Host={host};Port={port};Database={database};Username={user};Password={password};";
-        }
-
-        public string CadenaConexion
-        {
-            get { return cadenaConexion; }
+            return $"Host={host};Port={port};Database={database};Username={user};Password={password};";
         }
 
         private static string ObtenerVariableObligatoria(string nombre)
@@ -49,10 +52,12 @@ namespace MSUsuarios.Infraestructura.Persistencia.Conexion
 
             if (string.IsNullOrWhiteSpace(valor))
             {
-                throw new Exception($"No se encontró la variable de entorno '{nombre}'.");
+                throw new Exception($"No se encontro la variable de entorno '{nombre}'.");
             }
 
             return valor;
         }
+
+        public string CadenaConexion => cadenaConexion;
     }
 }
