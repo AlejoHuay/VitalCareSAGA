@@ -105,8 +105,8 @@ namespace MSUsuarios.Dominio.Validadores
             if (ci!.Contains(' '))
                 return Result.Fail("El numero de carnet no debe contener espacios.");
 
-            if (!Regex.IsMatch(ci, @"^\d{8}$"))
-                return Result.Fail("El CI debe tener exactamente 8 digitos numericos.");
+            if (!Regex.IsMatch(ci, @"^\d{5,8}$"))
+                return Result.Fail("El CI debe tener entre 5 y 8 digitos numericos.");
 
             return null;
         }

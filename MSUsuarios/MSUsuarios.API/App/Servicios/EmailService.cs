@@ -88,10 +88,76 @@ namespace MSUsuarios.App.Servicios
                     _smtpSettings.Password
                 );
                 client.EnableSsl = _smtpSettings.UseSsl;
+                client.Timeout = 10000; // 10 segundos timeout
 
                 client.Send(message);
 
                 return Result.Ok();
+            }
+            catch (SmtpException smtpEx)
+            {
+                return Result.Fail($"Error SMTP: No se pudo conectar con el servidor de correo. {smtpEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail($"No se pudo enviar el correo electronico. Detalle: {ex.Message}");
+            }
+        }
+
+        public Result EnviarCorreoRecuperacionContrasena(
+            string emailDestino,
+            string nombres,
+            string userName,
+            string enlaceRecuperacion)
+        {
+            emailDestino = emailDestino?.Trim() ?? string.Empty;
+            nombres = nombres?.Trim() ?? string.Empty;
+            userName = userName?.Trim() ?? string.Empty;
+            enlaceRecuperacion = enlaceRecuperacion?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(emailDestino))
+                return Result.Fail("El correo destino es obligatorio.");
+
+            if (string.IsNullOrWhiteSpace(userName))
+                return Result.Fail("El nombre de usuario es obligatorio para el correo.");
+
+            if (string.IsNullOrWhiteSpace(enlaceRecuperacion))
+                return Result.Fail("El enlace de recuperacion es obligatorio.");
+
+            try
+            {
+                string asunto = "Recuperacion de contrasena - Farmacia VitalCare";
+                string cuerpoHtml = ConstruirHtmlRecuperacionContrasena(
+                    nombres,
+                    userName,
+                    enlaceRecuperacion
+                );
+
+                using MailMessage message = new MailMessage();
+                message.From = new MailAddress(
+                    _smtpSettings.RemitenteEmail,
+                    _smtpSettings.RemitenteNombre
+                );
+                message.To.Add(emailDestino);
+                message.Subject = asunto;
+                message.Body = cuerpoHtml;
+                message.IsBodyHtml = true;
+
+                using SmtpClient client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port);
+                client.Credentials = new NetworkCredential(
+                    _smtpSettings.RemitenteEmail,
+                    _smtpSettings.Password
+                );
+                client.EnableSsl = _smtpSettings.UseSsl;
+                client.Timeout = 10000;
+
+                client.Send(message);
+
+                return Result.Ok();
+            }
+            catch (SmtpException smtpEx)
+            {
+                return Result.Fail($"Error SMTP: No se pudo conectar con el servidor de correo. {smtpEx.Message}");
             }
             catch (Exception ex)
             {
@@ -199,62 +265,6 @@ namespace MSUsuarios.App.Servicios
 
         </body>
         </html>";
-        }
-
-        public Result EnviarCorreoRecuperacionContrasena(
-            string emailDestino,
-            string nombres,
-            string userName,
-            string enlaceRecuperacion)
-        {
-            emailDestino = emailDestino?.Trim() ?? string.Empty;
-            nombres = nombres?.Trim() ?? string.Empty;
-            userName = userName?.Trim() ?? string.Empty;
-            enlaceRecuperacion = enlaceRecuperacion?.Trim() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(emailDestino))
-                return Result.Fail("El correo destino es obligatorio.");
-
-            if (string.IsNullOrWhiteSpace(userName))
-                return Result.Fail("El nombre de usuario es obligatorio para el correo.");
-
-            if (string.IsNullOrWhiteSpace(enlaceRecuperacion))
-                return Result.Fail("El enlace de recuperacion es obligatorio.");
-
-            try
-            {
-                string asunto = "Recuperacion de contraseña - Farmacia VitalCare";
-                string cuerpoHtml = ConstruirHtmlRecuperacionContrasena(
-                    nombres,
-                    userName,
-                    enlaceRecuperacion
-                );
-
-                using MailMessage message = new MailMessage();
-                message.From = new MailAddress(
-                    _smtpSettings.RemitenteEmail,
-                    _smtpSettings.RemitenteNombre
-                );
-                message.To.Add(emailDestino);
-                message.Subject = asunto;
-                message.Body = cuerpoHtml;
-                message.IsBodyHtml = true;
-
-                using SmtpClient client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port);
-                client.Credentials = new NetworkCredential(
-                    _smtpSettings.RemitenteEmail,
-                    _smtpSettings.Password
-                );
-                client.EnableSsl = _smtpSettings.UseSsl;
-
-                client.Send(message);
-
-                return Result.Ok();
-            }
-            catch (Exception ex)
-            {
-                return Result.Fail($"No se pudo enviar el correo electronico. Detalle: {ex.Message}");
-            }
         }
 
         private string ConstruirHtmlRecuperacionContrasena(

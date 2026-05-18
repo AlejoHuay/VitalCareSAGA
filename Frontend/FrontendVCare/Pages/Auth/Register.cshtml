@@ -110,8 +110,9 @@
                                        placeholder="Ej. 12345678"
                                        required
                                        maxlength="8"
-                                       pattern="\d{8}"
-                                       title="Debe ingresar 8 dígitos numéricos." />
+                                       minlength="5"
+                                       pattern="\d{5,8}"
+                                       title="Debe ingresar entre 5 y 8 dígitos numéricos." />
                             </div>
 
                             <div class="form-group">
@@ -184,15 +185,23 @@
 
                         @if (!string.IsNullOrWhiteSpace(Model?.MensajeOk))
                         {
-                            <div class="alert alert-success">@Model?.MensajeOk</div>
+                            <div id="successModal" class="modal-backdrop open">
+                                <div class="modal-content modal-success">
+                                    <h2>Registro exitoso</h2>
+                                    <p>@Model?.MensajeOk</p>
+                                    <div class="modal-actions">
+                                        <button type="button" id="closeSuccessModal" class="btn-primary">Entendido</button>
+                                    </div>
+                                </div>
+                            </div>
                         }
 
                         <div id="errorModal" class="modal-backdrop @(string.IsNullOrWhiteSpace(Model?.MensajeError) ? string.Empty : "open")">
-                            <div class="modal-content">
+                            <div class="modal-content modal-error">
                                 <h2>Error de registro</h2>
                                 <p>@Model?.MensajeError</p>
                                 <div class="modal-actions">
-                                    <button type="button" id="closeModal">Cerrar</button>
+                                    <button type="button" id="closeModal" class="btn-primary">Cerrar</button>
                                 </div>
                             </div>
                         </div>
@@ -226,6 +235,7 @@
                     : ciBase;
             });
 
+            // Modal de error
             const errorModal = document.getElementById("errorModal");
             const closeModal = document.getElementById("closeModal");
 
@@ -237,6 +247,22 @@
                 errorModal.addEventListener("click", function (event) {
                     if (event.target === errorModal) {
                         errorModal.classList.remove("open");
+                    }
+                });
+            }
+
+            // Modal de éxito
+            const successModal = document.getElementById("successModal");
+            const closeSuccessModal = document.getElementById("closeSuccessModal");
+
+            if (successModal && closeSuccessModal) {
+                closeSuccessModal.addEventListener("click", function () {
+                    window.location.href = "/Auth/Login";
+                });
+
+                successModal.addEventListener("click", function (event) {
+                    if (event.target === successModal) {
+                        window.location.href = "/Auth/Login";
                     }
                 });
             }

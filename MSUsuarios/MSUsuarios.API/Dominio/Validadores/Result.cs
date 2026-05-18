@@ -16,6 +16,11 @@ namespace MSUsuarios.Dominio.Validadores
             return new Result(true);
         }
 
+        public static Result Ok(string message)
+        {
+            return new Result(true, message);
+        }
+
         public static Result Fail(string error)
         {
             return new Result(false, error);

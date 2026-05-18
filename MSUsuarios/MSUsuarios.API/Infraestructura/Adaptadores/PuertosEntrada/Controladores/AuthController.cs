@@ -55,10 +55,11 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             if (!resultado.IsSuccess)
                 return BadRequest(new { mensaje = resultado.Error });
 
-            return Ok(new
-            {
-                mensaje = "Usuario registrado correctamente. Revisa tu correo electronico para activar la cuenta."
-            });
+            string mensaje = !string.IsNullOrWhiteSpace(resultado.Error)
+                ? resultado.Error
+                : "Usuario registrado correctamente. Revisa tu correo electronico para activar la cuenta.";
+
+            return Ok(new { mensaje = mensaje });
         }
 
         [HttpGet("validar-activacion")]

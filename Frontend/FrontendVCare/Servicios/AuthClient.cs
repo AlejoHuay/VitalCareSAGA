@@ -115,12 +115,36 @@ namespace FrontendVCare.Servicios
 
         private async Task<string> LeerMensajeAsync(HttpResponseMessage response, string mensajePorDefecto)
         {
-            JsonElement? json = await LeerJsonAsync(response);
-            if (json == null)
-                return mensajePorDefecto;
+            try
+            {
+                string contenido = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrWhiteSpace(contenido))
+                    return mensajePorDefecto;
 
-            string mensaje = _mensajeApiAdapter.Adapt(json.Value).Mensaje;
-            return string.IsNullOrWhiteSpace(mensaje) ? mensajePorDefecto : mensaje;
+                using JsonDocument document = JsonDocument.Parse(contenido);
+                JsonElement root = document.RootElement;
+
+                // Intenta leer "mensaje"
+                if (root.TryGetProperty("mensaje", out JsonElement mensajeElement))
+                {
+                    string? mensaje = mensajeElement.GetString();
+                    if (!string.IsNullOrWhiteSpace(mensaje))
+                        return mensaje;
+                }
+
+                // Si no encuentra "mensaje", intenta usar el adaptador
+                string adaptedMensaje = _mensajeApiAdapter.Adapt(root).Mensaje;
+                if (!string.IsNullOrWhiteSpace(adaptedMensaje))
+                    return adaptedMensaje;
+
+                return mensajePorDefecto;
+            }
+            catch (Exception ex)
+            {
+                // Si hay un error parseando, registra y devuelve un mensaje genérico
+                Console.WriteLine($"Error al leer respuesta: {ex.Message}");
+                return $"Error en la solicitud: {response.StatusCode}";
+            }
         }
 
         private static async Task<JsonElement?> LeerJsonAsync(HttpResponseMessage response)

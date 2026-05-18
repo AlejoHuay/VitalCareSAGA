@@ -35,52 +35,70 @@ namespace MSUsuarios.App.Servicios
 
         public Result CrearUsuario(UsuarioRegistroDto dto, string role, int? idUsuarioSesion)
         {
-            Result validacion = _validacionGeneral.ValidarRegistro(dto);
-            if (!validacion.IsSuccess)
-                return validacion;
-
-            string passwordTemporal = StringHelper.Limpiar(dto.Password);
-            string passwordHash = PasswordHelper.Hash(passwordTemporal);
-
-            Usuario usuario = ConstruirUsuarioNuevo(dto, role, passwordHash, idUsuarioSesion);
-
-            int filasAfectadas;
             try
             {
-                filasAfectadas = _repository.Insert(usuario);
+                Result validacion = _validacionGeneral.ValidarRegistro(dto);
+                if (!validacion.IsSuccess)
+                    return validacion;
+
+                string passwordTemporal = StringHelper.Limpiar(dto.Password);
+                string passwordHash = PasswordHelper.Hash(passwordTemporal);
+
+                Usuario usuario = ConstruirUsuarioNuevo(dto, role, passwordHash, idUsuarioSesion);
+
+                int filasAfectadas;
+                try
+                {
+                    filasAfectadas = _repository.Insert(usuario);
+                }
+                catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+                {
+                    return Result.Fail(MapearViolacionUnica(ex.ConstraintName));
+                }
+
+                if (filasAfectadas <= 0)
+                    return Result.Fail("No se pudo registrar el usuario.");
+
+                Usuario? usuarioRegistrado = _repository.GetByEmail(usuario.Email);
+                if (usuarioRegistrado == null)
+                    return Result.Fail("El usuario fue registrado, pero no se pudo recuperar su informacion.");
+
+                UsuarioTokenGeneracionDto tokenDto = new UsuarioTokenGeneracionDto
+                {
+                    IdUsuario = usuarioRegistrado.IdUsuario,
+                    TipoToken = TipoTokenConstantes.ActivacionCuenta,
+                    MinutosExpiracion = 60
+                };
+
+                (Result resultadoToken, string tokenParaUrl) = _tokenService.GenerarToken(tokenDto, out string _);
+                if (!resultadoToken.IsSuccess)
+                    return resultadoToken;
+
+                string enlaceActivacion = ConstruirEnlaceFrontend("/Auth/ActivarCuenta", tokenParaUrl);
+
+                Result resultadoEmail = _emailService.EnviarCorreoActivacionCuenta(
+                    usuarioRegistrado.Email,
+                    usuarioRegistrado.Nombres,
+                    usuarioRegistrado.UserName,
+                    passwordTemporal,
+                    enlaceActivacion
+                );
+
+                // El registro es exitoso incluso si el email falla (se notifica en la respuesta)
+                if (!resultadoEmail.IsSuccess)
+                {
+                    // Log the email error pero no falla el registro
+                    Console.WriteLine($"Advertencia al enviar email: {resultadoEmail.Error}");
+                    return Result.Ok($"Usuario registrado. Nota: No se pudo enviar el correo de activación. {resultadoEmail.Error}");
+                }
+
+                return Result.Ok();
             }
-            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+            catch (Exception ex)
             {
-                return Result.Fail(MapearViolacionUnica(ex.ConstraintName));
+                Console.WriteLine($"Error inesperado en CrearUsuario: {ex.Message}\n{ex.StackTrace}");
+                return Result.Fail($"Error al registrar usuario: {ex.Message}");
             }
-
-            if (filasAfectadas <= 0)
-                return Result.Fail("No se pudo registrar el usuario.");
-
-            Usuario? usuarioRegistrado = _repository.GetByEmail(usuario.Email);
-            if (usuarioRegistrado == null)
-                return Result.Fail("El usuario fue registrado, pero no se pudo recuperar su informacion.");
-
-            UsuarioTokenGeneracionDto tokenDto = new UsuarioTokenGeneracionDto
-            {
-                IdUsuario = usuarioRegistrado.IdUsuario,
-                TipoToken = TipoTokenConstantes.ActivacionCuenta,
-                MinutosExpiracion = 60
-            };
-
-            (Result resultadoToken, string tokenParaUrl) = _tokenService.GenerarToken(tokenDto, out string _);
-            if (!resultadoToken.IsSuccess)
-                return resultadoToken;
-
-            string enlaceActivacion = ConstruirEnlaceFrontend("/Auth/ActivarCuenta", tokenParaUrl);
-
-            return _emailService.EnviarCorreoActivacionCuenta(
-                usuarioRegistrado.Email,
-                usuarioRegistrado.Nombres,
-                usuarioRegistrado.UserName,
-                passwordTemporal,
-                enlaceActivacion
-            );
         }
 
         public Result ActualizarUsuario(UsuarioActualizarDto dto, int? idUsuarioSesion)
