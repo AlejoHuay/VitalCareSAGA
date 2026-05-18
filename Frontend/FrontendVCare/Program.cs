@@ -1,5 +1,7 @@
 using FrontendVCare.Adaptadores;
+using FrontendVCare.Adaptadores.Auth;
 using FrontendVCare.Dto.ClasificacionDtos;
+using FrontendVCare.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +36,18 @@ builder.Services.AddHttpClient<ProveedorApiAdapter>(client =>
         ?? "http://localhost:5297/";
     client.BaseAddress = new Uri(baseUrl);
 });
+
+// Registrar HttpClient para AuthClient
+builder.Services.AddHttpClient<AuthClient>(client =>
+{
+    string baseUrl = builder.Configuration["ApiUrls:MSAuth"]
+        ?? "http://localhost:5086/";
+    client.BaseAddress = new Uri(baseUrl);
+});
+
+// Registrar adaptadores de Auth
+builder.Services.AddScoped<LoginResponseAdapter>();
+builder.Services.AddScoped<MensajeApiAdapter>();
 
 // Registrar AdapterJSON para Clasificaciones
 builder.Services.AddHttpClient<AdapterJSON<ClasificacionDto>>(client =>

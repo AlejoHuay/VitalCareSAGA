@@ -12,9 +12,29 @@ namespace MSUsuarios.App.Servicios
 
         public EmailService(IConfiguration configuration)
         {
-            _smtpSettings = configuration
-                .GetSection("SmtpSettings")
-                .Get<SmtpSettings>() ?? new SmtpSettings();
+            _smtpSettings = new SmtpSettings
+            {
+                Host = Environment.GetEnvironmentVariable("SMTP_HOST") 
+                    ?? configuration.GetSection("SmtpSettings:Host").Value 
+                    ?? "smtp.example.com",
+                Port = int.TryParse(
+                    Environment.GetEnvironmentVariable("SMTP_PORT") 
+                    ?? configuration.GetSection("SmtpSettings:Port").Value, 
+                    out int port) ? port : 587,
+                RemitenteNombre = Environment.GetEnvironmentVariable("SMTP_REMITENTE_NOMBRE")
+                    ?? configuration.GetSection("SmtpSettings:RemitenteNombre").Value
+                    ?? "VitalCare",
+                RemitenteEmail = Environment.GetEnvironmentVariable("SMTP_REMITENTE_EMAIL")
+                    ?? configuration.GetSection("SmtpSettings:RemitenteEmail").Value
+                    ?? "no-reply@example.com",
+                Password = Environment.GetEnvironmentVariable("SMTP_PASSWORD")
+                    ?? configuration.GetSection("SmtpSettings:Password").Value
+                    ?? string.Empty,
+                UseSsl = bool.TryParse(
+                    Environment.GetEnvironmentVariable("SMTP_USE_SSL")
+                    ?? configuration.GetSection("SmtpSettings:UseSsl").Value,
+                    out bool ssl) ? ssl : true
+            };
         }
 
         public Result EnviarCorreoActivacionCuenta(

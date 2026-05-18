@@ -28,7 +28,8 @@ namespace MSUsuarios.App.Servicios
             _validacionGeneral = validacionGeneral;
             _tokenService = tokenService;
             _emailService = emailService;
-            _frontendBaseUrl = configuration["Frontend:BaseUrl"]?.TrimEnd('/')
+            _frontendBaseUrl = Environment.GetEnvironmentVariable("FRONTEND_BASE_URL")
+                ?? configuration["Frontend:BaseUrl"]?.TrimEnd('/')
                 ?? "http://localhost:5081";
         }
 

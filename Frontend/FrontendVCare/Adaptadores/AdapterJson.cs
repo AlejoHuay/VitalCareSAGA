@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace FrontendVCare.Adaptadores
 {
-    public class AdapterJSON<T>
+    public class AdapterJSON<T> : IAdapter<T>
     {
         private readonly HttpClient _httpClient;
 

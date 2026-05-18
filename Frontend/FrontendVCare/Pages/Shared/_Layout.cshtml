@@ -1,15 +1,9 @@
 
 @{
-    // MODO PRUEBA TEMPORAL
-    string usuarioSesion = "Jose";
-    string roleSesion = "Admin";
-
-    bool estaAutenticado = true;
-    bool esAdministrador = true;
-    //string usuarioSesion = Context.Session.GetString("UserName") ?? string.Empty;
-    //string roleSesion = Context.Session.GetString("Role")?.Trim() ?? string.Empty;
-    //bool estaAutenticado = !string.IsNullOrWhiteSpace(usuarioSesion);
-    //bool esAdministrador = roleSesion.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+    string usuarioSesion = Context.Session.GetString("UserName") ?? string.Empty;
+    string roleSesion = Context.Session.GetString("Role")?.Trim() ?? string.Empty;
+    bool estaAutenticado = !string.IsNullOrWhiteSpace(usuarioSesion);
+    bool esAdministrador = roleSesion.Equals("Admin", StringComparison.OrdinalIgnoreCase);
 }
 
 <!DOCTYPE html>
