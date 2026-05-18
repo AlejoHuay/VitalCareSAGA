@@ -13,6 +13,8 @@ namespace MSUsuarios.App.Servicios
     {
         private readonly IUsuarioRepository _repository;
         private readonly UsuarioValidacionGeneral _validacionGeneral;
+        private readonly ValidadorContraseña _validadorContraseña;
+        private readonly ValidadorCambioContraseña _validadorCambioContraseña;
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
         private readonly string _frontendBaseUrl;
@@ -20,12 +22,16 @@ namespace MSUsuarios.App.Servicios
         public UsuarioService(
             IUsuarioRepository repository,
             UsuarioValidacionGeneral validacionGeneral,
+            ValidadorContraseña validadorContraseña,
+            ValidadorCambioContraseña validadorCambioContraseña,
             ITokenService tokenService,
             IEmailService emailService,
             IConfiguration configuration)
         {
             _repository = repository;
             _validacionGeneral = validacionGeneral;
+            _validadorContraseña = validadorContraseña;
+            _validadorCambioContraseña = validadorCambioContraseña;
             _tokenService = tokenService;
             _emailService = emailService;
             _frontendBaseUrl = Environment.GetEnvironmentVariable("FRONTEND_BASE_URL")
@@ -201,21 +207,10 @@ namespace MSUsuarios.App.Servicios
             if (string.IsNullOrWhiteSpace(token))
                 return Result.Fail("El token de activacion es invalido.");
 
-            if (string.IsNullOrWhiteSpace(nuevaPassword))
-                return Result.Fail("La nueva contrasena es obligatoria.");
-
-            if (nuevaPassword.Length < 8)
-                return Result.Fail("La contrasena debe tener al menos 8 caracteres.");
-
-            // Validar que tenga mayúsculas, minúsculas y números
-            if (!System.Text.RegularExpressions.Regex.IsMatch(nuevaPassword, @"[a-z]"))
-                return Result.Fail("La contrasena debe contener al menos una letra minuscula.");
-
-            if (!System.Text.RegularExpressions.Regex.IsMatch(nuevaPassword, @"[A-Z]"))
-                return Result.Fail("La contrasena debe contener al menos una letra mayuscula.");
-
-            if (!System.Text.RegularExpressions.Regex.IsMatch(nuevaPassword, @"[0-9]"))
-                return Result.Fail("La contrasena debe contener al menos un numero.");
+            // Validar complejidad de la contraseña
+            Result resultadoValidacion = _validadorContraseña.ValidarComplexidad(nuevaPassword);
+            if (!resultadoValidacion.IsSuccess)
+                return resultadoValidacion;
 
             UsuarioToken? usuarioToken = _tokenService.ValidarToken(token, TipoTokenConstantes.ActivacionCuenta);
             if (usuarioToken == null)
@@ -292,21 +287,10 @@ namespace MSUsuarios.App.Servicios
             if (string.IsNullOrWhiteSpace(token))
                 return Result.Fail("El token de recuperacion es invalido.");
 
-            if (string.IsNullOrWhiteSpace(nuevaPassword))
-                return Result.Fail("La nueva contrasena es obligatoria.");
-
-            if (nuevaPassword.Length < 8)
-                return Result.Fail("La contrasena debe tener al menos 8 caracteres.");
-
-            // Validar que tenga mayúsculas, minúsculas y números
-            if (!System.Text.RegularExpressions.Regex.IsMatch(nuevaPassword, @"[a-z]"))
-                return Result.Fail("La contrasena debe contener al menos una letra minuscula.");
-
-            if (!System.Text.RegularExpressions.Regex.IsMatch(nuevaPassword, @"[A-Z]"))
-                return Result.Fail("La contrasena debe contener al menos una letra mayuscula.");
-
-            if (!System.Text.RegularExpressions.Regex.IsMatch(nuevaPassword, @"[0-9]"))
-                return Result.Fail("La contrasena debe contener al menos un numero.");
+            // Validar complejidad de la contraseña
+            Result resultadoValidacion = _validadorContraseña.ValidarComplexidad(nuevaPassword);
+            if (!resultadoValidacion.IsSuccess)
+                return resultadoValidacion;
 
             UsuarioToken? usuarioToken = _tokenService.ValidarToken(token, TipoTokenConstantes.ResetPassword);
             if (usuarioToken == null)
@@ -324,6 +308,25 @@ namespace MSUsuarios.App.Servicios
             Result resultadoToken = _tokenService.MarcarComoUsado(usuarioToken.IdUsuarioToken);
             if (!resultadoToken.IsSuccess)
                 return resultadoToken;
+
+            return Result.Ok();
+        }
+
+        public Result CambiarPassword(int idUsuario, string passwordActual, string nuevaPassword)
+        {
+            Usuario? usuario = _repository.GetById(idUsuario);
+            if (usuario == null)
+                return Result.Fail("El usuario no existe.");
+
+            // Validar el cambio de contraseña (verifica actual, complejidad, coincidencia, diferencia)
+            Result resultadoValidacion = _validadorCambioContraseña.Validar(passwordActual, nuevaPassword, nuevaPassword, usuario);
+            if (!resultadoValidacion.IsSuccess)
+                return resultadoValidacion;
+
+            string passwordHash = PasswordHelper.Hash(nuevaPassword);
+            int filasAfectadas = _repository.CambiarPassword(usuario.IdUsuario, passwordHash, false);
+            if (filasAfectadas <= 0)
+                return Result.Fail("No se pudo actualizar la contrasena.");
 
             return Result.Ok();
         }
