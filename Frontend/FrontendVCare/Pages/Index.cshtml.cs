@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ProyectoArqSoft.Pages
+namespace FrontendVCare.Pages
 {
     public class IndexModel : PageModel
     {
