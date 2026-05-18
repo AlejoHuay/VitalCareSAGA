@@ -104,6 +104,26 @@ namespace FrontendVCare.Servicios
             return await LeerResultadoAsync(response, "Contraseña actualizada correctamente.");
         }
 
+        public async Task<OperacionApiDto> CambiarContrasenaAsync(string token, string passwordActual, string nuevaPassword, string confirmarPassword)
+        {
+            Dictionary<string, string> datos = new Dictionary<string, string>
+            {
+                ["passwordActual"] = passwordActual,
+                ["nuevaPassword"] = nuevaPassword,
+                ["confirmarPassword"] = confirmarPassword
+            };
+
+            using FormUrlEncodedContent content = new FormUrlEncodedContent(datos);
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/auth/cambiar-contrasena")
+            {
+                Content = content
+            };
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            HttpResponseMessage response = await _httpClient.SendAsync(request);
+            return await LeerResultadoAsync(response, "Contraseña actualizada correctamente.");
+        }
+
         private async Task<OperacionApiDto> LeerResultadoAsync(HttpResponseMessage response, string mensajeExito)
         {
             string mensaje = await LeerMensajeAsync(response, mensajeExito);

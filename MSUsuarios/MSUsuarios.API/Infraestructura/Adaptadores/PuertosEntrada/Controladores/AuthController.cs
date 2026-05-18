@@ -167,5 +167,39 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
 
             return Ok(new { mensaje = "Sesion cerrada correctamente." });
         }
+
+        [Authorize]
+        [HttpPost("cambiar-contrasena")]
+        public IActionResult CambiarContrasena(
+            [FromForm] string passwordActual,
+            [FromForm] string nuevaPassword,
+            [FromForm] string confirmarPassword)
+        {
+            string? idUsuarioValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(idUsuarioValue, out int idUsuario))
+                return Unauthorized(new { mensaje = "Token invalido." });
+
+            passwordActual = passwordActual?.Trim() ?? string.Empty;
+            nuevaPassword = nuevaPassword?.Trim() ?? string.Empty;
+            confirmarPassword = confirmarPassword?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(passwordActual))
+                return BadRequest(new { mensaje = "La contrasena actual es obligatoria." });
+
+            if (string.IsNullOrWhiteSpace(nuevaPassword))
+                return BadRequest(new { mensaje = "La nueva contrasena es obligatoria." });
+
+            if (nuevaPassword != confirmarPassword)
+                return BadRequest(new { mensaje = "La contrasena y su confirmacion no coinciden." });
+
+            if (passwordActual == nuevaPassword)
+                return BadRequest(new { mensaje = "La nueva contrasena debe ser diferente a la actual." });
+
+            Result resultado = _usuarioService.CambiarPassword(idUsuario, passwordActual, nuevaPassword);
+            if (!resultado.IsSuccess)
+                return BadRequest(new { mensaje = resultado.Error });
+
+            return Ok(new { mensaje = "Contraseña actualizada correctamente." });
+        }
     }
 }
