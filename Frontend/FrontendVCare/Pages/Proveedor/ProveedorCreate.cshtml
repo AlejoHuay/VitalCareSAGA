@@ -1,0 +1,63 @@
+@page
+@model FrontendVCare.Pages.Proveedor.ProveedorCreateModel
+@{
+    ViewData["Title"] = "Nuevo Proveedor";
+}
+
+<div class="container py-5 medicamento-form-page">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="med-card shadow border-0" style="border-radius: 15px; overflow: hidden;">
+                <div class="med-card-header text-center bg-success text-white py-3">
+                    <h2 class="mb-0 fw-bold text-white">Nuevo Proveedor</h2>
+                    <p class="mb-0 small">Completa los datos del proveedor</p>
+                </div>
+
+                <div class="med-card-body p-4">
+                    <form method="post" asp-page-handler="CrearProveedor">
+                        <div class="form-floating mb-3">
+                            <input asp-for="Proveedor.Nombre"
+                                   class="form-control"
+                                   placeholder="Nombre"
+                                   pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+"
+                                   title="El nombre solo puede contener letras."
+                                   required />
+                            <label class="ms-2">Nombre</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Proveedor.Telefono"
+                                   class="form-control"
+                                   placeholder="Telefono"
+                                   inputmode="numeric"
+                                   maxlength="8"
+                                   pattern="\d{8}"
+                                   title="El telefono debe tener exactamente 8 digitos." />
+                            <label class="ms-2">Telefono</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Proveedor.CorreoElectronico" type="email" class="form-control" placeholder="Correo electronico" />
+                            <label class="ms-2">Correo electronico</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea asp-for="Proveedor.Direccion" class="form-control" style="height: 110px" placeholder="Direccion"></textarea>
+                            <label class="ms-2">Direccion</label>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.MensajeError))
+                        {
+                            <div class="alert alert-danger">@Model.MensajeError</div>
+                        }
+
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                            <a asp-page="Proveedor" class="btn btn-secondary">Volver</a>
+                            <button type="submit" class="btn btn-success px-5 fw-bold shadow-sm">Crear</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

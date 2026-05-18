@@ -3,6 +3,10 @@ using FrontendVCare.Dto.ClasificacionDtos;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddDistributedMemoryCache();
@@ -21,6 +25,13 @@ builder.Services.AddHttpClient<ClasificacionAdapter>(client =>
 {
     string baseUrl = builder.Configuration["ApiUrls:MSProductos"]
         ?? "http://localhost:7141/";
+    client.BaseAddress = new Uri(baseUrl);
+});
+
+builder.Services.AddHttpClient<ProveedorApiAdapter>(client =>
+{
+    string baseUrl = builder.Configuration["ApiUrls:MSProveedor"]
+        ?? "http://localhost:5297/";
     client.BaseAddress = new Uri(baseUrl);
 });
 

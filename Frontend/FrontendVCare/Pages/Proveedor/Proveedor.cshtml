@@ -1,17 +1,17 @@
 @page
-@model FrontendVCare.Pages.ClienteModel
+@model FrontendVCare.Pages.Proveedor.ProveedorModel
 @{
-    ViewData["Title"] = "Clientes";
-    var modalId = "confirmarEliminarClienteModal";
+    ViewData["Title"] = "Proveedores";
+    var modalId = "confirmarEliminarProveedorModal";
 }
 
 <div class="container mt-5">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-success">Clientes Registrados</h2>
+        <h2 class="fw-bold text-success">Proveedores Registrados</h2>
 
-        <a asp-page="ClienteCreate" class="btn-main">
-            + Nuevo Cliente
+        <a asp-page="ProveedorCreate" class="btn-main">
+            + Nuevo Proveedor
         </a>
     </div>
 
@@ -21,14 +21,14 @@
                 <input type="text"
                        name="filtro"
                        class="form-control"
-                       placeholder="Buscar por NIT o razón social..."
+                       placeholder="Buscar por nombre, teléfono, correo o dirección..."
                        value="@Model.FiltroActual" />
 
                 <button type="submit" class="btn btn-success btn-fixed">
                     Buscar
                 </button>
 
-                <a asp-page="Cliente" class="btn btn-secondary btn-fixed">
+                <a asp-page="Proveedor" class="btn btn-secondary btn-fixed">
                     Limpiar
                 </a>
             </div>
@@ -47,31 +47,33 @@
 
     <div class="card-module">
         <table class="table table-hover align-middle">
-            <caption class="visually-hidden">Tabla de clientes registrados con NIT, razón social, correo electrónico y acciones disponibles.</caption>
+            <caption class="visually-hidden">Tabla de proveedores registrados con nombre, teléfono, correo, dirección y acciones disponibles.</caption>
             <thead class="table-success">
                 <tr>
-                    <th>NIT</th>
-                    <th>Razón Social</th>
-                    <th>Correo Electrónico</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Dirección</th>
                     <th style="width:170px">Acciones</th>
                 </tr>
             </thead>
 
             <tbody>
-                @if (Model.Clientes.Count > 0)
+                @if (Model.Proveedores.Count > 0)
                 {
-                    @foreach (var cliente in Model.Clientes)
+                    @foreach (var proveedor in Model.Proveedores)
                     {
                         <tr>
-                            <td class="fw-semibold">@cliente.Nit</td>
-                            <td>@cliente.RazonSocial</td>
-                            <td>@cliente.CorreoElectronico</td>
+                            <td class="fw-semibold">@proveedor.Nombre</td>
+                            <td>@(proveedor.Telefono ?? "-")</td>
+                            <td>@(proveedor.CorreoElectronico ?? "-")</td>
+                            <td>@(proveedor.Direccion ?? "-")</td>
                             <td>
                                 <form method="post"
-                                      asp-page="ClienteEdit"
-                                      asp-page-handler="CargarClienteParaEdicion"
+                                      asp-page="ProveedorEdit"
+                                      asp-page-handler="CargarProveedorParaEdicion"
                                       style="display:inline;">
-                                    <input type="hidden" name="id" value="@cliente.IdCliente" />
+                                    <input type="hidden" name="id" value="@proveedor.Id" />
                                     <button type="submit" class="btn btn-warning btn-sm">
                                         Editar
                                     </button>
@@ -81,8 +83,8 @@
                                         class="btn btn-danger btn-sm"
                                         data-bs-toggle="modal"
                                         data-bs-target="#@modalId"
-                                        data-id="@cliente.IdCliente"
-                                        data-nombre="@cliente.RazonSocial">
+                                        data-id="@proveedor.Id"
+                                        data-nombre="@proveedor.Nombre">
                                     Eliminar
                                 </button>
                             </td>
@@ -92,7 +94,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="4" class="text-center py-4 text-muted">No se encontraron clientes.</td>
+                        <td colspan="5" class="text-center py-4 text-muted">No se encontraron proveedores.</td>
                     </tr>
                 }
             </tbody>
@@ -107,13 +109,13 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-2">Seguro que deseas eliminar este cliente?</p>
-                    <p class="fw-semibold mb-0" id="clienteEliminarNombre"></p>
+                    <p class="mb-2">Seguro que deseas eliminar este proveedor?</p>
+                    <p class="fw-semibold mb-0" id="proveedorEliminarNombre"></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form method="post" asp-page-handler="EliminarClienteLogicamente">
-                        <input type="hidden" name="id" id="clienteEliminarId" />
+                    <form method="post" asp-page-handler="EliminarProveedor">
+                        <input type="hidden" name="id" id="proveedorEliminarId" />
                         <button type="submit" class="btn btn-danger">Eliminar</button>
                     </form>
                 </div>
@@ -130,8 +132,8 @@
 
             modal.addEventListener('show.bs.modal', event => {
                 const button = event.relatedTarget;
-                modal.querySelector('#clienteEliminarId').value = button.getAttribute('data-id');
-                modal.querySelector('#clienteEliminarNombre').textContent = button.getAttribute('data-nombre');
+                modal.querySelector('#proveedorEliminarId').value = button.getAttribute('data-id');
+                modal.querySelector('#proveedorEliminarNombre').textContent = button.getAttribute('data-nombre');
             });
         })();
     </script>

@@ -1,0 +1,20 @@
+### 1. OBTENER TODOS LOS PROVEEDORES (Get All)
+GET http://localhost:5297/api/proveedor
+
+### 2. OBTENER UN PROVEEDOR POR ID (Get One - Busca a Novartis que debe ser el ID 3)
+GET http://localhost:5297/api/proveedor/3
+
+### 3. ACTUALIZAR UN PROVEEDOR (Update - Actualiza el teléfono de Novartis)
+PUT http://localhost:5297/api/proveedor/3
+Content-Type: application/json
+
+{
+  "nombre": "Novartis Farmacéutica",
+  "telefono": "999888777",
+  "correoElectronico": "nuevo@novartis.com",
+  "direccion": "Nueva Dirección 123",
+  "idUsuario": 2
+}
+
+### 4. ELIMINAR UN PROVEEDOR (Delete lógico a Genomma Lab que debe ser el ID 4)
+DELETE http://localhost:5297/api/proveedor/4
