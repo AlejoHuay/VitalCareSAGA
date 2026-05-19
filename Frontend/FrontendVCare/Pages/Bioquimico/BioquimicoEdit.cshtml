@@ -1,0 +1,119 @@
+@page
+@model FrontendVCare.Pages.Bioquimico.BioquimicoEditModel
+@{
+    ViewData["Title"] = "Actualizar Bioquímico";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-11">
+            <div class="card shadow border-0">
+                <div class="card-header bg-success text-white text-center">
+                    <h2 class="mb-0">Actualizar Bioquímico</h2>
+                    <p class="mb-0 small">Edita los datos del profesional</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="post">
+                        <input type="hidden" asp-for="Input.IdUsuario" />
+                        <input type="hidden" asp-for="Input.Role" />
+                        <input type="hidden" asp-for="Input.UserName" />
+                        <input type="hidden" asp-for="Input.MustChangePassword" />
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Nombres" class="form-control" placeholder="Nombres" />
+                            <label>Nombres</label>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="Input.ApellidoPaterno" class="form-control" placeholder="Apellido paterno" />
+                                    <label>Primer apellido</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="Input.ApellidoMaterno" class="form-control" placeholder="Apellido materno" />
+                                    <label>Segundo apellido</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="CiBase" class="form-control" placeholder="CI" />
+                                    <label>Carnet de identidad</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="CiComplemento" class="form-control" maxlength="2" placeholder="Compl." />
+                                    <label>Compl.</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <div class="form-floating">
+                                    <select asp-for="Input.CiExtencion" class="form-select">
+                                        <option value="">Seleccione</option>
+                                        <option value="BE">Beni</option>
+                                        <option value="CB">Cochabamba</option>
+                                        <option value="CH">Chuquisaca</option>
+                                        <option value="LP">La Paz</option>
+                                        <option value="OR">Oruro</option>
+                                        <option value="PD">Pando</option>
+                                        <option value="PT">Potosí</option>
+                                        <option value="SC">Santa Cruz</option>
+                                        <option value="TJ">Tarija</option>
+                                    </select>
+                                    <label>Expedido</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Telefono" class="form-control" placeholder="Teléfono" />
+                            <label>Teléfono</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" type="email" class="form-control" placeholder="Email" />
+                            <label>Correo electrónico</label>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label fw-bold small text-muted">Usuario del sistema</label>
+                                <div class="form-control bg-light">@Model.Input.UserName</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small text-muted">Estado</label>
+                                <select asp-for="Input.Activo" class="form-select">
+                                    <option value="1">Activo</option>
+                                    <option value="0">Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.MensajeError))
+                        {
+                            <div class="alert alert-danger">@Model.MensajeError</div>
+                        }
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a asp-page="Bioquimico" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-success">
+                                Actualizar Registro
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
