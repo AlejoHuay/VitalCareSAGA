@@ -41,7 +41,7 @@
                             <div class="col-md-6 mb-3">
                                 <div class="form-floating">
                                     <input asp-for="Input.ApellidoMaterno" class="form-control" placeholder="Apellido materno" />
-                                    <label>Segundo apellido</label>
+                                    <label>Segundo apellido (opcional)</label>
                                     <span asp-validation-for="Input.ApellidoMaterno" class="text-danger"></span>
                                 </div>
                             </div>
@@ -53,14 +53,16 @@
                                     <input asp-for="Input.Ci" class="form-control" placeholder="CI" maxlength="8" />
                                     <label>Carnet de identidad</label>
                                     <span asp-validation-for="Input.Ci" class="text-danger"></span>
+                                    <small class="text-muted">CI: Ej. 12345678</small>
                                 </div>
                             </div>
 
                             <div class="col-md-3 mb-3">
                                 <div class="form-floating">
-                                    <input asp-for="Input.CiComplemento" class="form-control" placeholder="Complemento" maxlength="2" />
+                                    <input asp-for="CiComplemento" class="form-control" placeholder="Complemento" maxlength="2" />
                                     <label>Complemento</label>
-                                    <span asp-validation-for="Input.CiComplemento" class="text-danger"></span>
+                                    <span asp-validation-for="CiComplemento" class="text-danger"></span>
+                                    <small class="text-muted">Opcional. Ej. 1A</small>
                                 </div>
                             </div>
 

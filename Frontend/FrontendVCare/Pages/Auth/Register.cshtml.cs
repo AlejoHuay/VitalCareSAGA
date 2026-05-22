@@ -4,6 +4,7 @@ using FrontendVCare.Dto.Auth;
 using FrontendVCare.Dto;
 using FrontendVCare.Helpers;
 using FrontendVCare.Servicios;
+using System.ComponentModel.DataAnnotations;
 
 namespace FrontendVCare.Pages.Auth
 {
@@ -19,6 +20,10 @@ namespace FrontendVCare.Pages.Auth
         [BindProperty]
         public UsuarioRegistroDto Registro { get; set; } = new();
 
+        [BindProperty]
+        [RegularExpression(@"^$|^\d[A-Za-z]$", ErrorMessage = "El complemento del CI debe tener el formato 1A.")]
+        public string CiComplemento { get; set; } = string.Empty;
+
         public string MensajeError { get; set; } = string.Empty;
         public string MensajeOk { get; set; } = string.Empty;
 
@@ -29,45 +34,31 @@ namespace FrontendVCare.Pages.Auth
 
         public async Task<IActionResult> OnPostAsync()
         {
-            Registro.UserName = CredencialesHelper.GenerarUserName(
-                Registro.Nombres,
-                Registro.ApellidoPaterno,
-                ConstruirCiParaUserName(Registro.Ci, Registro.CiComplemento)
-            );
-
             ModelState.Remove("Registro.UserName");
             ModelState.Remove("Registro.Password");
 
             if (!ModelState.IsValid)
-            {
-                MensajeError = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .FirstOrDefault(m => !string.IsNullOrWhiteSpace(m))
-                    ?? "Verifica los datos del formulario.";
                 return Page();
-            }
+
+            string ciBase = Registro.Ci;
+            Registro.Ci = CiFormatoHelper.ConstruirCi(Registro.Ci, CiComplemento);
+            Registro.UserName = CredencialesHelper.GenerarUserName(
+                Registro.Nombres,
+                Registro.ApellidoPaterno,
+                Registro.Ci
+            );
 
             OperacionApiDto resultado = await _authClient.RegistrarAsync(Registro);
 
             if (!resultado.Exito)
             {
+                Registro.Ci = ciBase;
                 MensajeError = resultado.Mensaje;
                 return Page();
             }
 
             MensajeOk = "Usuario registrado correctamente. Revisa las credenciales generadas y tu correo electronico.";
             return Page();
-        }
-
-        private static string ConstruirCiParaUserName(string ci, string? ciComplemento)
-        {
-            string ciBase = ci?.Trim() ?? string.Empty;
-            string complemento = ciComplemento?.Trim().ToUpperInvariant() ?? string.Empty;
-
-            return string.IsNullOrWhiteSpace(complemento)
-                ? ciBase
-                : $"{ciBase}-{complemento}";
         }
     }
 }

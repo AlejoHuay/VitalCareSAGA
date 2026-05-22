@@ -1,8 +1,10 @@
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Dto;
 using FrontendVCare.Dto.Auth;
+using FrontendVCare.Helpers;
 using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace FrontendVCare.Pages.Bioquimico
 {
@@ -17,6 +19,10 @@ namespace FrontendVCare.Pages.Bioquimico
 
         [BindProperty]
         public UsuarioRegistroDto Registro { get; set; } = new();
+
+        [BindProperty]
+        [RegularExpression(@"^$|^\d[A-Za-z]$", ErrorMessage = "El complemento del CI debe tener el formato 1A.")]
+        public string CiComplemento { get; set; } = string.Empty;
 
         public IActionResult OnGet()
         {
@@ -39,18 +45,15 @@ namespace FrontendVCare.Pages.Bioquimico
             ModelState.Remove("Registro.Password");
 
             if (!ModelState.IsValid)
-            {
-                Estado.MensajeError = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .FirstOrDefault(m => !string.IsNullOrWhiteSpace(m))
-                    ?? "Verifica los datos del formulario.";
                 return Page();
-            }
+
+            string ciBase = Registro.Ci;
+            Registro.Ci = CiFormatoHelper.ConstruirCi(Registro.Ci, CiComplemento);
 
             OperacionApiDto resultado = await _usuarioAdapter.CrearConResultadoAsync(Registro);
             if (!resultado.Exito)
             {
+                Registro.Ci = ciBase;
                 Estado.MensajeError = resultado.Mensaje;
                 return Page();
             }

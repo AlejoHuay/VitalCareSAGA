@@ -43,7 +43,6 @@ namespace FrontendVCare.Pages.Usuario
                 ApellidoPaterno = usuario.ApellidoPaterno,
                 ApellidoMaterno = usuario.ApellidoMaterno ?? string.Empty,
                 Ci = usuario.Ci,
-                CiComplemento = usuario.CiComplemento ?? string.Empty,
                 CiExtencion = usuario.CiExtencion,
                 Telefono = usuario.Telefono,
                 Email = usuario.Email,
@@ -61,6 +60,9 @@ namespace FrontendVCare.Pages.Usuario
             IActionResult? acceso = ValidarAccesoAdmin();
             if (acceso != null)
                 return acceso;
+
+            if (!ModelState.IsValid)
+                return Page();
 
             OperacionApiDto resultado = await _usuarioAdapter.ActualizarConResultadoAsync(Input);
             if (!resultado.Exito)

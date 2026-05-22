@@ -6,37 +6,38 @@ namespace FrontendVCare.Dto
     {
         public int IdUsuario { get; set; }
 
-        [Required(ErrorMessage = "El correo electronico es obligatorio.")]
-        [EmailAddress(ErrorMessage = "El correo electronico no es valido.")]
+        [Required(ErrorMessage = "El campo Email es obligatorio.")]
+        [StringLength(255, ErrorMessage = "El email no puede exceder 255 caracteres.")]
+        [EmailAddress(ErrorMessage = "El formato del email no es valido.")]
         public string Email { get; set; } = string.Empty;
 
         public string Role { get; set; } = string.Empty;
         public byte Activo { get; set; } = 1;
         public string? UserName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Los nombres son obligatorios.")]
-        [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", ErrorMessage = "Los nombres solo deben contener letras.")]
+        [Required(ErrorMessage = "El campo Nombres es obligatorio.")]
+        [StringLength(100, ErrorMessage = "El campo Nombres no puede exceder 100 caracteres.")]
+        [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", ErrorMessage = "El campo Nombres solo puede contener letras y espacios.")]
         public string? Nombres { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El primer apellido es obligatorio.")]
-        [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", ErrorMessage = "El primer apellido solo debe contener letras.")]
+        [Required(ErrorMessage = "El campo Apellido Paterno es obligatorio.")]
+        [StringLength(100, ErrorMessage = "El campo Apellido Paterno no puede exceder 100 caracteres.")]
+        [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", ErrorMessage = "El campo Apellido Paterno solo puede contener letras y espacios.")]
         public string ApellidoPaterno { get; set; } = string.Empty;
 
-        [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]*$", ErrorMessage = "El segundo apellido solo debe contener letras.")]
+        [StringLength(100, ErrorMessage = "El campo Apellido Materno no puede exceder 100 caracteres.")]
+        [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]*$", ErrorMessage = "El campo Apellido Materno solo puede contener letras y espacios.")]
         public string? ApellidoMaterno { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El carnet de identidad es obligatorio.")]
-        [RegularExpression(@"^\d{5,8}$", ErrorMessage = "El CI debe tener entre 5 y 8 digitos numericos.")]
+        [Required(ErrorMessage = "El numero de carnet es obligatorio.")]
+        [RegularExpression(@"^\d{8}$", ErrorMessage = "El CI debe tener 8 digitos numericos.")]
         public string Ci { get; set; } = string.Empty;
-
-        [RegularExpression(@"^[A-Za-z0-9]{0,2}$", ErrorMessage = "El complemento debe tener hasta 2 caracteres alfanumericos.")]
-        public string? CiComplemento { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "La extension del CI es obligatoria.")]
         public string CiExtencion { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El telefono es obligatorio.")]
-        [RegularExpression(@"^\d{8}$", ErrorMessage = "El telefono debe tener exactamente 8 digitos numericos.")]
+        [RegularExpression(@"^\d{8}$", ErrorMessage = "El telefono debe tener exactamente 8 digitos.")]
         public string Telefono { get; set; } = string.Empty;
 
         public DateTime UltimaActualizacion { get; set; } = DateTime.Now;

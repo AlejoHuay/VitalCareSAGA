@@ -1,8 +1,10 @@
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Dto;
 using FrontendVCare.Dto.Auth;
+using FrontendVCare.Helpers;
 using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace FrontendVCare.Pages.Usuario
 {
@@ -12,6 +14,10 @@ namespace FrontendVCare.Pages.Usuario
 
         [BindProperty]
         public UsuarioRegistroDto Input { get; set; } = new();
+
+        [BindProperty]
+        [RegularExpression(@"^$|^\d[A-Za-z]$", ErrorMessage = "El complemento del CI debe tener el formato 1A.")]
+        public string CiComplemento { get; set; } = string.Empty;
 
         public UsuarioCreateModel(UsuarioAdapter usuarioAdapter)
         {
@@ -37,18 +43,15 @@ namespace FrontendVCare.Pages.Usuario
             ModelState.Remove("Input.Password");
 
             if (!ModelState.IsValid)
-            {
-                Estado.MensajeError = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .FirstOrDefault(m => !string.IsNullOrWhiteSpace(m))
-                    ?? "Verifica los datos del formulario.";
                 return Page();
-            }
+
+            string ciBase = Input.Ci;
+            Input.Ci = CiFormatoHelper.ConstruirCi(Input.Ci, CiComplemento);
 
             OperacionApiDto resultado = await _usuarioAdapter.CrearConResultadoAsync(Input);
             if (!resultado.Exito)
             {
+                Input.Ci = ciBase;
                 Estado.MensajeError = resultado.Mensaje;
                 return Page();
             }

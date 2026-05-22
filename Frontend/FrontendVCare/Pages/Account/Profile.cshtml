@@ -241,14 +241,14 @@
 
                             <div class="col-md-6 mb-3">
                                 <label for="Ci" class="form-label">Cédula de Identidad</label>
-                                <input type="text" class="form-control" asp-for="UsuarioActualizar.Ci" placeholder="C.I." required>
+                                <input type="text" class="form-control" asp-for="UsuarioActualizar.Ci" placeholder="Ej: 12345678" required>
                                 <span class="text-danger" asp-validation-for="UsuarioActualizar.Ci"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label for="CiComplemento" class="form-label">Complemento C.I.</label>
-                                <input type="text" class="form-control" asp-for="UsuarioActualizar.CiComplemento" placeholder="Ej: 1A" maxlength="2">
-                                <span class="text-danger" asp-validation-for="UsuarioActualizar.CiComplemento"></span>
+                                <input type="text" class="form-control" asp-for="CiComplemento" placeholder="Ej: 1A" maxlength="2">
+                                <span class="text-danger" asp-validation-for="CiComplemento"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
