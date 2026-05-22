@@ -9,7 +9,7 @@ namespace MSUsuarios.App.DTOs
         public string? UserName { get; set; } = string.Empty;
         public string? Nombres { get; set; } = string.Empty;
         public string ApellidoPaterno { get; set; } = string.Empty;
-        public string ApellidoMaterno { get; set; } = string.Empty;
+        public string? ApellidoMaterno { get; set; }
         public string Ci { get; set; } = string.Empty;
         public string? CiComplemento { get; set; }
         public string CiExtencion { get; set; } = string.Empty;
