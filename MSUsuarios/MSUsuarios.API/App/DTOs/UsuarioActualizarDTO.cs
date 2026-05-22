@@ -11,6 +11,7 @@ namespace MSUsuarios.App.DTOs
         public string ApellidoPaterno { get; set; } = string.Empty;
         public string ApellidoMaterno { get; set; } = string.Empty;
         public string Ci { get; set; } = string.Empty;
+        public string? CiComplemento { get; set; }
         public string CiExtencion { get; set; } = string.Empty;
         public string Telefono { get; set; } = string.Empty;
         public DateTime UltimaActualizacion { get; set; } = DateTime.Now;

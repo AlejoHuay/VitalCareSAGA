@@ -7,6 +7,7 @@ namespace MSUsuarios.Dominio.Modelos
         public string? ApellidoMaterno { get; set; }
         public string ApellidoPaterno { get; set; } = string.Empty;
         public string Ci { get; set; } = string.Empty;
+        public string? CiComplemento { get; set; }
         public string Telefono { get; set; } = string.Empty;
         public sbyte Activo { get; set; } = 1;
         public DateTime FechaRegistro { get; set; } = DateTime.Now;

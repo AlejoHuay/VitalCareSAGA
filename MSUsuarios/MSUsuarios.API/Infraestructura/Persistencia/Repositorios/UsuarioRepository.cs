@@ -14,6 +14,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             primer_apellido,
             segundo_apellido,
             ci,
+            ci_complemento,
             ci_extension,
             telefono,
             email,
@@ -42,6 +43,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
                     primer_apellido,
                     segundo_apellido,
                     ci,
+                    ci_complemento,
                     ci_extension,
                     telefono,
                     email,
@@ -60,6 +62,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
                     @primer_apellido,
                     @segundo_apellido,
                     @ci,
+                    @ci_complemento,
                     @ci_extension,
                     @telefono,
                     @email,
@@ -94,6 +97,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
                     primer_apellido = @primer_apellido,
                     segundo_apellido = @segundo_apellido,
                     ci = @ci,
+                    ci_complemento = @ci_complemento,
                     ci_extension = @ci_extension,
                     telefono = @telefono,
                     email = @email,
@@ -143,6 +147,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
                 "primer_apellido",
                 "segundo_apellido",
                 "ci",
+                "ci_complemento",
                 "telefono",
                 "ci_extension",
                 "email",
@@ -197,17 +202,19 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             return reader.Read() ? MapearUsuario(reader) : null;
         }
 
-        public Usuario? GetByCi(string ci)
+        public Usuario? GetByCi(string ci, string? ciComplemento = null)
         {
             string query = $@"
                 SELECT {ColumnasSeleccionUsuario}
                 FROM usuario
                 WHERE ci = @ci
+                  AND COALESCE(ci_complemento, '') = COALESCE(@ci_complemento, '')
                 LIMIT 1";
 
             using var conn = new NpgsqlConnection(_connectionString);
             using var cmd = new NpgsqlCommand(query, conn);
             cmd.Parameters.AddWithValue("ci", ObtenerCiNumerico(ci));
+            AgregarParametroNullable(cmd, "ci_complemento", ObtenerCiComplementoNormalizado(ciComplemento));
             conn.Open();
 
             using var reader = cmd.ExecuteReader();
@@ -231,13 +238,14 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             return reader.Read() ? MapearUsuario(reader) : null;
         }
 
-        public bool ExisteCi(string ci)
+        public bool ExisteCi(string ci, string? ciComplemento = null)
         {
-            const string query = "SELECT COUNT(1) FROM usuario WHERE ci = @ci";
+            const string query = "SELECT COUNT(1) FROM usuario WHERE ci = @ci AND COALESCE(ci_complemento, '') = COALESCE(@ci_complemento, '')";
 
             using var conn = new NpgsqlConnection(_connectionString);
             using var cmd = new NpgsqlCommand(query, conn);
             cmd.Parameters.AddWithValue("ci", ObtenerCiNumerico(ci));
+            AgregarParametroNullable(cmd, "ci_complemento", ObtenerCiComplementoNormalizado(ciComplemento));
             conn.Open();
 
             return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
@@ -328,6 +336,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             cmd.Parameters.AddWithValue("primer_apellido", usuario.ApellidoPaterno.Trim());
             AgregarParametroNullable(cmd, "segundo_apellido", usuario.ApellidoMaterno);
             cmd.Parameters.AddWithValue("ci", ObtenerCiNumerico(usuario.Ci));
+            AgregarParametroNullable(cmd, "ci_complemento", ObtenerCiComplementoNormalizado(usuario.CiComplemento));
             cmd.Parameters.AddWithValue("ci_extension", usuario.CiExtencion.Trim().ToUpperInvariant());
             cmd.Parameters.AddWithValue("telefono", usuario.Telefono.Trim());
             cmd.Parameters.AddWithValue("email", usuario.Email.Trim().ToLowerInvariant());
@@ -358,6 +367,12 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             return ciNumerico;
         }
 
+        private static string? ObtenerCiComplementoNormalizado(string? ciComplemento)
+        {
+            string complemento = ciComplemento?.Trim().ToUpperInvariant() ?? string.Empty;
+            return string.IsNullOrWhiteSpace(complemento) ? null : complemento;
+        }
+
         private static DateTime AsegurarUtc(DateTime fecha)
         {
             return fecha.Kind switch
@@ -379,6 +394,9 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
                     ? null
                     : reader.GetString(reader.GetOrdinal("segundo_apellido")),
                 Ci = reader.GetInt32(reader.GetOrdinal("ci")).ToString(),
+                CiComplemento = reader.IsDBNull(reader.GetOrdinal("ci_complemento"))
+                    ? null
+                    : reader.GetString(reader.GetOrdinal("ci_complemento")),
                 CiExtencion = reader.GetString(reader.GetOrdinal("ci_extension")),
                 Telefono = reader.GetString(reader.GetOrdinal("telefono")),
                 Email = reader.GetString(reader.GetOrdinal("email")),

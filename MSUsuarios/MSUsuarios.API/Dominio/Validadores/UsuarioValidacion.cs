@@ -23,6 +23,7 @@ namespace MSUsuarios.Dominio.Validadores
             string? apellidoPaterno = LimpiarTexto(dto.ApellidoPaterno);
             string? apellidoMaterno = LimpiarTexto(dto.ApellidoMaterno);
             string? ci = LimpiarTexto(dto.Ci);
+            string? ciComplemento = LimpiarTexto(dto.CiComplemento);
             string? ciExtension = LimpiarTexto(dto.CiExtencion);
             string? telefono = LimpiarTexto(dto.Telefono);
             string? email = LimpiarTexto(dto.Email);
@@ -31,8 +32,9 @@ namespace MSUsuarios.Dominio.Validadores
 
             Result? resultado = ValidarCamposObligatorios(nombres, apellidoPaterno, apellidoMaterno, email)
                 ?? ValidarCi(ci)
+                ?? ValidarCiComplemento(ciComplemento)
                 ?? ValidarCiExtension(ciExtension)
-                ?? ValidarCiDuplicado(ci!)
+                ?? ValidarCiDuplicado(ci!, ciComplemento)
                 ?? ValidarTelefono(telefono)
                 ?? ValidarEmail(email)
                 ?? ValidarPassword(password)
@@ -54,14 +56,16 @@ namespace MSUsuarios.Dominio.Validadores
             string? apellidoPaterno = LimpiarTexto(dto.ApellidoPaterno);
             string? apellidoMaterno = LimpiarTexto(dto.ApellidoMaterno);
             string? ci = LimpiarTexto(dto.Ci);
+            string? ciComplemento = LimpiarTexto(dto.CiComplemento);
             string? ciExtension = LimpiarTexto(dto.CiExtencion);
             string? telefono = LimpiarTexto(dto.Telefono);
             string? email = LimpiarTexto(dto.Email);
 
             Result? resultado = ValidarCamposObligatorios(nombres, apellidoPaterno, apellidoMaterno, email)
                 ?? ValidarCi(ci)
+                ?? ValidarCiComplemento(ciComplemento)
                 ?? ValidarCiExtension(ciExtension)
-                ?? ValidarCiDuplicadoEnActualizacion(dto.IdUsuario, ci!)
+                ?? ValidarCiDuplicadoEnActualizacion(dto.IdUsuario, ci!, ciComplemento)
                 ?? ValidarTelefono(telefono)
                 ?? ValidarEmail(email)
                 ?? ValidarEmailDuplicadoEnActualizacion(dto.IdUsuario, email!)
@@ -107,6 +111,17 @@ namespace MSUsuarios.Dominio.Validadores
 
             if (!Regex.IsMatch(ci, @"^\d{5,8}$"))
                 return Result.Fail("El CI debe tener entre 5 y 8 digitos numericos.");
+
+            return null;
+        }
+
+        private Result? ValidarCiComplemento(string? ciComplemento)
+        {
+            if (string.IsNullOrWhiteSpace(ciComplemento))
+                return null;
+
+            if (!Regex.IsMatch(ciComplemento!, @"^[A-Za-z0-9]{1,2}$"))
+                return Result.Fail("El complemento del CI debe tener hasta 2 caracteres alfanumericos.");
 
             return null;
         }
@@ -181,9 +196,9 @@ namespace MSUsuarios.Dominio.Validadores
             return null;
         }
 
-        private Result? ValidarCiDuplicado(string ci)
+        private Result? ValidarCiDuplicado(string ci, string? ciComplemento)
         {
-            if (_repository.ExisteCi(ci))
+            if (_repository.ExisteCi(ci, ciComplemento))
                 return Result.Fail("El CI ya esta registrado en el sistema.");
 
             return null;
@@ -206,9 +221,9 @@ namespace MSUsuarios.Dominio.Validadores
             return null;
         }
 
-        private Result? ValidarCiDuplicadoEnActualizacion(int idUsuario, string ci)
+        private Result? ValidarCiDuplicadoEnActualizacion(int idUsuario, string ci, string? ciComplemento)
         {
-            Usuario? usuario = _repository.GetByCi(ci);
+            Usuario? usuario = _repository.GetByCi(ci, ciComplemento);
             if (usuario != null && usuario.IdUsuario != idUsuario)
                 return Result.Fail("El CI ya esta registrado en el sistema.");
 

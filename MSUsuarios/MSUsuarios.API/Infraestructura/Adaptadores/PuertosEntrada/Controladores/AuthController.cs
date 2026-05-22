@@ -45,7 +45,7 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             dto.UserName = CredencialesHelper.GenerarUserName(
                 dto.Nombres,
                 dto.ApellidoPaterno,
-                dto.Ci
+                ConstruirCiParaUserName(dto.Ci, dto.CiComplemento)
             );
 
             dto.Password = CredencialesHelper.GenerarPasswordTemporal();
@@ -200,6 +200,16 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
                 return BadRequest(new { mensaje = resultado.Error });
 
             return Ok(new { mensaje = "Contraseña actualizada correctamente." });
+        }
+
+        private static string ConstruirCiParaUserName(string ci, string? ciComplemento)
+        {
+            string ciBase = ci?.Trim() ?? string.Empty;
+            string complemento = ciComplemento?.Trim().ToUpperInvariant() ?? string.Empty;
+
+            return string.IsNullOrWhiteSpace(complemento)
+                ? ciBase
+                : $"{ciBase}-{complemento}";
         }
     }
 }

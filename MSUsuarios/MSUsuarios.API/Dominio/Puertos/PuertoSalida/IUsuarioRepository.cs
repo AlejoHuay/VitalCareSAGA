@@ -5,10 +5,10 @@ namespace MSUsuarios.Dominio.Puertos.PuertoSalida
     public interface IUsuarioRepository : IRepository<Usuario>
     {
         int Update(Usuario usuario, int? idUsuarioSesion);
-        Usuario? GetByCi(string ci);
+        Usuario? GetByCi(string ci, string? ciComplemento = null);
         Usuario? GetByEmail(string email);
         Usuario? GetByUserName(string userName);
-        bool ExisteCi(string ci);
+        bool ExisteCi(string ci, string? ciComplemento = null);
         bool ExisteEmail(string email);
         bool ExisteUserName(string userName);
         int CambiarPassword(int idUsuario, string nuevoPasswordHash, bool mustChangePassword);
