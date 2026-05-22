@@ -89,23 +89,25 @@
                                 }
                             </td>
                             <td>
-                                <a asp-page="BioquimicoEdit"
-                                   asp-route-id="@b.IdUsuario"
-                                   class="btn btn-warning btn-sm">
-                                    Editar
-                                </a>
+                                <div class="acciones-inline">
+                                    <a asp-page="BioquimicoEdit"
+                                       asp-route-id="@b.IdUsuario"
+                                       class="btn btn-warning btn-sm">
+                                        Editar
+                                    </a>
 
-                                @if (activo)
-                                {
-                                    <button type="button"
-                                            class="btn btn-danger btn-sm btnEliminar"
-                                            data-id="@b.IdUsuario"
-                                            data-nombre="@b.Nombres @b.ApellidoPaterno @b.ApellidoMaterno"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalEliminarBioquimico">
-                                        Baja
-                                    </button>
-                                }
+                                    @if (activo)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-danger btn-sm btnEliminar"
+                                                data-id="@b.IdUsuario"
+                                                data-nombre="@b.Nombres @b.ApellidoPaterno @b.ApellidoMaterno"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarBioquimico">
+                                            Baja
+                                        </button>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }

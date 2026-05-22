@@ -81,27 +81,29 @@
                                 }
                             </td>
                             <td>
-                                <form method="post"
-                                      asp-page="UsuarioEdit"
-                                      asp-page-handler="CargarUsuarioParaEdicion"
-                                      style="display:inline;">
-                                    <input type="hidden" name="id" value="@usuario.IdUsuario" />
-                                    <button type="submit" class="btn btn-warning btn-sm">
-                                        Editar
-                                    </button>
-                                </form>
+                                <div class="acciones-inline">
+                                    <form method="post"
+                                          asp-page="UsuarioEdit"
+                                          asp-page-handler="CargarUsuarioParaEdicion"
+                                          class="m-0">
+                                        <input type="hidden" name="id" value="@usuario.IdUsuario" />
+                                        <button type="submit" class="btn btn-warning btn-sm">
+                                            Editar
+                                        </button>
+                                    </form>
 
-                                @if (esActivo)
-                                {
-                                    <button type="button"
-                                            class="btn btn-danger btn-sm btnEliminar"
-                                            data-id="@usuario.IdUsuario"
-                                            data-nombre="@usuario.UserName"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalEliminarUsuario">
-                                        Baja
-                                    </button>
-                                }
+                                    @if (esActivo)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-danger btn-sm btnEliminar"
+                                                data-id="@usuario.IdUsuario"
+                                                data-nombre="@usuario.UserName"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarUsuario">
+                                            Baja
+                                        </button>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }
