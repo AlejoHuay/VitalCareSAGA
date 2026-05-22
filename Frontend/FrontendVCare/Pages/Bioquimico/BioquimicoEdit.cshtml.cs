@@ -54,6 +54,16 @@ namespace FrontendVCare.Pages.Bioquimico
 
             Input.Role = "Bioquimico";
 
+            if (!ModelState.IsValid)
+            {
+                Estado.MensajeError = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .FirstOrDefault(m => !string.IsNullOrWhiteSpace(m))
+                    ?? "Verifica los datos del formulario.";
+                return Page();
+            }
+
             OperacionApiDto resultado = await _usuarioAdapter.ActualizarConResultadoAsync(Input);
             if (!resultado.Exito)
             {

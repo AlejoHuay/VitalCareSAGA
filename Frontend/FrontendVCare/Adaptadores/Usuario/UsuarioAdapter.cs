@@ -242,9 +242,17 @@ namespace FrontendVCare.Adaptadores
 
         private async Task<string> LeerMensajeAsync(HttpResponseMessage response, string mensajePorDefecto)
         {
-            JsonElement? root = await LeerJsonAsync(response);
+            string contenido = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(contenido))
+                return response.IsSuccessStatusCode
+                    ? mensajePorDefecto
+                    : $"La operación falló. El servidor respondió {(int)response.StatusCode}.";
+
+            JsonElement? root = IntentarLeerJson(contenido);
             if (root == null)
-                return mensajePorDefecto;
+                return response.IsSuccessStatusCode
+                    ? mensajePorDefecto
+                    : contenido;
 
             if (root.Value.TryGetProperty("mensaje", out JsonElement mensajeElement))
             {
@@ -254,6 +262,19 @@ namespace FrontendVCare.Adaptadores
             }
 
             return mensajePorDefecto;
+        }
+
+        private static JsonElement? IntentarLeerJson(string contenido)
+        {
+            try
+            {
+                using JsonDocument document = JsonDocument.Parse(contenido);
+                return document.RootElement.Clone();
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }
