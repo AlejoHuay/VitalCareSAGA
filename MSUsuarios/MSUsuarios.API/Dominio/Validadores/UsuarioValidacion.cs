@@ -23,7 +23,6 @@ namespace MSUsuarios.Dominio.Validadores
             string? apellidoPaterno = LimpiarTexto(dto.ApellidoPaterno);
             string? apellidoMaterno = LimpiarTexto(dto.ApellidoMaterno);
             string? ci = LimpiarTexto(dto.Ci);
-            string? ciComplemento = LimpiarTexto(dto.CiComplemento);
             string? ciExtension = LimpiarTexto(dto.CiExtencion);
             string? telefono = LimpiarTexto(dto.Telefono);
             string? email = LimpiarTexto(dto.Email);
@@ -32,9 +31,8 @@ namespace MSUsuarios.Dominio.Validadores
 
             Result? resultado = ValidarCamposObligatorios(nombres, apellidoPaterno, apellidoMaterno, email)
                 ?? ValidarCi(ci)
-                ?? ValidarCiComplemento(ciComplemento)
                 ?? ValidarCiExtension(ciExtension)
-                ?? ValidarCiDuplicado(ci!, ciComplemento)
+                ?? ValidarCiDuplicado(ci!)
                 ?? ValidarTelefono(telefono)
                 ?? ValidarEmail(email)
                 ?? ValidarPassword(password)
@@ -56,16 +54,14 @@ namespace MSUsuarios.Dominio.Validadores
             string? apellidoPaterno = LimpiarTexto(dto.ApellidoPaterno);
             string? apellidoMaterno = LimpiarTexto(dto.ApellidoMaterno);
             string? ci = LimpiarTexto(dto.Ci);
-            string? ciComplemento = LimpiarTexto(dto.CiComplemento);
             string? ciExtension = LimpiarTexto(dto.CiExtencion);
             string? telefono = LimpiarTexto(dto.Telefono);
             string? email = LimpiarTexto(dto.Email);
 
             Result? resultado = ValidarCamposObligatorios(nombres, apellidoPaterno, apellidoMaterno, email)
                 ?? ValidarCi(ci)
-                ?? ValidarCiComplemento(ciComplemento)
                 ?? ValidarCiExtension(ciExtension)
-                ?? ValidarCiDuplicadoEnActualizacion(dto.IdUsuario, ci!, ciComplemento)
+                ?? ValidarCiDuplicadoEnActualizacion(dto.IdUsuario, ci!)
                 ?? ValidarTelefono(telefono)
                 ?? ValidarEmail(email)
                 ?? ValidarEmailDuplicadoEnActualizacion(dto.IdUsuario, email!)
@@ -88,9 +84,9 @@ namespace MSUsuarios.Dominio.Validadores
 
         private Result? ValidarCamposObligatorios(string? nombres, string? apellidoPaterno, string? apellidoMaterno, string? email)
         {
-            Result? resultado = TextoSoloLetrasRequerido(nombres, "Nombres", 100)
-                ?? TextoSoloLetrasRequerido(apellidoPaterno, "Apellido Paterno", 100)
-                ?? TextoSoloLetrasOpcional(apellidoMaterno, "Apellido Materno", 100);
+            Result? resultado = ValidarTextoSoloLetrasRequerido(nombres, "Nombres")
+                ?? ValidarTextoSoloLetrasRequerido(apellidoPaterno, "Apellido Paterno")
+                ?? ValidarTextoSoloLetrasOpcional(apellidoMaterno, "Apellido Materno");
 
             if (resultado != null)
                 return resultado;
@@ -109,19 +105,8 @@ namespace MSUsuarios.Dominio.Validadores
             if (ci!.Contains(' '))
                 return Result.Fail("El numero de carnet no debe contener espacios.");
 
-            if (!Regex.IsMatch(ci, @"^\d{5,8}$"))
-                return Result.Fail("El CI debe tener entre 5 y 8 digitos numericos.");
-
-            return null;
-        }
-
-        private Result? ValidarCiComplemento(string? ciComplemento)
-        {
-            if (string.IsNullOrWhiteSpace(ciComplemento))
-                return null;
-
-            if (!Regex.IsMatch(ciComplemento!, @"^[A-Za-z0-9]{1,2}$"))
-                return Result.Fail("El complemento del CI debe tener hasta 2 caracteres alfanumericos.");
+            if (!Regex.IsMatch(ci, @"^\d{8}(?:-\d[A-Za-z])?$"))
+                return Result.Fail("El CI debe tener 8 digitos y un complemento opcional de hasta dos caracteres (Ej. 10000000-1B).");
 
             return null;
         }
@@ -196,9 +181,9 @@ namespace MSUsuarios.Dominio.Validadores
             return null;
         }
 
-        private Result? ValidarCiDuplicado(string ci, string? ciComplemento)
+        private Result? ValidarCiDuplicado(string ci)
         {
-            if (_repository.ExisteCi(ci, ciComplemento))
+            if (_repository.ExisteCi(ci))
                 return Result.Fail("El CI ya esta registrado en el sistema.");
 
             return null;
@@ -221,9 +206,9 @@ namespace MSUsuarios.Dominio.Validadores
             return null;
         }
 
-        private Result? ValidarCiDuplicadoEnActualizacion(int idUsuario, string ci, string? ciComplemento)
+        private Result? ValidarCiDuplicadoEnActualizacion(int idUsuario, string ci)
         {
-            Usuario? usuario = _repository.GetByCi(ci, ciComplemento);
+            Usuario? usuario = _repository.GetByCi(ci);
             if (usuario != null && usuario.IdUsuario != idUsuario)
                 return Result.Fail("El CI ya esta registrado en el sistema.");
 
@@ -246,6 +231,38 @@ namespace MSUsuarios.Dominio.Validadores
         private string? LimpiarTexto(string? texto)
         {
             return texto?.Trim();
+        }
+
+        private static Result? ValidarTextoSoloLetrasRequerido(string? valor, string campo)
+        {
+            valor = valor?.Trim();
+
+            if (string.IsNullOrWhiteSpace(valor))
+                return Result.Fail($"El campo {campo} es obligatorio.");
+
+            if (valor.Length > 100)
+                return Result.Fail($"El campo {campo} no puede exceder 100 caracteres.");
+
+            if (!Regex.IsMatch(valor, PatronSoloLetrasYEspacios))
+                return Result.Fail($"El campo {campo} solo puede contener letras y espacios.");
+
+            return null;
+        }
+
+        private static Result? ValidarTextoSoloLetrasOpcional(string? valor, string campo)
+        {
+            valor = valor?.Trim();
+
+            if (string.IsNullOrWhiteSpace(valor))
+                return null;
+
+            if (valor.Length > 100)
+                return Result.Fail($"El campo {campo} no puede exceder 100 caracteres.");
+
+            if (!Regex.IsMatch(valor, PatronSoloLetrasYEspacios))
+                return Result.Fail($"El campo {campo} solo puede contener letras y espacios.");
+
+            return null;
         }
     }
 }

@@ -338,8 +338,7 @@ namespace MSUsuarios.App.Servicios
                 Nombres = StringHelper.LimpiarTexto(dto.Nombres),
                 ApellidoPaterno = StringHelper.LimpiarTexto(dto.ApellidoPaterno),
                 ApellidoMaterno = StringHelper.LimpiarTexto(dto.ApellidoMaterno),
-                Ci = StringHelper.SoloNumeros(dto.Ci),
-                CiComplemento = StringHelper.LimpiarTextoMayus(dto.CiComplemento),
+                Ci = StringHelper.LimpiarCI(dto.Ci),
                 CiExtencion = StringHelper.LimpiarTextoMayus(dto.CiExtencion),
                 Telefono = StringHelper.SoloNumeros(dto.Telefono),
                 Email = StringHelper.LimpiarTextoMinus(dto.Email),
@@ -360,8 +359,7 @@ namespace MSUsuarios.App.Servicios
 
             usuario.ApellidoPaterno = StringHelper.LimpiarTexto(dto.ApellidoPaterno);
             usuario.ApellidoMaterno = StringHelper.LimpiarTexto(dto.ApellidoMaterno);
-            usuario.Ci = StringHelper.SoloNumeros(dto.Ci);
-            usuario.CiComplemento = StringHelper.LimpiarTextoMayus(dto.CiComplemento);
+            usuario.Ci = StringHelper.LimpiarCI(dto.Ci);
             usuario.CiExtencion = StringHelper.LimpiarTextoMayus(dto.CiExtencion);
             usuario.Telefono = StringHelper.SoloNumeros(dto.Telefono);
             usuario.Email = StringHelper.LimpiarTextoMinus(dto.Email);
@@ -385,7 +383,6 @@ namespace MSUsuarios.App.Servicios
                 ApellidoPaterno = usuario.ApellidoPaterno,
                 ApellidoMaterno = usuario.ApellidoMaterno,
                 Ci = usuario.Ci,
-                CiComplemento = usuario.CiComplemento,
                 CiExtencion = usuario.CiExtencion,
                 Telefono = usuario.Telefono,
                 Activo = usuario.Activo,
@@ -407,7 +404,7 @@ namespace MSUsuarios.App.Servicios
             return constraintName switch
             {
                 "usuario_ci_key" => "El CI ya esta registrado en el sistema.",
-                "uq_usuario_ci_complemento" => "El CI ya esta registrado en el sistema.",
+                "uq_usuario_ci" => "El CI ya esta registrado en el sistema.",
                 "usuario_email_key" => "El email ya esta registrado en el sistema.",
                 "uq_usuario_email" => "El email ya esta registrado en el sistema.",
                 "usuario_user_name_key" => "El nombre de usuario ya esta registrado en el sistema.",
