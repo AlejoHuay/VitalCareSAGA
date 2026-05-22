@@ -23,7 +23,7 @@ namespace FrontendVCare.Dto
         public string ApellidoPaterno { get; set; } = string.Empty;
 
         [RegularExpression(@"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]*$", ErrorMessage = "El segundo apellido solo debe contener letras.")]
-        public string ApellidoMaterno { get; set; } = string.Empty;
+        public string? ApellidoMaterno { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El carnet de identidad es obligatorio.")]
         [RegularExpression(@"^\d{5,8}$", ErrorMessage = "El CI debe tener entre 5 y 8 dígitos numéricos.")]
