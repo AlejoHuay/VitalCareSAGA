@@ -67,7 +67,13 @@
 
                         <tr>
                             <td>@b.Nombres @b.ApellidoPaterno @b.ApellidoMaterno</td>
-                            <td>@b.Ci</td>
+                            <td>
+                                @b.Ci
+                                @if (!string.IsNullOrWhiteSpace(b.CiComplemento))
+                                {
+                                    <span>-@b.CiComplemento</span>
+                                }
+                            </td>
                             <td class="text-center">@b.CiExtencion</td>
                             <td>@b.Telefono</td>
                             <td>@b.Email</td>

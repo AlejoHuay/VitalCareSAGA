@@ -17,15 +17,18 @@ namespace FrontendVCare.Dto.Auth
         [Required(ErrorMessage = "El carnet de identidad es obligatorio.")]
         public string Ci { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "La extensión es obligatoria.")]
+        [RegularExpression(@"^[A-Za-z0-9]{0,2}$", ErrorMessage = "El complemento debe tener hasta 2 caracteres alfanumericos.")]
+        public string? CiComplemento { get; set; }
+
+        [Required(ErrorMessage = "La extension es obligatoria.")]
         public string CiExtencion { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El teléfono es obligatorio.")]
-        [RegularExpression(@"^\d{8}$", ErrorMessage = "El teléfono debe contener solo dígitos numéricos.")]
+        [Required(ErrorMessage = "El telefono es obligatorio.")]
+        [RegularExpression(@"^\d{8}$", ErrorMessage = "El telefono debe contener solo digitos numericos.")]
         public string Telefono { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
-        [EmailAddress(ErrorMessage = "El correo electrónico no es válido.")]
+        [Required(ErrorMessage = "El correo electronico es obligatorio.")]
+        [EmailAddress(ErrorMessage = "El correo electronico no es valido.")]
         public string Email { get; set; } = string.Empty;
 
         public string? Role { get; set; } = string.Empty;

@@ -32,7 +32,7 @@ namespace FrontendVCare.Pages.Auth
             Registro.UserName = CredencialesHelper.GenerarUserName(
                 Registro.Nombres,
                 Registro.ApellidoPaterno,
-                Registro.Ci
+                ConstruirCiParaUserName(Registro.Ci, Registro.CiComplemento)
             );
 
             ModelState.Remove("Registro.UserName");
@@ -56,8 +56,18 @@ namespace FrontendVCare.Pages.Auth
                 return Page();
             }
 
-            MensajeOk = "Usuario registrado correctamente. Revisa las credenciales generadas y tu correo electrónico.";
+            MensajeOk = "Usuario registrado correctamente. Revisa las credenciales generadas y tu correo electronico.";
             return Page();
+        }
+
+        private static string ConstruirCiParaUserName(string ci, string? ciComplemento)
+        {
+            string ciBase = ci?.Trim() ?? string.Empty;
+            string complemento = ciComplemento?.Trim().ToUpperInvariant() ?? string.Empty;
+
+            return string.IsNullOrWhiteSpace(complemento)
+                ? ciBase
+                : $"{ciBase}-{complemento}";
         }
     }
 }

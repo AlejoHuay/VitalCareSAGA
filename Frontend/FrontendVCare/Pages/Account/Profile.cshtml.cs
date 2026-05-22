@@ -68,7 +68,7 @@ namespace FrontendVCare.Pages.Account
                 Nombres = usuario.Nombres;
                 ApellidoPaterno = usuario.ApellidoPaterno;
                 ApellidoMaterno = usuario.ApellidoMaterno ?? string.Empty;
-                CI = usuario.Ci;
+                CI = ConstruirCiVisual(usuario.Ci, usuario.CiComplemento);
                 UserName = usuario.UserName;
 
                 // Initialize update form with current values
@@ -82,6 +82,7 @@ namespace FrontendVCare.Pages.Account
                     ApellidoPaterno = usuario.ApellidoPaterno,
                     ApellidoMaterno = usuario.ApellidoMaterno ?? string.Empty,
                     Ci = usuario.Ci,
+                    CiComplemento = usuario.CiComplemento ?? string.Empty,
                     CiExtencion = usuario.CiExtencion,
                     Telefono = usuario.Telefono
                 };
@@ -187,6 +188,13 @@ namespace FrontendVCare.Pages.Account
                 await OnGetAsync();
                 return Page();
             }
+        }
+        private static string ConstruirCiVisual(string ci, string? ciComplemento)
+        {
+            string complemento = ciComplemento?.Trim().ToUpperInvariant() ?? string.Empty;
+            return string.IsNullOrWhiteSpace(complemento)
+                ? ci
+                : $"{ci}-{complemento}";
         }
     }
 }

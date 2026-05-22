@@ -246,6 +246,12 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
+                                <label for="CiComplemento" class="form-label">Complemento C.I.</label>
+                                <input type="text" class="form-control" asp-for="UsuarioActualizar.CiComplemento" placeholder="Ej: 1A" maxlength="2">
+                                <span class="text-danger" asp-validation-for="UsuarioActualizar.CiComplemento"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
                                 <label for="CiExtencion" class="form-label">Extensión C.I.</label>
                                 <input type="text" class="form-control" asp-for="UsuarioActualizar.CiExtencion" placeholder="Ex: LP, CB, SC">
                                 <span class="text-danger" asp-validation-for="UsuarioActualizar.CiExtencion"></span>

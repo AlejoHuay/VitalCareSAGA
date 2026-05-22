@@ -43,6 +43,7 @@ namespace FrontendVCare.Pages.Usuario
                 ApellidoPaterno = usuario.ApellidoPaterno,
                 ApellidoMaterno = usuario.ApellidoMaterno ?? string.Empty,
                 Ci = usuario.Ci,
+                CiComplemento = usuario.CiComplemento ?? string.Empty,
                 CiExtencion = usuario.CiExtencion,
                 Telefono = usuario.Telefono,
                 Email = usuario.Email,

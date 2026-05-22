@@ -6,8 +6,8 @@ namespace FrontendVCare.Dto
     {
         public int IdUsuario { get; set; }
 
-        [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
-        [EmailAddress(ErrorMessage = "El correo electrónico no es válido.")]
+        [Required(ErrorMessage = "El correo electronico es obligatorio.")]
+        [EmailAddress(ErrorMessage = "El correo electronico no es valido.")]
         public string Email { get; set; } = string.Empty;
 
         public string Role { get; set; } = string.Empty;
@@ -26,14 +26,17 @@ namespace FrontendVCare.Dto
         public string? ApellidoMaterno { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El carnet de identidad es obligatorio.")]
-        [RegularExpression(@"^\d{5,8}$", ErrorMessage = "El CI debe tener entre 5 y 8 dígitos numéricos.")]
+        [RegularExpression(@"^\d{5,8}$", ErrorMessage = "El CI debe tener entre 5 y 8 digitos numericos.")]
         public string Ci { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "La extensión del CI es obligatoria.")]
+        [RegularExpression(@"^[A-Za-z0-9]{0,2}$", ErrorMessage = "El complemento debe tener hasta 2 caracteres alfanumericos.")]
+        public string? CiComplemento { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La extension del CI es obligatoria.")]
         public string CiExtencion { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El teléfono es obligatorio.")]
-        [RegularExpression(@"^\d{8}$", ErrorMessage = "El teléfono debe tener exactamente 8 dígitos numéricos.")]
+        [Required(ErrorMessage = "El telefono es obligatorio.")]
+        [RegularExpression(@"^\d{8}$", ErrorMessage = "El telefono debe tener exactamente 8 digitos numericos.")]
         public string Telefono { get; set; } = string.Empty;
 
         public DateTime UltimaActualizacion { get; set; } = DateTime.Now;

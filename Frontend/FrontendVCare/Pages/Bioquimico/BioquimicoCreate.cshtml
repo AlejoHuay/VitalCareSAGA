@@ -40,11 +40,19 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-8 mb-3">
+                            <div class="col-md-5 mb-3">
                                 <div class="form-floating">
                                     <input asp-for="Registro.Ci" class="form-control" placeholder="CI" maxlength="8" />
                                     <label>Carnet de identidad</label>
                                     <span asp-validation-for="Registro.Ci" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="Registro.CiComplemento" class="form-control" placeholder="Complemento" maxlength="2" />
+                                    <label>Complemento</label>
+                                    <span asp-validation-for="Registro.CiComplemento" class="text-danger"></span>
                                 </div>
                             </div>
 
@@ -63,6 +71,7 @@
                                         <option value="TJ">Tarija</option>
                                     </select>
                                     <label>Expedido</label>
+                                    <span asp-validation-for="Registro.CiExtencion" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
