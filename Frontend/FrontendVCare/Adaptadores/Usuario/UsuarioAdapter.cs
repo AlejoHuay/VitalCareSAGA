@@ -261,6 +261,37 @@ namespace FrontendVCare.Adaptadores
                     return mensaje;
             }
 
+            if (root.Value.TryGetProperty("errors", out JsonElement errorsElement)
+                && errorsElement.ValueKind == JsonValueKind.Object)
+            {
+                foreach (JsonProperty propiedad in errorsElement.EnumerateObject())
+                {
+                    if (propiedad.Value.ValueKind != JsonValueKind.Array)
+                        continue;
+
+                    foreach (JsonElement error in propiedad.Value.EnumerateArray())
+                    {
+                        string? mensajeError = error.GetString();
+                        if (!string.IsNullOrWhiteSpace(mensajeError))
+                            return mensajeError;
+                    }
+                }
+            }
+
+            if (root.Value.TryGetProperty("detail", out JsonElement detailElement))
+            {
+                string? detail = detailElement.GetString();
+                if (!string.IsNullOrWhiteSpace(detail))
+                    return detail;
+            }
+
+            if (root.Value.TryGetProperty("title", out JsonElement titleElement))
+            {
+                string? title = titleElement.GetString();
+                if (!string.IsNullOrWhiteSpace(title))
+                    return title;
+            }
+
             return mensajePorDefecto;
         }
 
