@@ -20,7 +20,7 @@
                        name="filtro"
                        class="form-control"
                        placeholder="Buscar por nombres, CI, email o usuario..."
-                       value="@Model.Filtro" />
+                       value="@Model.Estado.FiltroActual" />
 
                 <button type="submit" class="btn btn-success">
                     Buscar
@@ -33,14 +33,14 @@
         </div>
     </form>
 
-    @if (!string.IsNullOrWhiteSpace(Model.Mensaje))
+    @if (!string.IsNullOrWhiteSpace(Model.Estado.Mensaje))
     {
-        <div class="alert alert-success">@Model.Mensaje</div>
+        <div class="alert alert-success">@Model.Estado.Mensaje</div>
     }
 
-    @if (!string.IsNullOrWhiteSpace(Model.MensajeError))
+    @if (!string.IsNullOrWhiteSpace(Model.Estado.MensajeError))
     {
-        <div class="alert alert-danger">@Model.MensajeError</div>
+        <div class="alert alert-danger">@Model.Estado.MensajeError</div>
     }
 
     <div class="card shadow-sm">
@@ -137,6 +137,7 @@
 
                 <form method="post" asp-page-handler="DarBaja">
                     <input type="hidden" id="idBioquimicoEliminar" name="id" />
+                    <input type="hidden" name="filtro" value="@Model.Estado.FiltroActual" />
                     <button type="submit" class="btn btn-danger">
                         Confirmar Baja
                     </button>

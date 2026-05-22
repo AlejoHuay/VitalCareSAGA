@@ -1,11 +1,11 @@
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Dto;
+using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FrontendVCare.Pages.Bioquimico
 {
-    public class BioquimicoModel : PageModel
+    public class BioquimicoModel : BasePageModel
     {
         private const string RolBioquimico = "Bioquimico";
         private readonly UsuarioAdapter _usuarioAdapter;
@@ -17,48 +17,56 @@ namespace FrontendVCare.Pages.Bioquimico
 
         public List<UsuarioDto> Bioquimicos { get; set; } = new();
 
-        [BindProperty(SupportsGet = true)]
-        public string Filtro { get; set; } = string.Empty;
-
-        [TempData]
-        public string Mensaje { get; set; } = string.Empty;
-
-        [TempData]
-        public string MensajeError { get; set; } = string.Empty;
-
-        public async Task<IActionResult> OnGetAsync()
+        public async Task<IActionResult> OnGetAsync(string? filtro, string? mensaje, string? error)
         {
-            if (!EsAdmin())
-                return RedirectToPage("/Auth/Login");
+            IActionResult? acceso = ValidarAccesoAdmin();
+            if (acceso != null)
+                return acceso;
 
-            List<UsuarioDto> usuarios = await _usuarioAdapter.ObtenerTodosAsync(Filtro);
+            CargarParametros(filtro, mensaje, error);
+            await CargarBioquimicosAsync(Estado.FiltroActual);
+            return Page();
+        }
 
+        public async Task<IActionResult> OnPostDarBajaAsync(int id, string? filtro)
+        {
+            IActionResult? acceso = ValidarAccesoAdmin();
+            if (acceso != null)
+                return acceso;
+
+            Estado.FiltroActual = (filtro ?? string.Empty).Trim();
+
+            OperacionApiDto resultado = await _usuarioAdapter.EliminarAsync(id);
+            if (!resultado.Exito)
+            {
+                Estado.MensajeError = resultado.Mensaje;
+                await CargarBioquimicosAsync(Estado.FiltroActual);
+                return Page();
+            }
+
+            return RedirectToPage("Bioquimico", new
+            {
+                filtro = Estado.FiltroActual,
+                mensaje = "Bioquimico dado de baja correctamente."
+            });
+        }
+
+        private void CargarParametros(string? filtro, string? mensaje, string? error)
+        {
+            Estado.FiltroActual = (filtro ?? string.Empty).Trim();
+            Estado.Mensaje = mensaje ?? string.Empty;
+            Estado.MensajeError = error ?? string.Empty;
+        }
+
+        private async Task CargarBioquimicosAsync(string filtro)
+        {
+            var (resultado, usuarios) = await _usuarioAdapter.ObtenerTodosConResultadoAsync(filtro);
             Bioquimicos = usuarios
                 .Where(u => string.Equals(u.Role?.Trim(), RolBioquimico, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            return Page();
-        }
-
-        public async Task<IActionResult> OnPostDarBajaAsync(int id)
-        {
-            if (!EsAdmin())
-                return RedirectToPage("/Auth/Login");
-
-            var resultado = await _usuarioAdapter.DarBajaLogicaAsync(id);
-
-            if (!resultado.Success)
-                MensajeError = resultado.Message ?? "No se pudo dar de baja al bioquímico.";
-            else
-                Mensaje = "Bioquímico dado de baja correctamente.";
-
-            return RedirectToPage(new { filtro = Filtro });
-        }
-
-        private bool EsAdmin()
-        {
-            string role = HttpContext.Session.GetString("Role") ?? string.Empty;
-            return role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+            if (!resultado.Exito && string.IsNullOrWhiteSpace(Estado.MensajeError))
+                Estado.MensajeError = resultado.Mensaje;
         }
     }
 }
