@@ -13,7 +13,7 @@ public class ProveedorRepository : IProveedorRepository
     public async Task<int> CrearAsync(Proveedor proveedor)
     {
         using var conexion = new NpgsqlConnection(CadenaConexion);
-        var sql = @"INSERT INTO farmacia.proveedor (nombre, telefono, correo_electronico, direccion, id_usuario) 
+        var sql = @"INSERT INTO public.proveedor (nombre, telefono, correo_electronico, direccion, id_usuario) 
                     VALUES (@Nombre, @Telefono, @CorreoElectronico, @Direccion, @IdUsuario) RETURNING id;";
         return await conexion.ExecuteScalarAsync<int>(sql, proveedor);
     }
@@ -21,7 +21,7 @@ public class ProveedorRepository : IProveedorRepository
     public async Task<bool> ExisteNombreAsync(string nombre)
     {
         using var conexion = new NpgsqlConnection(CadenaConexion);
-        var sql = "SELECT COUNT(1) FROM farmacia.proveedor WHERE nombre = @Nombre;";
+        var sql = "SELECT COUNT(1) FROM public.proveedor WHERE nombre = @Nombre;";
         return await conexion.ExecuteScalarAsync<int>(sql, new { Nombre = nombre }) > 0;
     }
 
@@ -37,7 +37,7 @@ public class ProveedorRepository : IProveedorRepository
                            correo_electronico as CorreoElectronico, direccion as Direccion, 
                            estado as Estado, fecha_registro as FechaRegistro, 
                            ultima_actualizacion as UltimaActualizacion, id_usuario as IdUsuario 
-                    FROM farmacia.proveedor 
+                    FROM public.proveedor 
                     WHERE estado = 1 ORDER BY id ASC;";
         return await conexion.QueryAsync<Proveedor>(sql);
     }
@@ -49,14 +49,14 @@ public class ProveedorRepository : IProveedorRepository
                            correo_electronico as CorreoElectronico, direccion as Direccion, 
                            estado as Estado, fecha_registro as FechaRegistro, 
                            ultima_actualizacion as UltimaActualizacion, id_usuario as IdUsuario 
-                    FROM farmacia.proveedor WHERE id = @Id AND estado = 1;";
+                    FROM public.proveedor WHERE id = @Id AND estado = 1;";
         return await conexion.QueryFirstOrDefaultAsync<Proveedor>(sql, new { Id = id });
     }
 
     public async Task<bool> ActualizarAsync(Proveedor proveedor)
     {
         using var conexion = new NpgsqlConnection(CadenaConexion);
-        var sql = @"UPDATE farmacia.proveedor 
+        var sql = @"UPDATE public.proveedor 
                     SET nombre = @Nombre, telefono = @Telefono, correo_electronico = @CorreoElectronico, 
                         direccion = @Direccion, id_usuario = @IdUsuario, ultima_actualizacion = CURRENT_TIMESTAMP
                     WHERE id = @Id AND estado = 1;";
@@ -68,7 +68,7 @@ public class ProveedorRepository : IProveedorRepository
     {
         using var conexion = new NpgsqlConnection(CadenaConexion);
         // Borrado lógico: Cambiamos estado a 0
-        var sql = "UPDATE farmacia.proveedor SET estado = 0, ultima_actualizacion = CURRENT_TIMESTAMP WHERE id = @Id;";
+        var sql = "UPDATE public.proveedor SET estado = 0, ultima_actualizacion = CURRENT_TIMESTAMP WHERE id = @Id;";
         var filasAfectadas = await conexion.ExecuteAsync(sql, new { Id = id });
         return filasAfectadas > 0;
     }

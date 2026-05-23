@@ -9,7 +9,7 @@ using MSUsuarios.Dominio.Puertos.PuertoSalida;
 using MSUsuarios.Dominio.Validadores;
 using MSUsuarios.Infraestructura.Creadores;
 
-Env.Load("../.env");
+Env.Load("../../.env");
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();

@@ -1,9 +1,12 @@
+using DotNetEnv;
 using MSClientes.API.AdaptadoresDeInterfaz.Gateways;
 using MSClientes.API.CasosDeUso.Interactores;
 using MSClientes.API.CasosDeUso.PuertosEntrada;
 using MSClientes.API.CasosDeUso.Validadores;
 using MSClientes.API.Entidades;
 using MSClientes.API.FrameworksYDrivers.Creadores;
+
+Env.Load("../../.env");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +32,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5051")
+        policy.WithOrigins(Environment.GetEnvironmentVariable("FRONTEND_BASE_URL") ?? "http://localhost:5081")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

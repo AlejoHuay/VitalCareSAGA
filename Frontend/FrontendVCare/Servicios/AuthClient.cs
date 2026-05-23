@@ -41,33 +41,6 @@ namespace FrontendVCare.Servicios
             return (OperacionApiDto.Ok("Inicio de sesión correcto."), respuesta);
         }
 
-        public async Task<OperacionApiDto> RegistrarAsync(UsuarioRegistroDto request)
-        {
-            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/auth/registrar", request);
-            return await LeerResultadoAsync(response, "Usuario registrado correctamente.");
-        }
-
-        public async Task<OperacionApiDto> ValidarActivacionAsync(string token)
-        {
-            string url = $"api/auth/validar-activacion?token={Uri.EscapeDataString(token)}";
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
-            return await LeerResultadoAsync(response, "Token válido.");
-        }
-
-        public async Task<OperacionApiDto> ActivarCuentaAsync(ActivarCuentaRequestDto request)
-        {
-            Dictionary<string, string> datos = new Dictionary<string, string>
-            {
-                ["token"] = request.Token,
-                ["nuevaPassword"] = request.NuevaPassword,
-                ["confirmarPassword"] = request.ConfirmarPassword
-            };
-
-            using FormUrlEncodedContent content = new FormUrlEncodedContent(datos);
-            HttpResponseMessage response = await _httpClient.PostAsync("api/auth/activar-cuenta", content);
-            return await LeerResultadoAsync(response, "Cuenta activada correctamente.");
-        }
-
         public async Task<OperacionApiDto> LogoutAsync(string token)
         {
             using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/auth/logout");
@@ -75,33 +48,6 @@ namespace FrontendVCare.Servicios
 
             HttpResponseMessage response = await _httpClient.SendAsync(request);
             return await LeerResultadoAsync(response, "Sesión cerrada correctamente.");
-        }
-
-        public async Task<OperacionApiDto> SolicitarRecuperacionAsync(SolicitarRecuperacionDto request)
-        {
-            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/auth/solicitar-recuperacion-contrasena", request);
-            return await LeerResultadoAsync(response, "Se ha enviado un enlace a tu correo.");
-        }
-
-        public async Task<OperacionApiDto> ValidarRecuperacionAsync(string token)
-        {
-            string url = $"api/auth/validar-recuperacion-contrasena?token={Uri.EscapeDataString(token)}";
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
-            return await LeerResultadoAsync(response, "Token valido.");
-        }
-
-        public async Task<OperacionApiDto> ConfirmarRecuperacionAsync(RecuperarContrasenaRequestDto request)
-        {
-            Dictionary<string, string> datos = new Dictionary<string, string>
-            {
-                ["token"] = request.Token,
-                ["nuevaPassword"] = request.NuevaPassword,
-                ["confirmarPassword"] = request.ConfirmarPassword
-            };
-
-            using FormUrlEncodedContent content = new FormUrlEncodedContent(datos);
-            HttpResponseMessage response = await _httpClient.PostAsync("api/auth/confirmar-recuperacion-contrasena", content);
-            return await LeerResultadoAsync(response, "Contraseña actualizada correctamente.");
         }
 
         public async Task<OperacionApiDto> CambiarContrasenaAsync(string token, string passwordActual, string nuevaPassword, string confirmarPassword)

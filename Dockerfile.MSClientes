@@ -1,0 +1,27 @@
+# Dockerfile para MSClientes.API
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+WORKDIR /src
+COPY ["MSClientes/MSClientes.API/MSClientes.API.csproj", "MSClientes/MSClientes.API/"]
+
+RUN dotnet restore "MSClientes/MSClientes.API/MSClientes.API.csproj"
+
+COPY . .
+WORKDIR "/src/MSClientes/MSClientes.API"
+
+RUN dotnet build "MSClientes.API.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "MSClientes.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+COPY --from=publish /app/publish .
+COPY [".env", ".env"]
+
+EXPOSE 5055
+
+ENV ASPNETCORE_URLS=http://+:5055
+
+ENTRYPOINT ["dotnet", "MSClientes.API.dll"]

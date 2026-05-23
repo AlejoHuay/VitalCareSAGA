@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  # Microservicio - MSClientes (MongoDB Atlas)
+  msclientes:
+    build:
+      context: .
+      dockerfile: Dockerfile.MSClientes
+    container_name: vitalcare-msclientes
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:${MSCLIENTES_PORT}
+      - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING}
+      - MONGODB_DATABASE=${MONGODB_DATABASE}
+      - MONGODB_COLLECTION=${MONGODB_COLLECTION}
+    ports:
+      - "${MSCLIENTES_PORT}:${MSCLIENTES_PORT}"
+    networks:
+      - vitalcare-network
+    restart: unless-stopped
+    depends_on:
+      - msusuarios
+
+  # Microservicio - MSProductos (MySQL)
+  msproductos:
+    build:
+      context: .
+      dockerfile: Dockerfile.MSProductos
+    container_name: vitalcare-msproductos
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:${MSPRODUCTOS_PORT}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "${MSPRODUCTOS_PORT}:${MSPRODUCTOS_PORT}"
+    networks:
+      - vitalcare-network
+    restart: unless-stopped
+    depends_on:
+      - msusuarios
+
+  # Microservicio - MSProveedor (PostgreSQL)
+  msproveedor:
+    build:
+      context: .
+      dockerfile: Dockerfile.MSProveedor
+    container_name: vitalcare-msproveedor
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:${MSPROVEEDOR_PORT}
+      - POSTGRES_PROVEEDOR_HOST=${POSTGRES_PROVEEDOR_HOST}
+      - POSTGRES_PROVEEDOR_PORT=${POSTGRES_PROVEEDOR_PORT}
+      - POSTGRES_PROVEEDOR_DATABASE=${POSTGRES_PROVEEDOR_DATABASE}
+      - POSTGRES_PROVEEDOR_USER=${POSTGRES_PROVEEDOR_USER}
+      - POSTGRES_PROVEEDOR_PASSWORD=${POSTGRES_PROVEEDOR_PASSWORD}
+    ports:
+      - "${MSPROVEEDOR_PORT}:${MSPROVEEDOR_PORT}"
+    networks:
+      - vitalcare-network
+    restart: unless-stopped
+    depends_on:
+      - msusuarios
+
+  # Microservicio - MSUsuarios (PostgreSQL Railway + JWT + SMTP)
+  msusuarios:
+    build:
+      context: .
+      dockerfile: Dockerfile.MSUsuarios
+    container_name: vitalcare-msusuarios
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:${MSUSUARIOS_PORT}
+      # Base de datos PostgreSQL - Railway
+      - POSTGRES_RAILWAY_HOST=${POSTGRES_RAILWAY_HOST}
+      - POSTGRES_RAILWAY_PORT=${POSTGRES_RAILWAY_PORT}
+      - POSTGRES_RAILWAY_DATABASE=${POSTGRES_RAILWAY_DATABASE}
+      - POSTGRES_RAILWAY_USER=${POSTGRES_RAILWAY_USER}
+      - POSTGRES_RAILWAY_PASSWORD=${POSTGRES_RAILWAY_PASSWORD}
+      # JWT Configuration
+      - JWT_KEY=${JWT_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+      # SMTP Configuration
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_REMITENTE_NOMBRE=${SMTP_REMITENTE_NOMBRE}
+      - SMTP_REMITENTE_EMAIL=${SMTP_REMITENTE_EMAIL}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_USE_SSL=${SMTP_USE_SSL}
+      # Frontend Base URL
+      - FRONTEND_BASE_URL=http://frontend:${FRONTEND_PORT}
+    ports:
+      - "${MSUSUARIOS_PORT}:${MSUSUARIOS_PORT}"
+    networks:
+      - vitalcare-network
+    restart: unless-stopped
+
+  # Frontend - FrontendVCare (Razor Pages)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.Frontend
+    container_name: vitalcare-frontend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:${FRONTEND_PORT}
+      - MSUSUARIOS_URL=${MSUSUARIOS_URL}
+      - MSCLIENTES_URL=${MSCLIENTES_URL}
+      - MSPRODUCTOS_URL=${MSPRODUCTOS_URL}
+      - MSPROVEEDOR_URL=${MSPROVEEDOR_URL}
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    depends_on:
+      - msclientes
+      - msproductos
+      - msproveedor
+      - msusuarios
+    networks:
+      - vitalcare-network
+    restart: unless-stopped
+
+networks:
+  vitalcare-network:
+    driver: bridge

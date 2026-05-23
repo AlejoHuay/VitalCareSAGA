@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace MSProductos.Infraestructura.Conexion
+﻿namespace MSProductos.Infraestructura.Conexion
 {
     public class ConexionStringSingleton
     {
@@ -30,16 +28,14 @@ namespace MSProductos.Infraestructura.Conexion
 
         private ConexionStringSingleton()
         {
-            IConfigurationRoot configuracion = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
-                .Build();
+            // Leer variables de entorno para construir connection string MySQL
+            string host = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "localhost";
+            string port = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3306";
+            string database = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "msproductos";
+            string user = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "root";
+            string password = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? "";
 
-            cadenaConexion = configuracion.GetConnectionString("MySqlConnection")
-                ?? throw new Exception(
-                    "No se encontró la cadena de conexión 'MySqlConnection'."
-                );
+            cadenaConexion = $"server={host};port={port};database={database};user={user};password={password};";
         }
 
         public string CadenaConexion

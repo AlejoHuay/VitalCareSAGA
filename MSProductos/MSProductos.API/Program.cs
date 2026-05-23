@@ -1,9 +1,12 @@
+using DotNetEnv;
 using MSProductos.Aplicacion.InputPorts;
 using MSProductos.Aplicacion.Interactors;
 using MSProductos.Dominio.Entidades;
 using MSProductos.Dominio.Interfaces;
 using MSProductos.Dominio.Validadores;
 using MSProductos.Infraestructura.Repositorios;
+
+Env.Load("../../.env");
 
 var builder = WebApplication.CreateBuilder(args);
 

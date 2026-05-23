@@ -1,0 +1,31 @@
+# Dockerfile para MSProductos.API
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+WORKDIR /src
+COPY ["MSProductos/MSProductos.API/MSProductos.API.csproj", "MSProductos/MSProductos.API/"]
+COPY ["MSProductos/MSProductos.Aplicacion/MSProductos.Aplicacion.csproj", "MSProductos/MSProductos.Aplicacion/"]
+COPY ["MSProductos/MSProductos.Infraestructura/MSProductos.Infraestructura.csproj", "MSProductos/MSProductos.Infraestructura/"]
+COPY ["MSProductos/MSProductos.Domain/MSProductos.Dominio.csproj", "MSProductos/MSProductos.Domain/"]
+
+RUN dotnet restore "MSProductos/MSProductos.API/MSProductos.API.csproj"
+
+COPY . .
+WORKDIR "/src/MSProductos/MSProductos.API"
+
+RUN dotnet build "MSProductos.API.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "MSProductos.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+COPY --from=publish /app/publish .
+COPY [".env", ".env"]
+
+EXPOSE 5141
+
+ENV ASPNETCORE_URLS=http://+:5141
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+ENTRYPOINT ["dotnet", "MSProductos.API.dll"]

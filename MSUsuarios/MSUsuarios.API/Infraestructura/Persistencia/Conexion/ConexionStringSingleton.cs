@@ -1,5 +1,3 @@
-using DotNetEnv;
-
 namespace MSUsuarios.Infraestructura.Persistencia.Conexion
 {
     public class ConexionStringSingleton
@@ -29,19 +27,17 @@ namespace MSUsuarios.Infraestructura.Persistencia.Conexion
 
         private ConexionStringSingleton()
         {
-            Env.Load("../.env");
-
-            cadenaConexion = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION")
+            cadenaConexion = Environment.GetEnvironmentVariable("POSTGRES_RAILWAY_CONNECTION")
                 ?? ConstruirCadenaConexionDesdeVariables();
         }
 
         private static string ConstruirCadenaConexionDesdeVariables()
         {
-            string host = ObtenerVariableObligatoria("POSTGRES_HOST");
-            string port = ObtenerVariableObligatoria("POSTGRES_PORT");
-            string database = ObtenerVariableObligatoria("POSTGRES_DB");
-            string user = ObtenerVariableObligatoria("POSTGRES_USER");
-            string password = ObtenerVariableObligatoria("POSTGRES_PASSWORD");
+            string host = ObtenerVariableObligatoria("POSTGRES_RAILWAY_HOST");
+            string port = ObtenerVariableObligatoria("POSTGRES_RAILWAY_PORT");
+            string database = ObtenerVariableObligatoria("POSTGRES_RAILWAY_DATABASE");
+            string user = ObtenerVariableObligatoria("POSTGRES_RAILWAY_USER");
+            string password = ObtenerVariableObligatoria("POSTGRES_RAILWAY_PASSWORD");
 
             return $"Host={host};Port={port};Database={database};Username={user};Password={password};";
         }

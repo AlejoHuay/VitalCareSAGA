@@ -1,8 +1,11 @@
+using DotNetEnv;
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Adaptadores.Auth;
 using FrontendVCare.Dto;
 using FrontendVCare.Dto.ClasificacionDtos;
 using FrontendVCare.Servicios;
+
+Env.Load("../../.env");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,21 +22,24 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddHttpClient<ClienteApiAdapter>(client =>
 {
-    string baseUrl = builder.Configuration["ApiUrls:MSClientes"]
+    string baseUrl = Environment.GetEnvironmentVariable("MSCLIENTES_URL") 
+        ?? builder.Configuration["ApiUrls:MSClientes"]
         ?? "http://localhost:5055/";
     client.BaseAddress = new Uri(baseUrl);
 });
 
 builder.Services.AddHttpClient<ClasificacionAdapter>(client =>
 {
-    string baseUrl = builder.Configuration["ApiUrls:MSProductos"]
+    string baseUrl = Environment.GetEnvironmentVariable("MSPRODUCTOS_URL")
+        ?? builder.Configuration["ApiUrls:MSProductos"]
         ?? "http://localhost:5141/";
     client.BaseAddress = new Uri(baseUrl);
 });
 
 builder.Services.AddHttpClient<ProveedorApiAdapter>(client =>
 {
-    string baseUrl = builder.Configuration["ApiUrls:MSProveedor"]
+    string baseUrl = Environment.GetEnvironmentVariable("MSPROVEEDOR_URL") 
+        ?? builder.Configuration["ApiUrls:MSProveedor"]
         ?? "http://localhost:5297/";
     client.BaseAddress = new Uri(baseUrl);
 });
@@ -41,16 +47,18 @@ builder.Services.AddHttpClient<ProveedorApiAdapter>(client =>
 // Registrar HttpClient para AuthClient
 builder.Services.AddHttpClient<AuthClient>(client =>
 {
-    string baseUrl = builder.Configuration["ApiUrls:MSAuth"]
-        ?? "http://localhost:5086/";
+    string baseUrl = Environment.GetEnvironmentVariable("MSUSUARIOS_URL")
+        ?? builder.Configuration["ApiUrls:MSAuth"]
+        ?? "http://localhost:5281/";
     client.BaseAddress = new Uri(baseUrl);
 });
 
 // Registrar HttpClient para Usuarios
 builder.Services.AddHttpClient<UsuarioAdapter>(client =>
 {
-    string baseUrl = builder.Configuration["ApiUrls:MSAuth"]
-        ?? "http://localhost:5086/";
+    string baseUrl = Environment.GetEnvironmentVariable("MSUSUARIOS_URL")
+        ?? builder.Configuration["ApiUrls:MSAuth"]
+        ?? "http://localhost:5281/";
     client.BaseAddress = new Uri(baseUrl);
 });
 
@@ -61,7 +69,10 @@ builder.Services.AddScoped<MensajeApiAdapter>();
 // Registrar AdapterJSON para Clasificaciones
 builder.Services.AddHttpClient<AdapterJSON<ClasificacionDto>>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["ApiUrls:MSProductos"] ?? throw new InvalidOperationException("ApiUrls:MSProductos missing"));
+    string baseUrl = Environment.GetEnvironmentVariable("MSPRODUCTOS_URL")
+        ?? builder.Configuration["ApiUrls:MSProductos"]
+        ?? "http://localhost:5141/";
+    client.BaseAddress = new Uri(baseUrl);
 });
 
 // Registrar ClasificacionAdapter

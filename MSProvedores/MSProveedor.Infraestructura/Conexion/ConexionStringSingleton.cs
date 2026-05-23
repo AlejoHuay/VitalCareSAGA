@@ -1,24 +1,21 @@
-using Microsoft.Extensions.Configuration;
-
 namespace MSProveedor.Infraestructura.Conexion;
 
 public class ConexionStringSingleton
 {
     private static ConexionStringSingleton? _instancia;
+    private static readonly object _bloqueo = new object();
     public string CadenaConexion { get; private set; }
 
     private ConexionStringSingleton()
     {
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
+        // Leer variables de entorno para construir connection string PostgreSQL
+        string host = Environment.GetEnvironmentVariable("POSTGRES_PROVEEDOR_HOST") ?? "localhost";
+        string port = Environment.GetEnvironmentVariable("POSTGRES_PROVEEDOR_PORT") ?? "5432";
+        string database = Environment.GetEnvironmentVariable("POSTGRES_PROVEEDOR_DATABASE") ?? "railway";
+        string user = Environment.GetEnvironmentVariable("POSTGRES_PROVEEDOR_USER") ?? "postgres";
+        string password = Environment.GetEnvironmentVariable("POSTGRES_PROVEEDOR_PASSWORD") ?? "";
 
-        IConfiguration configuracion = builder.Build();
-
-        CadenaConexion = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
-                         ?? configuracion.GetConnectionString("PostgresConnection")
-                         ?? throw new Exception("No se encontro la cadena de conexion 'PostgresConnection' ni la variable 'POSTGRES_CONNECTION_STRING'.");
+        CadenaConexion = $"Host={host};Port={port};Database={database};Username={user};Password={password};";
     }
 
     public static ConexionStringSingleton Instancia
@@ -27,7 +24,10 @@ public class ConexionStringSingleton
         {
             if (_instancia == null)
             {
-                _instancia = new ConexionStringSingleton();
+                lock (_bloqueo)
+                {
+                    _instancia ??= new ConexionStringSingleton();
+                }
             }
 
             return _instancia;

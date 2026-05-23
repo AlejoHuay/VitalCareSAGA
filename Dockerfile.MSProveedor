@@ -1,0 +1,30 @@
+# Dockerfile para MSProveedor.API
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+WORKDIR /src
+COPY ["MSProvedores/MSProveedor.API/MSProveedor.API.csproj", "MSProvedores/MSProveedor.API/"]
+COPY ["MSProvedores/MSProveedor.Aplicacion/MSProveedor.Aplicacion.csproj", "MSProvedores/MSProveedor.Aplicacion/"]
+COPY ["MSProvedores/MSProveedor.Infraestructura/MSProveedor.Infraestructura.csproj", "MSProvedores/MSProveedor.Infraestructura/"]
+COPY ["MSProvedores/MSProveedor.Dominio/MSProveedor.Dominio.csproj", "MSProvedores/MSProveedor.Dominio/"]
+
+RUN dotnet restore "MSProvedores/MSProveedor.API/MSProveedor.API.csproj"
+
+COPY . .
+WORKDIR "/src/MSProvedores/MSProveedor.API"
+
+RUN dotnet build "MSProveedor.API.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "MSProveedor.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+COPY --from=publish /app/publish .
+COPY [".env", ".env"]
+
+EXPOSE 5297
+
+ENV ASPNETCORE_URLS=http://+:5297
+
+ENTRYPOINT ["dotnet", "MSProveedor.API.dll"]

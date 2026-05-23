@@ -1,0 +1,28 @@
+# Dockerfile para MSUsuarios.API
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+WORKDIR /src
+COPY ["MSUsuarios/MSUsuarios.API/MSUsuarios.API.csproj", "MSUsuarios/MSUsuarios.API/"]
+
+RUN dotnet restore "MSUsuarios/MSUsuarios.API/MSUsuarios.API.csproj"
+
+COPY . .
+WORKDIR "/src/MSUsuarios/MSUsuarios.API"
+
+RUN dotnet build "MSUsuarios.API.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "MSUsuarios.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+COPY --from=publish /app/publish .
+COPY [".env", ".env"]
+
+EXPOSE 5086
+
+ENV ASPNETCORE_URLS=http://+:5086
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+ENTRYPOINT ["dotnet", "MSUsuarios.API.dll"]
