@@ -90,7 +90,10 @@ builder.Services.AddScoped<ClasificacionAdapter>(sp =>
 
 builder.Services.AddHttpClient<AdapterJSON<MedicamentoDto>>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["ApiUrls:MSProductos"] ?? "http://localhost:7141/");
+    string baseUrl = Environment.GetEnvironmentVariable("MSPRODUCTOS_URL")
+        ?? builder.Configuration["ApiUrls:MSProductos"]
+        ?? "http://localhost:5141/";
+    client.BaseAddress = new Uri(baseUrl);
 });
 
 builder.Services.AddScoped<MedicamentoAdapter>(sp =>

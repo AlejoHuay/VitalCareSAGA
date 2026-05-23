@@ -20,6 +20,11 @@ RUN dotnet publish "MSProveedor.API.csproj" -c Release -o /app/publish /p:UseApp
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y \
+    libgssapi-krb5-2 \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=publish /app/publish .
 COPY [".env", ".env"]
 
