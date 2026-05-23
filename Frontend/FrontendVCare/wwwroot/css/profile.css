@@ -339,6 +339,125 @@
     color: var(--text-dark);
 }
 
+/* ===== DETAIL CARDS ===== */
+
+.detail-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+}
+
+.detail-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.detail-card-header {
+    padding: 25px;
+    background: linear-gradient(135deg, var(--verde-vital) 0%, var(--azul-vital) 100%);
+    color: white;
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+}
+
+.detail-card-icon {
+    font-size: 32px;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.detail-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    color: white;
+}
+
+.detail-card-subtitle {
+    font-size: 13px;
+    opacity: 0.9;
+    margin: 4px 0 0 0;
+    color: white;
+}
+
+.detail-card-body {
+    padding: 25px;
+}
+
+.detail-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-light);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.detail-label i {
+    color: var(--verde-vital);
+    font-size: 14px;
+}
+
+.detail-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-dark);
+    padding: 8px 0;
+}
+
+.detail-note {
+    font-size: 12px;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.detail-note i {
+    color: #28a745;
+    font-size: 12px;
+}
+
+.role-display,
+.status-display {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 15px 0;
+}
+
+.section-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 20px 0;
+}
+
+.btn-lg {
+    padding: 12px 32px !important;
+    font-size: 16px !important;
+}
+
 /* ===== SECURITY ITEMS ===== */
 
 .security-item {

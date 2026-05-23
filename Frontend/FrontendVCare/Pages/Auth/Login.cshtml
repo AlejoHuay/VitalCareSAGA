@@ -22,7 +22,6 @@
 
             <nav class="topbar-nav">
                 <a asp-page="/Index">Inicio</a>
-                <a asp-page="/Auth/Register">Registro</a>
             </nav>
         </div>
     </header>
@@ -40,8 +39,7 @@
                 </p>
 
                 <div class="login-note">
-                    Utiliza tus credenciales para entrar al sistema. Si aún no tienes una cuenta,
-                    puedes registrarte desde la opción correspondiente.
+                    Utiliza tus credenciales para entrar al sistema de gestión farmacéutica.
                 </div>
 
                 <div class="login-actions">
@@ -100,21 +98,12 @@
                             </div>
                         </div>
 
-                        <div class="forgot-password-link">
-                            <a asp-page="/Auth/OlvidoContrasena">¿Olvidaste tu contraseña?</a>
-                        </div>
-
                         @if (!string.IsNullOrWhiteSpace(Model.MensajeError))
                         {
                             <div class="alert alert-error">@Model.MensajeError</div>
                         }
 
                         <button type="submit" class="btn-login">Ingresar</button>
-
-                        <div class="extra-links">
-                            ¿No tienes cuenta?
-                            <a asp-page="/Auth/Register">Regístrate</a>
-                        </div>
                     </form>
                 </div>
             </div>

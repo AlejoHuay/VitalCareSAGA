@@ -8,15 +8,7 @@ namespace MSUsuarios.App.Interfaces
             string emailDestino,
             string nombres,
             string userName,
-            string passwordTemporal,
-            string enlaceActivacion
-        );
-
-        Result EnviarCorreoRecuperacionContrasena(
-            string emailDestino,
-            string nombres,
-            string userName,
-            string enlaceRecuperacion
+            string passwordTemporal
         );
     }
 }

@@ -12,14 +12,6 @@
     </div>
 }
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
 <div class="profile-container">
     <!-- Header Hero -->
     <section class="profile-header">
@@ -31,162 +23,123 @@
                 </div>
                 <div class="profile-avatar">
                     <div class="avatar-circle">
-                        <i class="bi bi-person-fill"></i>
+                        <i class="bi bi-person-circle"></i>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Main Content -->
+    <!-- User Summary Card -->
+    <section class="py-4">
+        <div class="container">
+            <div class="summary-card">
+                <div class="summary-content">
+                    <div class="summary-item">
+                        <span class="summary-label">Usuario</span>
+                        <span class="summary-value">@(Model.Usuario ?? "N/A")</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Nombre</span>
+                        <span class="summary-value">@(Model.Nombres ?? "N/A") @(Model.ApellidoPaterno ?? "")</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Correo</span>
+                        <span class="summary-value">@(Model.Email ?? "N/A")</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Rol</span>
+                        <span class="summary-value"><span class="role-badge">@(Model.Role ?? "Usuario")</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content - Dashboard Cards -->
     <section class="profile-content py-5">
         <div class="container">
-            <div class="row">
-                <!-- Sidebar Navigation -->
-                <div class="col-lg-3 mb-4 mb-lg-0">
-                    <div class="profile-menu">
-                        <div class="profile-menu-item active" data-section="account-details">
+            <div class="row g-4">
+                <!-- Card: Detalles de Cuenta -->
+                <div class="col-md-6">
+                    <div class="dashboard-card">
+                        <div class="card-icon">
                             <i class="bi bi-person-vcard"></i>
-                            <span>Detalles de Cuenta</span>
                         </div>
-                        <div class="profile-menu-item" data-section="security">
-                            <i class="bi bi-lock-fill"></i>
-                            <span>Seguridad</span>
+                        <div class="card-content">
+                            <h3 class="card-title">Detalles de Cuenta</h3>
+                            <p class="card-description">Visualiza y edita tu información personal, correo, teléfono y datos de identificación.</p>
+                            <ul class="card-features">
+                                <li>Información personal</li>
+                                <li>Datos de contacto</li>
+                                <li>Documento de identidad</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a asp-page="/Account/DetallesCuenta" class="btn btn-primary">
+                                <i class="bi bi-arrow-right"></i> Acceder
+                            </a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Content Area -->
-                <div class="col-lg-9">
-                    <!-- Account Details Section -->
-                    <div class="profile-section active" id="account-details">
-                        <div class="section-card">
-                            <div class="section-header">
-                                <h2>Información Personal</h2>
-                                <p class="section-subtitle">Detalles de tu cuenta registrada</p>
-                            </div>
-
-                            <!-- User Info Grid -->
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <div class="info-label">Nombre de Usuario</div>
-                                    <div class="info-value">@(Model.Usuario ?? "No disponible")</div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-label">Nombres</div>
-                                    <div class="info-value">@(Model.Nombres ?? "No disponible")</div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-label">Apellido Paterno</div>
-                                    <div class="info-value">@(Model.ApellidoPaterno ?? "No disponible")</div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-label">Apellido Materno</div>
-                                    <div class="info-value">@(Model.ApellidoMaterno ?? "No disponible")</div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-label">Cédula de Identidad</div>
-                                    <div class="info-value">@(Model.CI ?? "No disponible")</div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-label">Correo Electrónico</div>
-                                    <div class="info-value">
-                                        <i class="bi bi-envelope"></i>
-                                        @(Model.Email ?? "No registrado")
-                                    </div>
-                                    <small class="info-note">Email verificado</small>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-label">Teléfono</div>
-                                    <div class="info-value">
-                                        @if (!string.IsNullOrEmpty(Model.Phone))
-                                        {
-                                            <i class="bi bi-telephone"></i>
-                                            <span>@Model.Phone</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">No registrado</span>
-                                        }
-                                    </div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-label">Rol</div>
-                                    <div class="info-value">
-                                        <span class="role-badge">@(Model.Role ?? "Usuario")</span>
-                                    </div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-label">Estado de Cuenta</div>
-                                    <div class="info-value">
-                                        <span class="status-badge status-active">
-                                            <span class="status-dot"></span> Activa
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Action Button -->
-                            <div class="section-actions mt-4">
-                                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                                    <i class="bi bi-pencil"></i> Editar Información
-                                </button>
-                            </div>
+                <!-- Card: Seguridad -->
+                <div class="col-md-6">
+                    <div class="dashboard-card">
+                        <div class="card-icon">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">Seguridad</h3>
+                            <p class="card-description">Protege tu cuenta cambiando tu contraseña y administrando tu seguridad.</p>
+                            <ul class="card-features">
+                                <li>Cambiar contraseña</li>
+                                <li>Gestionar acceso</li>
+                                <li>Mejorar seguridad</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a asp-page="/Account/Seguridad" class="btn btn-primary">
+                                <i class="bi bi-arrow-right"></i> Acceder
+                            </a>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                    <!-- Security Section -->
-                    <div class="profile-section" id="security">
-                        <div class="section-card">
-                            <div class="section-header">
-                                <h2>Seguridad</h2>
-                                <p class="section-subtitle">Protege tu cuenta y datos personales</p>
-                            </div>
-
-                            <!-- Password Change -->
-                            <div class="security-item">
-                                <div class="security-info">
-                                    <h4>Contraseña</h4>
-                                    <p class="text-muted mb-0">Última actualización: <span id="lastPasswordChange">Desconocida</span></p>
-                                </div>
-                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                                    Cambiar Contraseña
-                                </button>
-                            </div>
-
-                            <!-- Two-Factor Authentication -->
-                            <div class="security-item">
-                                <div class="security-info">
-                                    <h4>Autenticación de Dos Factores</h4>
-                                    <p class="text-muted mb-0">Añade una capa adicional de seguridad a tu cuenta</p>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="twoFactorSwitch" disabled>
-                                    <label class="form-check-label" for="twoFactorSwitch">
-                                        No disponible aún
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Active Sessions -->
-                            <div class="security-item">
-                                <div class="security-info">
-                                    <h4>Sesiones Activas</h4>
-                                    <p class="text-muted mb-0">Dispositivos con acceso a tu cuenta</p>
-                                </div>
-                                <button type="button" class="btn btn-outline-danger btn-sm" disabled>
-                                    Cerrar Todas las Sesiones
-                                </button>
-                            </div>
-                        </div>
+    <!-- Quick Stats -->
+    <section class="stats-section py-5 bg-light">
+        <div class="container">
+            <h3 class="mb-4">Estado de tu Cuenta</h3>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-number"><i class="bi bi-check-circle-fill"></i></div>
+                        <div class="stat-label">Estado</div>
+                        <div class="stat-value">Activa</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-number"><i class="bi bi-shield-check"></i></div>
+                        <div class="stat-label">Seguridad</div>
+                        <div class="stat-value">Básica</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-number"><i class="bi bi-person-check"></i></div>
+                        <div class="stat-label">Verificación</div>
+                        <div class="stat-value">Completa</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-number"><i class="bi bi-gear"></i></div>
+                        <div class="stat-label">Configuración</div>
+                        <div class="stat-value">Completa</div>
                     </div>
                 </div>
             </div>
@@ -194,145 +147,127 @@
     </section>
 </div>
 
-<!-- Edit Profile Modal -->
-<div class="modal fade" id="editProfileModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-pencil-square"></i> Editar Información
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="post">
-                <div class="modal-body">
-                    @if (Model.UsuarioActualizar != null)
-                    {
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="Nombres" class="form-label">Nombres</label>
-                                <input type="text" class="form-control" asp-for="UsuarioActualizar.Nombres" placeholder="Tu nombre" required>
-                                <span class="text-danger" asp-validation-for="UsuarioActualizar.Nombres"></span>
-                            </div>
+<style>
+    .summary-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+    }
 
-                            <div class="col-md-6 mb-3">
-                                <label for="ApellidoPaterno" class="form-label">Apellido Paterno</label>
-                                <input type="text" class="form-control" asp-for="UsuarioActualizar.ApellidoPaterno" placeholder="Apellido paterno" required>
-                                <span class="text-danger" asp-validation-for="UsuarioActualizar.ApellidoPaterno"></span>
-                            </div>
+    .summary-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
 
-                            <div class="col-md-6 mb-3">
-                                <label for="ApellidoMaterno" class="form-label">Apellido Materno</label>
-                                <input type="text" class="form-control" asp-for="UsuarioActualizar.ApellidoMaterno" placeholder="Apellido materno">
-                                <span class="text-danger" asp-validation-for="UsuarioActualizar.ApellidoMaterno"></span>
-                            </div>
+    .summary-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-                            <div class="col-md-6 mb-3">
-                                <label for="Email" class="form-label">Correo Electrónico</label>
-                                <input type="email" class="form-control" asp-for="UsuarioActualizar.Email" placeholder="tu.email@ejemplo.com" required>
-                                <span class="text-danger" asp-validation-for="UsuarioActualizar.Email"></span>
-                            </div>
+    .summary-value {
+        font-size: 16px;
+        font-weight: 500;
+        color: #1f2937;
+    }
 
-                            <div class="col-md-6 mb-3">
-                                <label for="Telefono" class="form-label">Teléfono</label>
-                                <input type="tel" class="form-control" asp-for="UsuarioActualizar.Telefono" placeholder="+1 (555) 000-0000">
-                                <span class="text-danger" asp-validation-for="UsuarioActualizar.Telefono"></span>
-                            </div>
+    .dashboard-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        height: 100%;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
 
-                            <div class="col-md-6 mb-3">
-                                <label for="Ci" class="form-label">Cédula de Identidad</label>
-                                <input type="text" class="form-control" asp-for="UsuarioActualizar.Ci" placeholder="C.I." required>
-                                <span class="text-danger" asp-validation-for="UsuarioActualizar.Ci"></span>
-                            </div>
+    .dashboard-card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
 
-                            <div class="col-md-6 mb-3">
-                                <label for="CiExtencion" class="form-label">Extensión C.I.</label>
-                                <input type="text" class="form-control" asp-for="UsuarioActualizar.CiExtencion" placeholder="Ex: LP, CB, SC">
-                                <span class="text-danger" asp-validation-for="UsuarioActualizar.CiExtencion"></span>
-                            </div>
-                        </div>
-                    }
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-lg"></i> Guardar Cambios
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    .card-icon {
+        font-size: 48px;
+        color: #1f7a63;
+        margin-bottom: 16px;
+    }
 
-<!-- Change Password Modal -->
-<div class="modal fade" id="changePasswordModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-lock-fill"></i> Cambiar Contraseña
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="post" asp-page-handler="ChangePassword">
-                <div class="modal-body">
-                    @if (TempData["PasswordError"] != null)
-                    {
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="bi bi-exclamation-triangle"></i> @TempData["PasswordError"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    }
+    .card-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 8px;
+    }
 
-                    <div class="mb-3">
-                        <label for="currentPassword" class="form-label">Contraseña Actual</label>
-                        <input type="password" id="currentPassword" name="currentPassword" class="form-control" placeholder="Tu contraseña actual" required>
-                    </div>
+    .card-description {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 16px;
+    }
 
-                    <div class="mb-3">
-                        <label for="newPassword" class="form-label">Nueva Contraseña</label>
-                        <input type="password" id="newPassword" name="newPassword" class="form-control" placeholder="Tu nueva contraseña" required>
-                    </div>
+    .card-features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 16px 0;
+        flex-grow: 1;
+    }
 
-                    <div class="mb-3">
-                        <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Confirma tu nueva contraseña" required>
-                    </div>
+    .card-features li {
+        font-size: 13px;
+        color: #4b5563;
+        padding: 4px 0;
+        padding-left: 20px;
+        position: relative;
+    }
 
-                    <div class="alert alert-info" role="alert">
-                        <small>
-                            <strong>Requisitos de contraseña:</strong><br>
-                            • Al menos 8 caracteres<br>
-                            • Una letra mayúscula<br>
-                            • Una letra minúscula<br>
-                            • Al menos un número
-                        </small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-lg"></i> Cambiar Contraseña
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    .card-features li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #1f7a63;
+        font-weight: bold;
+    }
 
-@section Scripts {
-    <script>
-        // Section Navigation
-        document.querySelectorAll('.profile-menu-item').forEach(item => {
-            item.addEventListener('click', function () {
-                const section = this.getAttribute('data-section');
-                
-                document.querySelectorAll('.profile-menu-item').forEach(i => i.classList.remove('active'));
-                document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
-                
-                this.classList.add('active');
-                document.getElementById(section).classList.add('active');
-            });
-        });
-    </script>
-}
+    .card-footer {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 16px;
+        margin-top: auto;
+    }
+
+    .stat-box {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .stat-number {
+        font-size: 36px;
+        color: #1f7a63;
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+</style>
+

@@ -57,100 +57,9 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
 
             string mensaje = !string.IsNullOrWhiteSpace(resultado.Error)
                 ? resultado.Error
-                : "Usuario registrado correctamente. Revisa tu correo electronico para activar la cuenta.";
+                : "Usuario registrado correctamente. Revisa tu correo electronico para obtener tus credenciales de acceso.";
 
             return Ok(new { mensaje = mensaje });
-        }
-
-        [HttpGet("validar-activacion")]
-        public IActionResult ValidarActivacion([FromQuery] string token)
-        {
-            Result resultado = _usuarioService.ValidarActivacionCuenta(token);
-
-            if (!resultado.IsSuccess)
-                return BadRequest(new { mensaje = resultado.Error });
-
-            return Ok(new { mensaje = "Token valido. Ahora debes definir tu nueva contrasena." });
-        }
-
-        [HttpPost("activar-cuenta")]
-        public IActionResult ActivarCuenta(
-            [FromForm] string token,
-            [FromForm] string nuevaPassword,
-            [FromForm] string confirmarPassword)
-        {
-            token = token?.Trim() ?? string.Empty;
-            nuevaPassword = nuevaPassword?.Trim() ?? string.Empty;
-            confirmarPassword = confirmarPassword?.Trim() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(token))
-                return BadRequest(new { mensaje = "Token invalido." });
-
-            if (string.IsNullOrWhiteSpace(nuevaPassword))
-                return BadRequest(new { mensaje = "La nueva contrasena es obligatoria." });
-
-            if (nuevaPassword != confirmarPassword)
-                return BadRequest(new { mensaje = "La contrasena y su confirmacion no coinciden." });
-
-            Result resultado = _usuarioService.ActivarCuenta(token, nuevaPassword);
-
-            if (!resultado.IsSuccess)
-                return BadRequest(new { mensaje = resultado.Error });
-
-            return Ok(new { mensaje = "Cuenta activada correctamente. Ya puedes iniciar sesion." });
-        }
-
-        [HttpPost("solicitar-recuperacion-contrasena")]
-        public IActionResult SolicitarRecuperacionContrasena([FromBody] SolicitarRecuperacionDto dto)
-        {
-            string? email = dto?.Email?.Trim();
-            if (string.IsNullOrWhiteSpace(email))
-                return BadRequest(new { mensaje = "El correo electronico es obligatorio." });
-
-            Result resultado = _usuarioService.SolicitarRecuperacionContrasena(email);
-
-            if (!resultado.IsSuccess)
-                return BadRequest(new { mensaje = resultado.Error });
-
-            return Ok(new { mensaje = "Se ha enviado un enlace de recuperacion a tu correo electronico." });
-        }
-
-        [HttpGet("validar-recuperacion-contrasena")]
-        public IActionResult ValidarRecuperacionContrasena([FromQuery] string token)
-        {
-            Result resultado = _usuarioService.ValidarRecuperacionContrasena(token);
-
-            if (!resultado.IsSuccess)
-                return BadRequest(new { mensaje = resultado.Error });
-
-            return Ok(new { mensaje = "Token valido. Ahora puedes cambiar tu contrasena." });
-        }
-
-        [HttpPost("confirmar-recuperacion-contrasena")]
-        public IActionResult ConfirmarRecuperacionContrasena(
-            [FromForm] string token,
-            [FromForm] string nuevaPassword,
-            [FromForm] string confirmarPassword)
-        {
-            token = token?.Trim() ?? string.Empty;
-            nuevaPassword = nuevaPassword?.Trim() ?? string.Empty;
-            confirmarPassword = confirmarPassword?.Trim() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(token))
-                return BadRequest(new { mensaje = "Token invalido." });
-
-            if (string.IsNullOrWhiteSpace(nuevaPassword))
-                return BadRequest(new { mensaje = "La nueva contrasena es obligatoria." });
-
-            if (nuevaPassword != confirmarPassword)
-                return BadRequest(new { mensaje = "La contrasena y su confirmacion no coinciden." });
-
-            Result resultado = _usuarioService.ConfirmarRecuperacionContrasena(token, nuevaPassword);
-
-            if (!resultado.IsSuccess)
-                return BadRequest(new { mensaje = resultado.Error });
-
-            return Ok(new { mensaje = "Contraseña actualizada correctamente. Ya puedes iniciar sesion con tu nueva contraseña." });
         }
 
         [Authorize]
@@ -165,7 +74,7 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             if (!resultado.IsSuccess)
                 return BadRequest(new { mensaje = resultado.Error });
 
-            return Ok(new { mensaje = "Sesion cerrada correctamente." });
+            return Ok(new { mensaje = "Sesión cerrada correctamente." });
         }
 
         [Authorize]
@@ -184,7 +93,7 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             confirmarPassword = confirmarPassword?.Trim() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(passwordActual))
-                return BadRequest(new { mensaje = "La contrasena actual es obligatoria." });
+                return BadRequest(new { mensaje = "La contraseña actual es obligatoria." });
 
             if (string.IsNullOrWhiteSpace(nuevaPassword))
                 return BadRequest(new { mensaje = "La nueva contrasena es obligatoria." });

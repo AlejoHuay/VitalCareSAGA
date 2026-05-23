@@ -153,22 +153,22 @@ namespace MSUsuarios.Dominio.Validadores
         private Result? ValidarPassword(string? password)
         {
             if (string.IsNullOrWhiteSpace(password))
-                return Result.Fail("La contrasena es obligatoria.");
+                return Result.Fail("La contraseña es obligatoria.");
 
             if (password!.Length < 8)
-                return Result.Fail("La contrasena debe tener al menos 8 caracteres.");
+                return Result.Fail("La contraseña debe tener al menos 8 caracteres.");
 
             if (password.Length > 128)
-                return Result.Fail("La contrasena no puede exceder 128 caracteres.");
+                return Result.Fail("La contraseña no puede exceder 128 caracteres.");
 
             if (!Regex.IsMatch(password, @"[a-z]"))
-                return Result.Fail("La contrasena debe contener al menos una letra minuscula.");
+                return Result.Fail("La contraseña debe contener al menos una letra minúscula.");
 
             if (!Regex.IsMatch(password, @"[A-Z]"))
-                return Result.Fail("La contrasena debe contener al menos una letra mayuscula.");
+                return Result.Fail("La contraseña debe contener al menos una letra mayúscula.");
 
             if (!Regex.IsMatch(password, @"[0-9]"))
-                return Result.Fail("La contrasena debe contener al menos un numero.");
+                return Result.Fail("La contraseña debe contener al menos un número.");
 
             return null;
         }

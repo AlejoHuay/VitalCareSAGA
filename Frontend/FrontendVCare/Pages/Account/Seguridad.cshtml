@@ -1,0 +1,140 @@
+@page
+@model FrontendVCare.Pages.Account.SeguridadModel
+@{
+    ViewData["Title"] = "Seguridad";
+}
+
+@if (Model.PasswordError != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle"></i> @Model.PasswordError
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="profile-container">
+    <!-- Header Hero -->
+    <section class="profile-header">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h1 class="profile-title">Seguridad</h1>
+                    <p class="profile-subtitle">Protege tu cuenta y datos personales</p>
+                </div>
+                <div class="profile-avatar">
+                    <div class="avatar-circle">
+                        <i class="bi bi-lock-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="profile-content py-5">
+        <div class="container">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>Opciones de Seguridad</h2>
+                    <p class="section-subtitle">Administra la seguridad de tu cuenta</p>
+                </div>
+
+                <!-- Password Change Section -->
+                <div class="security-item">
+                    <div class="security-info">
+                        <h4>Contraseña</h4>
+                        <p class="text-muted mb-0">Cambia tu contraseña para mantener tu cuenta segura</p>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                        <i class="bi bi-pencil"></i> Cambiar Contraseña
+                    </button>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Two-Factor Authentication -->
+                <div class="security-item">
+                    <div class="security-info">
+                        <h4>Autenticación de Dos Factores</h4>
+                        <p class="text-muted mb-0">Añade una capa adicional de seguridad a tu cuenta</p>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="twoFactorSwitch" disabled>
+                        <label class="form-check-label" for="twoFactorSwitch">
+                            No disponible aún
+                        </label>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Active Sessions -->
+                <div class="security-item">
+                    <div class="security-info">
+                        <h4>Sesiones Activas</h4>
+                        <p class="text-muted mb-0">Dispositivos con acceso a tu cuenta</p>
+                    </div>
+                    <button type="button" class="btn btn-outline-danger btn-sm" disabled>
+                        Cerrar Todas las Sesiones
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-lock-fill"></i> Cambiar Contraseña
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-page-handler="ChangePassword">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Contraseña Actual</label>
+                        <input type="password" id="currentPassword" name="currentPassword" class="form-control" placeholder="Tu contraseña actual" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Nueva Contraseña</label>
+                        <input type="password" id="newPassword" name="newPassword" class="form-control" placeholder="Tu nueva contraseña" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Confirma tu nueva contraseña" required>
+                    </div>
+
+                    <div class="alert alert-info" role="alert">
+                        <small>
+                            <strong>Requisitos de contraseña:</strong><br>
+                            • Al menos 8 caracteres<br>
+                            • Una letra mayúscula<br>
+                            • Una letra minúscula<br>
+                            • Al menos un número
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Cambiar Contraseña
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

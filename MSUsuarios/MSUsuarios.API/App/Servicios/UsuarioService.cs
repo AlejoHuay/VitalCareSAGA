@@ -69,25 +69,11 @@ namespace MSUsuarios.App.Servicios
                 if (usuarioRegistrado == null)
                     return Result.Fail("El usuario fue registrado, pero no se pudo recuperar su informacion.");
 
-                UsuarioTokenGeneracionDto tokenDto = new UsuarioTokenGeneracionDto
-                {
-                    IdUsuario = usuarioRegistrado.IdUsuario,
-                    TipoToken = TipoTokenConstantes.ActivacionCuenta,
-                    MinutosExpiracion = 60
-                };
-
-                (Result resultadoToken, string tokenParaUrl) = _tokenService.GenerarToken(tokenDto, out string _);
-                if (!resultadoToken.IsSuccess)
-                    return resultadoToken;
-
-                string enlaceActivacion = ConstruirEnlaceFrontend("/Auth/ActivarCuenta", tokenParaUrl);
-
                 Result resultadoEmail = _emailService.EnviarCorreoActivacionCuenta(
                     usuarioRegistrado.Email,
                     usuarioRegistrado.Nombres,
                     usuarioRegistrado.UserName,
-                    passwordTemporal,
-                    enlaceActivacion
+                    passwordTemporal
                 );
 
                 // El registro es exitoso incluso si el email falla (se notifica en la respuesta)
@@ -95,7 +81,7 @@ namespace MSUsuarios.App.Servicios
                 {
                     // Log the email error pero no falla el registro
                     Console.WriteLine($"Advertencia al enviar email: {resultadoEmail.Error}");
-                    return Result.Ok($"Usuario registrado. Nota: No se pudo enviar el correo de activación. {resultadoEmail.Error}");
+                    return Result.Ok($"Usuario registrado. Nota: No se pudo enviar el correo. {resultadoEmail.Error}");
                 }
 
                 return Result.Ok();
@@ -184,132 +170,6 @@ namespace MSUsuarios.App.Servicios
         public IEnumerable<UsuarioDto> ObtenerTodos(string filtro)
         {
             return _repository.GetAll(StringHelper.LimpiarTexto(filtro)).Select(MapearDto);
-        }
-
-        public Result ValidarActivacionCuenta(string token)
-        {
-            token = token?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(token))
-                return Result.Fail("El token de activacion es invalido.");
-
-            UsuarioToken? usuarioToken = _tokenService.ValidarToken(token, TipoTokenConstantes.ActivacionCuenta);
-            if (usuarioToken == null)
-                return Result.Fail("El token ha expirado o es invalido.");
-
-            return Result.Ok();
-        }
-
-        public Result ActivarCuenta(string token, string nuevaPassword)
-        {
-            token = token?.Trim() ?? string.Empty;
-            nuevaPassword = nuevaPassword?.Trim() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(token))
-                return Result.Fail("El token de activacion es invalido.");
-
-            // Validar complejidad de la contraseña
-            Result resultadoValidacion = _validadorContraseña.ValidarComplexidad(nuevaPassword);
-            if (!resultadoValidacion.IsSuccess)
-                return resultadoValidacion;
-
-            UsuarioToken? usuarioToken = _tokenService.ValidarToken(token, TipoTokenConstantes.ActivacionCuenta);
-            if (usuarioToken == null)
-                return Result.Fail("El token ha expirado o es invalido.");
-
-            Usuario? usuario = _repository.GetById(usuarioToken.UsuarioIdUsuario);
-            if (usuario == null)
-                return Result.Fail("El usuario no existe.");
-
-            string passwordHash = PasswordHelper.Hash(nuevaPassword);
-            int filasAfectadas = _repository.CambiarPassword(usuario.IdUsuario, passwordHash, false);
-            if (filasAfectadas <= 0)
-                return Result.Fail("No se pudo actualizar la contrasena.");
-
-            Result resultadoToken = _tokenService.MarcarComoUsado(usuarioToken.IdUsuarioToken);
-            if (!resultadoToken.IsSuccess)
-                return resultadoToken;
-
-            return Result.Ok();
-        }
-
-        public Result SolicitarRecuperacionContrasena(string email)
-        {
-            email = StringHelper.LimpiarTextoMinus(email);
-            if (string.IsNullOrWhiteSpace(email))
-                return Result.Fail("El correo electronico es obligatorio.");
-
-            Usuario? usuario = _repository.GetByEmail(email);
-            if (usuario == null)
-                return Result.Fail("El correo no esta registrado en el sistema.");
-
-            if (usuario.Activo != 1)
-                return Result.Fail("El usuario esta inactivo. Contacta al administrador.");
-
-            UsuarioTokenGeneracionDto tokenDto = new UsuarioTokenGeneracionDto
-            {
-                IdUsuario = usuario.IdUsuario,
-                TipoToken = TipoTokenConstantes.ResetPassword,
-                MinutosExpiracion = 60
-            };
-
-            (Result resultadoToken, string tokenParaUrl) = _tokenService.GenerarToken(tokenDto, out string _);
-            if (!resultadoToken.IsSuccess)
-                return resultadoToken;
-
-            string enlaceRecuperacion = ConstruirEnlaceFrontend("/Auth/RecuperarContrasena", tokenParaUrl);
-
-            return _emailService.EnviarCorreoRecuperacionContrasena(
-                usuario.Email,
-                usuario.Nombres,
-                usuario.UserName,
-                enlaceRecuperacion
-            );
-        }
-
-        public Result ValidarRecuperacionContrasena(string token)
-        {
-            token = token?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(token))
-                return Result.Fail("El token de recuperacion es invalido.");
-
-            UsuarioToken? usuarioToken = _tokenService.ValidarToken(token, TipoTokenConstantes.ResetPassword);
-            if (usuarioToken == null)
-                return Result.Fail("El token ha expirado o es invalido.");
-
-            return Result.Ok();
-        }
-
-        public Result ConfirmarRecuperacionContrasena(string token, string nuevaPassword)
-        {
-            token = token?.Trim() ?? string.Empty;
-            nuevaPassword = nuevaPassword?.Trim() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(token))
-                return Result.Fail("El token de recuperacion es invalido.");
-
-            // Validar complejidad de la contraseña
-            Result resultadoValidacion = _validadorContraseña.ValidarComplexidad(nuevaPassword);
-            if (!resultadoValidacion.IsSuccess)
-                return resultadoValidacion;
-
-            UsuarioToken? usuarioToken = _tokenService.ValidarToken(token, TipoTokenConstantes.ResetPassword);
-            if (usuarioToken == null)
-                return Result.Fail("El token ha expirado o es invalido.");
-
-            Usuario? usuario = _repository.GetById(usuarioToken.UsuarioIdUsuario);
-            if (usuario == null)
-                return Result.Fail("El usuario no existe.");
-
-            string passwordHash = PasswordHelper.Hash(nuevaPassword);
-            int filasAfectadas = _repository.CambiarPassword(usuario.IdUsuario, passwordHash, false);
-            if (filasAfectadas <= 0)
-                return Result.Fail("No se pudo actualizar la contrasena.");
-
-            Result resultadoToken = _tokenService.MarcarComoUsado(usuarioToken.IdUsuarioToken);
-            if (!resultadoToken.IsSuccess)
-                return resultadoToken;
-
-            return Result.Ok();
         }
 
         public Result CambiarPassword(int idUsuario, string passwordActual, string nuevaPassword)

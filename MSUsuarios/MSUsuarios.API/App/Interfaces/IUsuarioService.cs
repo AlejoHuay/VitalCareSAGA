@@ -14,10 +14,5 @@ namespace MSUsuarios.App.Interfaces
         UsuarioDto? ObtenerUsuarioPorUserName(string userName);
         IEnumerable<UsuarioDto> ObtenerTodos();
         IEnumerable<UsuarioDto> ObtenerTodos(string filtro);
-        Result ValidarActivacionCuenta(string token);
-        Result ActivarCuenta(string token, string nuevaPassword);
-        Result SolicitarRecuperacionContrasena(string email);
-        Result ValidarRecuperacionContrasena(string token);
-        Result ConfirmarRecuperacionContrasena(string token, string nuevaPassword);
     }
 }
