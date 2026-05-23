@@ -2,6 +2,7 @@ using FrontendVCare.Adaptadores;
 using FrontendVCare.Adaptadores.Auth;
 using FrontendVCare.Dto;
 using FrontendVCare.Dto.ClasificacionDtos;
+using FrontendVCare.Dto.MedicamentoDtos;
 using FrontendVCare.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,7 +28,7 @@ builder.Services.AddHttpClient<ClienteApiAdapter>(client =>
 builder.Services.AddHttpClient<ClasificacionAdapter>(client =>
 {
     string baseUrl = builder.Configuration["ApiUrls:MSProductos"]
-        ?? "http://localhost:5141/";
+        ?? "http://localhost:7141/";
     client.BaseAddress = new Uri(baseUrl);
 });
 
@@ -61,7 +62,7 @@ builder.Services.AddScoped<MensajeApiAdapter>();
 // Registrar AdapterJSON para Clasificaciones
 builder.Services.AddHttpClient<AdapterJSON<ClasificacionDto>>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["ApiUrls:MSProductos"] ?? throw new InvalidOperationException("ApiUrls:MSProductos missing"));
+    client.BaseAddress = new Uri(builder.Configuration["ApiUrls:MSProductos"] ?? throw new InvalidOperationException("ApiUrls:ServicioVentas missing"));
 });
 
 // Registrar ClasificacionAdapter
@@ -69,6 +70,17 @@ builder.Services.AddScoped<ClasificacionAdapter>(sp =>
 {
     var adapterJson = sp.GetRequiredService<AdapterJSON<ClasificacionDto>>();
     return new ClasificacionAdapter(adapterJson);
+});
+
+builder.Services.AddHttpClient<AdapterJSON<MedicamentoDto>>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiUrls:MSProductos"] ?? "http://localhost:7141/");
+});
+
+builder.Services.AddScoped<MedicamentoAdapter>(sp =>
+{
+    var adapterJson = sp.GetRequiredService<AdapterJSON<MedicamentoDto>>();
+    return new MedicamentoAdapter(adapterJson);
 });
 
 var app = builder.Build();

@@ -1,0 +1,118 @@
+@page
+@model FrontendVCare.Pages.Medicamento.MedicamentoPageModel
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-success">Medicamentos</h2>
+            <p class="text-muted mb-0">Gestiona los medicamentos disponibles</p>
+        </div>
+
+        <a asp-page="/Medicamento/CrearMedicamento" class="btn btn-primary">
+            + Crear Medicamento
+        </a>
+    </div>
+
+    <form method="get" class="mb-4">
+        <div class="card-module p-3">
+            <div class="input-group">
+                <input type="text"
+                       name="filtro"
+                       class="form-control"
+                       placeholder="Buscar por nombre, presentación o clasificación" />
+                <button type="submit" class="btn btn-success btn-fixed">Buscar</button>
+                <a asp-page="/Medicamento/Medicamento" class="btn btn-secondary btn-fixed">Limpiar</a>
+            </div>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrEmpty(Model.Mensaje))
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            @Model.Mensaje
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            @Model.MensajeError
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card-module">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-success">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Presentación</th>
+                    <th>Clasificación</th>
+                    <th>Precio</th>
+                    <th style="width:180px">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var medicamento in Model.Medicamentos)
+                {
+                    <tr>
+                        <td class="fw-semibold">@medicamento.Nombre</td>
+                        <td>@medicamento.Presentacion</td>
+                        <td>@medicamento.Clasificacion</td>
+                        <td>@medicamento.Precio.ToString("C")</td>
+                        <td>
+                            <a asp-page="/Medicamento/ActualizarMedicamento"
+                               asp-route-id="@medicamento.Id"
+                               class="btn btn-warning btn-sm me-1">
+                                Editar
+                            </a>
+                            <button type="button"
+                                    class="btn btn-danger btn-sm btnEliminar"
+                                    data-id="@medicamento.Id"
+                                    data-nombre="@medicamento.Nombre"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalEliminar">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Confirmar eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Seguro que deseas eliminar este medicamento?</p>
+                <p id="nombreEliminar" class="fw-bold"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" asp-page-handler="Eliminar" style="display:inline;">
+                    <input type="hidden" id="idEliminar" name="id" />
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".btnEliminar").forEach(function (boton) {
+            boton.addEventListener("click", function () {
+                const id = this.getAttribute("data-id");
+                const nombre = this.getAttribute("data-nombre");
+                document.getElementById("idEliminar").value = id || "";
+                document.getElementById("nombreEliminar").textContent = nombre || "";
+            });
+        });
+    });
+</script>
