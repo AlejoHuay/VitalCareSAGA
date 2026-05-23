@@ -14,27 +14,42 @@ namespace MSUsuarios.App.Servicios
         {
             _smtpSettings = new SmtpSettings
             {
-                Host = Environment.GetEnvironmentVariable("SMTP_HOST") 
-                    ?? configuration.GetSection("SmtpSettings:Host").Value 
+                Host = ObtenerValorConfiguracion(configuration, "SMTP_HOST", "SmtpSettings:Host")
                     ?? "smtp.example.com",
                 Port = int.TryParse(
-                    Environment.GetEnvironmentVariable("SMTP_PORT") 
-                    ?? configuration.GetSection("SmtpSettings:Port").Value, 
+                    ObtenerValorConfiguracion(configuration, "SMTP_PORT", "SmtpSettings:Port"),
                     out int port) ? port : 587,
-                RemitenteNombre = Environment.GetEnvironmentVariable("SMTP_REMITENTE_NOMBRE")
-                    ?? configuration.GetSection("SmtpSettings:RemitenteNombre").Value
+                RemitenteNombre = ObtenerValorConfiguracion(
+                        configuration,
+                        "SMTP_REMITENTE_NOMBRE",
+                        "SmtpSettings:RemitenteNombre"
+                    )
                     ?? "VitalCare",
-                RemitenteEmail = Environment.GetEnvironmentVariable("SMTP_REMITENTE_EMAIL")
-                    ?? configuration.GetSection("SmtpSettings:RemitenteEmail").Value
+                RemitenteEmail = ObtenerValorConfiguracion(
+                        configuration,
+                        "SMTP_REMITENTE_EMAIL",
+                        "SmtpSettings:RemitenteEmail"
+                    )
                     ?? "no-reply@example.com",
-                Password = Environment.GetEnvironmentVariable("SMTP_PASSWORD")
-                    ?? configuration.GetSection("SmtpSettings:Password").Value
+                Password = ObtenerValorConfiguracion(configuration, "SMTP_PASSWORD", "SmtpSettings:Password")
                     ?? string.Empty,
                 UseSsl = bool.TryParse(
-                    Environment.GetEnvironmentVariable("SMTP_USE_SSL")
-                    ?? configuration.GetSection("SmtpSettings:UseSsl").Value,
+                    ObtenerValorConfiguracion(configuration, "SMTP_USE_SSL", "SmtpSettings:UseSsl"),
                     out bool ssl) ? ssl : true
             };
+        }
+
+        private static string? ObtenerValorConfiguracion(
+            IConfiguration configuration,
+            string variableEntornoPrincipal,
+            string claveConfiguracion)
+        {
+            string variableEntornoCompatibilidad = claveConfiguracion.Replace(':', '_');
+            variableEntornoCompatibilidad = variableEntornoCompatibilidad.Replace("_", "__");
+
+            return Environment.GetEnvironmentVariable(variableEntornoPrincipal)
+                ?? Environment.GetEnvironmentVariable(variableEntornoCompatibilidad)
+                ?? configuration[claveConfiguracion];
         }
 
         public Result EnviarCorreoActivacionCuenta(

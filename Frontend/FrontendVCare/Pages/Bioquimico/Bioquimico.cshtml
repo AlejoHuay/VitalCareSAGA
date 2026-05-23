@@ -20,7 +20,7 @@
                        name="filtro"
                        class="form-control"
                        placeholder="Buscar por nombres, CI, email o usuario..."
-                       value="@Model.Filtro" />
+                       value="@Model.Estado.FiltroActual" />
 
                 <button type="submit" class="btn btn-success">
                     Buscar
@@ -33,14 +33,14 @@
         </div>
     </form>
 
-    @if (!string.IsNullOrWhiteSpace(Model.Mensaje))
+    @if (!string.IsNullOrWhiteSpace(Model.Estado.Mensaje))
     {
-        <div class="alert alert-success">@Model.Mensaje</div>
+        <div class="alert alert-success">@Model.Estado.Mensaje</div>
     }
 
-    @if (!string.IsNullOrWhiteSpace(Model.MensajeError))
+    @if (!string.IsNullOrWhiteSpace(Model.Estado.MensajeError))
     {
-        <div class="alert alert-danger">@Model.MensajeError</div>
+        <div class="alert alert-danger">@Model.Estado.MensajeError</div>
     }
 
     <div class="card shadow-sm">
@@ -67,7 +67,9 @@
 
                         <tr>
                             <td>@b.Nombres @b.ApellidoPaterno @b.ApellidoMaterno</td>
-                            <td>@b.Ci</td>
+                            <td>
+                                @b.Ci
+                            </td>
                             <td class="text-center">@b.CiExtencion</td>
                             <td>@b.Telefono</td>
                             <td>@b.Email</td>
@@ -83,23 +85,25 @@
                                 }
                             </td>
                             <td>
-                                <a asp-page="BioquimicoEdit"
-                                   asp-route-id="@b.IdUsuario"
-                                   class="btn btn-warning btn-sm">
-                                    Editar
-                                </a>
+                                <div class="acciones-inline">
+                                    <a asp-page="BioquimicoEdit"
+                                       asp-route-id="@b.IdUsuario"
+                                       class="btn btn-warning btn-sm">
+                                        Editar
+                                    </a>
 
-                                @if (activo)
-                                {
-                                    <button type="button"
-                                            class="btn btn-danger btn-sm btnEliminar"
-                                            data-id="@b.IdUsuario"
-                                            data-nombre="@b.Nombres @b.ApellidoPaterno @b.ApellidoMaterno"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalEliminarBioquimico">
-                                        Baja
-                                    </button>
-                                }
+                                    @if (activo)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-danger btn-sm btnEliminar"
+                                                data-id="@b.IdUsuario"
+                                                data-nombre="@b.Nombres @b.ApellidoPaterno @b.ApellidoMaterno"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarBioquimico">
+                                            Baja
+                                        </button>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }
@@ -137,6 +141,7 @@
 
                 <form method="post" asp-page-handler="DarBaja">
                     <input type="hidden" id="idBioquimicoEliminar" name="id" />
+                    <input type="hidden" name="filtro" value="@Model.Estado.FiltroActual" />
                     <button type="submit" class="btn btn-danger">
                         Confirmar Baja
                     </button>

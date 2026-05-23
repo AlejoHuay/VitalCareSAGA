@@ -84,9 +84,9 @@ namespace MSUsuarios.Dominio.Validadores
 
         private Result? ValidarCamposObligatorios(string? nombres, string? apellidoPaterno, string? apellidoMaterno, string? email)
         {
-            Result? resultado = TextoSoloLetrasRequerido(nombres, "Nombres", 100)
-                ?? TextoSoloLetrasRequerido(apellidoPaterno, "Apellido Paterno", 100)
-                ?? TextoSoloLetrasOpcional(apellidoMaterno, "Apellido Materno", 100);
+            Result? resultado = ValidarTextoSoloLetrasRequerido(nombres, "Nombres")
+                ?? ValidarTextoSoloLetrasRequerido(apellidoPaterno, "Apellido Paterno")
+                ?? ValidarTextoSoloLetrasOpcional(apellidoMaterno, "Apellido Materno");
 
             if (resultado != null)
                 return resultado;
@@ -105,8 +105,8 @@ namespace MSUsuarios.Dominio.Validadores
             if (ci!.Contains(' '))
                 return Result.Fail("El numero de carnet no debe contener espacios.");
 
-            if (!Regex.IsMatch(ci, @"^\d{5,8}$"))
-                return Result.Fail("El CI debe tener entre 5 y 8 digitos numericos.");
+            if (!Regex.IsMatch(ci, @"^\d{8}(?:-\d[A-Za-z])?$"))
+                return Result.Fail("El CI debe tener 8 digitos y un complemento opcional de hasta dos caracteres (Ej. 10000000-1B).");
 
             return null;
         }
@@ -231,6 +231,38 @@ namespace MSUsuarios.Dominio.Validadores
         private string? LimpiarTexto(string? texto)
         {
             return texto?.Trim();
+        }
+
+        private static Result? ValidarTextoSoloLetrasRequerido(string? valor, string campo)
+        {
+            valor = valor?.Trim();
+
+            if (string.IsNullOrWhiteSpace(valor))
+                return Result.Fail($"El campo {campo} es obligatorio.");
+
+            if (valor.Length > 100)
+                return Result.Fail($"El campo {campo} no puede exceder 100 caracteres.");
+
+            if (!Regex.IsMatch(valor, PatronSoloLetrasYEspacios))
+                return Result.Fail($"El campo {campo} solo puede contener letras y espacios.");
+
+            return null;
+        }
+
+        private static Result? ValidarTextoSoloLetrasOpcional(string? valor, string campo)
+        {
+            valor = valor?.Trim();
+
+            if (string.IsNullOrWhiteSpace(valor))
+                return null;
+
+            if (valor.Length > 100)
+                return Result.Fail($"El campo {campo} no puede exceder 100 caracteres.");
+
+            if (!Regex.IsMatch(valor, PatronSoloLetrasYEspacios))
+                return Result.Fail($"El campo {campo} solo puede contener letras y espacios.");
+
+            return null;
         }
     }
 }

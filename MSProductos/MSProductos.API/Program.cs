@@ -24,6 +24,12 @@ builder.Services.AddScoped<IClasificacionInputPort, ClasificacionInteractor>();
 
 builder.Services.AddScoped<IResult<Clasificacion>, ClasificacionValidador>();
 
+builder.Services.AddScoped<IMedicamentoRepository, MedicamentoRepository>();
+
+builder.Services.AddScoped<IMedicamentoInputPort, MedicamentoInteractor>();
+
+builder.Services.AddScoped<IResult<Medicamento>, MedicamentoValidator>();
+
 
 var app = builder.Build();
 

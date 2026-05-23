@@ -1,0 +1,76 @@
+@page
+@model FrontendVCare.Pages.Medicamento.CrearMedicamentoModel
+
+<div class="container py-5 medicamento-form-page">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="med-card shadow border-0" style="border-radius: 15px; overflow: hidden;">
+                <div class="med-card-header text-center bg-success text-white py-3">
+                    <h2 class="mb-0 fw-bold text-white">Nuevo Medicamento</h2>
+                    <p class="mb-0 small">Completa los datos del medicamento</p>
+                </div>
+
+                <div class="med-card-body p-4">
+                    <form method="post" asp-page-handler="CrearMedicamento">
+                        <div class="form-floating mb-3">
+                            <input asp-for="Medicamento.Nombre" class="form-control" placeholder="Nombre" required />
+                            <label class="ms-2">Nombre</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <select asp-for="Medicamento.Presentacion" class="form-select" required>
+                                <option value="" disabled selected>Seleccione</option>
+                                <option value="Cápsulas">Cápsulas</option>
+                                <option value="Crema">Crema</option>
+                                <option value="Gotas">Gotas</option>
+                                <option value="Inyectable">Inyectable</option>
+                                <option value="Jarabe">Jarabe</option>
+                                <option value="Polvo">Polvo</option>
+                                <option value="Pomada">Pomada</option>
+                                <option value="Suspensión">Suspensión</option>
+                                <option value="Tabletas">Tabletas</option>
+                            </select>
+                            <label class="ms-2">Presentación</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <select asp-for="Medicamento.IdClasificacion" class="form-select" required>
+                                <option value="" disabled selected>Seleccione</option>
+                                @foreach (var clasificacion in Model.Clasificaciones)
+                                {
+                                    <option value="@clasificacion.Id">@clasificacion.Nombre</option>
+                                }
+                            </select>
+                            <label class="ms-2">Clasificación</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Medicamento.Concentracion" class="form-control" placeholder="Concentración" required />
+                            <label class="ms-2">Concentración</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Medicamento.Precio" class="form-control" placeholder="Precio" type="number" step="0.01" min="0" required />
+                            <label class="ms-2">Precio</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Medicamento.Stock" class="form-control" placeholder="Stock" type="number" min="0" required />
+                            <label class="ms-2">Stock</label>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.MensajeError))
+                        {
+                            <div class="alert alert-danger">@Model.MensajeError</div>
+                        }
+
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                            <a asp-page="/Medicamento/Medicamento" class="btn btn-secondary">Volver</a>
+                            <button type="submit" class="btn btn-success px-5 fw-bold shadow-sm">Crear</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

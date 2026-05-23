@@ -3,6 +3,7 @@ using FrontendVCare.Adaptadores;
 using FrontendVCare.Adaptadores.Auth;
 using FrontendVCare.Dto;
 using FrontendVCare.Dto.ClasificacionDtos;
+using FrontendVCare.Dto.MedicamentoDtos;
 using FrontendVCare.Servicios;
 
 Env.Load("../../.env");
@@ -16,8 +17,13 @@ builder.Logging.AddDebug();
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(8);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 
 builder.Services.AddHttpClient<ClienteApiAdapter>(client =>
@@ -80,6 +86,17 @@ builder.Services.AddScoped<ClasificacionAdapter>(sp =>
 {
     var adapterJson = sp.GetRequiredService<AdapterJSON<ClasificacionDto>>();
     return new ClasificacionAdapter(adapterJson);
+});
+
+builder.Services.AddHttpClient<AdapterJSON<MedicamentoDto>>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiUrls:MSProductos"] ?? "http://localhost:7141/");
+});
+
+builder.Services.AddScoped<MedicamentoAdapter>(sp =>
+{
+    var adapterJson = sp.GetRequiredService<AdapterJSON<MedicamentoDto>>();
+    return new MedicamentoAdapter(adapterJson);
 });
 
 var app = builder.Build();

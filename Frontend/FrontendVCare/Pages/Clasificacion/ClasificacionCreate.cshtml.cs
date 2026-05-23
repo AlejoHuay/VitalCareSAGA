@@ -41,7 +41,8 @@ namespace FrontendVCare.Pages.Clasificacion
                     return Page();
                 }
 
-                int idUsuario = 666;
+                int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+
                 if (idUsuario == null || idUsuario == 0)
                 {
                     MensajeError = "No se encontró el usuario. Por favor, inicia sesión nuevamente.";
@@ -53,7 +54,7 @@ namespace FrontendVCare.Pages.Clasificacion
                     Nombre = Nombre,
                     Origen = Origen,
                     Descripcion = Descripcion,
-                    IdUsuario = idUsuario
+                    IdUsuario = idUsuario.Value
                 };
 
                 var (exito, mensaje) = await _clasificacionAdapter.CreateAsync(nuevaClasificacion);

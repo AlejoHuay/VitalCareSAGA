@@ -1,0 +1,72 @@
+@page
+@model FrontendVCare.Pages.Usuario.UsuarioEditModel
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+
+            <div class="card shadow border-0">
+                <div class="card-header text-center bg-success text-white py-3">
+                    <h2 class="mb-0 fw-bold text-white">
+                        Editar Perfil de Usuario
+                    </h2>
+                    <p class="mb-0 small">ID Sistema: #@Model.Input.IdUsuario</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="post" asp-page-handler="ActualizarUsuario">
+                        <input type="hidden" asp-for="Input.IdUsuario" />
+                        <input type="hidden" asp-for="Input.Nombres" />
+                        <input type="hidden" asp-for="Input.ApellidoPaterno" />
+                        <input type="hidden" asp-for="Input.ApellidoMaterno" />
+                        <input type="hidden" asp-for="Input.Ci" />
+                        <input type="hidden" asp-for="Input.CiExtencion" />
+                        <input type="hidden" asp-for="Input.Telefono" />
+                        <input type="hidden" asp-for="Input.UserName" />
+                        <input type="hidden" asp-for="Input.MustChangePassword" />
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control" placeholder="Email" />
+                            <label class="ms-2">Correo Electronico</label>
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <select asp-for="Input.Role" class="form-select">
+                                <option value="Admin">Administrador</option>
+                                <option value="Bioquimico">Bioquimico</option>
+                            </select>
+                            <label class="ms-2">Rol / Privilegios</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <select asp-for="Input.Activo" class="form-select">
+                                <option value="1">Habilitado</option>
+                                <option value="0">Deshabilitado (Baja)</option>
+                            </select>
+                            <label class="ms-2">Estado de Cuenta</label>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Estado.MensajeError))
+                        {
+                            <div class="alert alert-danger mb-4">
+                                @Model.Estado.MensajeError
+                            </div>
+                        }
+
+                        <div class="d-flex justify-content-end gap-2 mt-2 pt-3 border-top">
+                            <a asp-page="Usuario" class="btn btn-secondary px-4">Cancelar</a>
+                            <button type="submit" class="btn btn-success px-5 fw-bold">
+                                Actualizar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
