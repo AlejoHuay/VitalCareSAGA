@@ -2,16 +2,6 @@
 @model FrontendVCare.Pages.Auth.RegisterModel
 @{
     Layout = null;
-
-    var ciBaseValue = "";
-    var ciComplementoValue = "";
-
-    if (!string.IsNullOrWhiteSpace(Model?.Registro?.Ci))
-    {
-        var partesCi = Model.Registro.Ci.Split('-');
-        ciBaseValue = partesCi.Length > 0 ? partesCi[0] : "";
-        ciComplementoValue = partesCi.Length > 1 ? partesCi[1] : "";
-    }
 }
 
 <!DOCTYPE html>
@@ -33,7 +23,7 @@
 
             <nav class="topbar-nav">
                 <a asp-page="/Index">Inicio</a>
-                <a asp-page="/Auth/Login">Iniciar sesión</a>
+                <a asp-page="/Auth/Login">Iniciar sesion</a>
             </nav>
         </div>
     </header>
@@ -43,20 +33,20 @@
             <div class="hero-left">
                 <span class="hero-badge">CREAR CUENTA</span>
 
-                <h1>Únete a<br />Farmacia VitalCare</h1>
+                <h1>Unete a<br />Farmacia VitalCare</h1>
 
                 <p>
-                    Registra un nuevo usuario dentro del sistema de gestión
-                    farmacéutica con una experiencia clara, moderna y profesional.
+                    Registra un nuevo usuario dentro del sistema de gestion
+                    farmaceutica con una experiencia clara, moderna y profesional.
                 </p>
 
                 <div class="hero-note">
-                    El nombre de usuario y la contraseña se generan automáticamente
+                    El nombre de usuario y la contrasena se generan automaticamente
                     al momento de registrar la cuenta y llegan por correo.
                 </div>
 
                 <div class="hero-actions">
-                    <a asp-page="/Index" class="btn-outline-home">← Volver al inicio</a>
+                    <a asp-page="/Index" class="btn-outline-home">&larr; Volver al inicio</a>
                 </div>
             </div>
 
@@ -84,7 +74,7 @@
                                 <label asp-for="Registro.ApellidoPaterno">Primer apellido</label>
                                 <input type="text"
                                        asp-for="Registro.ApellidoPaterno"
-                                       placeholder="Ej. Pérez"
+                                       placeholder="Ej. Perez"
                                        required
                                        maxlength="100"
                                        pattern="[A-Za-zÀ-ÖØ-öø-ÿ ]+"
@@ -95,36 +85,37 @@
                                 <label asp-for="Registro.ApellidoMaterno">Segundo apellido (opcional)</label>
                                 <input type="text"
                                        asp-for="Registro.ApellidoMaterno"
-                                       placeholder="Ej. Gutiérrez"
+                                       placeholder="Ej. Gutierrez"
                                        maxlength="100"
                                        pattern="[A-Za-zÀ-ÖØ-öø-ÿ ]+"
                                        title="Solo se permiten letras y espacios." />
                             </div>
 
                             <div class="form-group">
-                                <label for="CiBase">Carnet de identidad</label>
+                                <label asp-for="Registro.Ci">Carnet de identidad</label>
                                 <input type="text"
+                                       asp-for="Registro.Ci"
                                        id="CiBase"
-                                       name="CiBase"
-                                       value="@ciBaseValue"
                                        placeholder="Ej. 12345678"
                                        required
                                        maxlength="8"
-                                       minlength="5"
-                                       pattern="\d{5,8}"
-                                       title="Debe ingresar entre 5 y 8 dígitos numéricos." />
+                                       minlength="8"
+                                       pattern="\d{8}"
+                                       title="Debe ingresar 8 digitos numericos." />
+                                <small class="text-helper">CI: Ej. 12345678</small>
                             </div>
 
                             <div class="form-group">
-                                <label for="CiComplemento">Complemento (opcional)</label>
+                                <label asp-for="CiComplemento">Complemento (opcional)</label>
                                 <input type="text"
+                                       asp-for="CiComplemento"
                                        id="CiComplemento"
-                                       name="CiComplemento"
-                                       value="@ciComplementoValue"
                                        placeholder="Ej. 1A"
                                        maxlength="2"
-                                       pattern="[A-Za-z0-9]{0,2}"
-                                       title="Hasta 2 caracteres alfanuméricos." />
+                                       pattern="^$|^\d[A-Za-z]$"
+                                       title="Debe tener el formato 1A." />
+                                <span asp-validation-for="CiComplemento" class="text-danger"></span>
+                                <small class="text-helper">Si no tiene complemento, deje el campo vacio.</small>
                             </div>
 
                             <div class="form-group">
@@ -137,25 +128,25 @@
                                     <option value="LP">La Paz</option>
                                     <option value="OR">Oruro</option>
                                     <option value="PD">Pando</option>
-                                    <option value="PT">Potosí</option>
+                                    <option value="PT">Potosi</option>
                                     <option value="SC">Santa Cruz</option>
                                     <option value="TJ">Tarija</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
-                                <label asp-for="Registro.Telefono">Teléfono</label>
+                                <label asp-for="Registro.Telefono">Telefono</label>
                                 <input type="text"
                                        asp-for="Registro.Telefono"
                                        placeholder="Ej. 71234567"
                                        required
                                        maxlength="8"
                                        pattern="\d{8}"
-                                       title="Debe ingresar 8 dígitos numéricos." />
+                                       title="Debe ingresar 8 digitos numericos." />
                             </div>
 
                             <div class="form-group full-width">
-                                <label asp-for="Registro.Email">Correo electrónico</label>
+                                <label asp-for="Registro.Email">Correo electronico</label>
                                 <input type="email"
                                        asp-for="Registro.Email"
                                        placeholder="Ej. usuario@correo.com"
@@ -166,22 +157,20 @@
                                 <label asp-for="Registro.UserName">Nombre de usuario generado</label>
                                 <input type="text"
                                        asp-for="Registro.UserName"
-                                       placeholder="Se generará automáticamente"
+                                       placeholder="Se generara automaticamente"
                                        readonly
                                        class="readonly-field" />
                             </div>
 
                             <div class="form-group">
-                                <label asp-for="Registro.Password">Contraseña generada</label>
+                                <label asp-for="Registro.Password">Contrasena generada</label>
                                 <input type="password"
                                        asp-for="Registro.Password"
-                                       placeholder="Se generará automáticamente"
+                                       placeholder="Se generara automaticamente"
                                        readonly
                                        class="readonly-field" />
                             </div>
                         </div>
-
-                        <input type="hidden" asp-for="Registro.Ci" id="CiCompleto" />
 
                         @if (!string.IsNullOrWhiteSpace(Model?.MensajeOk))
                         {
@@ -209,8 +198,8 @@
                         <button type="submit" class="btn-register">Registrar cuenta</button>
 
                         <div class="login-link">
-                            ¿Ya tienes cuenta?
-                            <a asp-page="/Auth/Login">Inicia sesión</a>
+                            Ya tienes cuenta?
+                            <a asp-page="/Auth/Login">Inicia sesion</a>
                         </div>
                     </form>
                 </div>
@@ -220,22 +209,6 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const form = document.getElementById("registerForm");
-
-            form.addEventListener("submit", function () {
-                const ciBaseInput = document.getElementById("CiBase");
-                const ciComplementoInput = document.getElementById("CiComplemento");
-                const ciCompletoInput = document.getElementById("CiCompleto");
-
-                const ciBase = ciBaseInput.value.trim();
-                const ciComplemento = ciComplementoInput.value.trim().toUpperCase();
-
-                ciCompletoInput.value = ciComplemento
-                    ? `${ciBase}-${ciComplemento}`
-                    : ciBase;
-            });
-
-            // Modal de error
             const errorModal = document.getElementById("errorModal");
             const closeModal = document.getElementById("closeModal");
 
@@ -251,7 +224,6 @@
                 });
             }
 
-            // Modal de éxito
             const successModal = document.getElementById("successModal");
             const closeSuccessModal = document.getElementById("closeSuccessModal");
 
@@ -270,5 +242,3 @@
     </script>
 </body>
 </html>
-
-

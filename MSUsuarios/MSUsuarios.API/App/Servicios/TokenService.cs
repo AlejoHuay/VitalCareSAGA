@@ -59,7 +59,8 @@ namespace MSUsuarios.App.Servicios
             {
                 new Claim(ClaimTypes.NameIdentifier, dto.IdUsuario.ToString()),
                 new Claim(ClaimTypes.Name, dto.UserName ?? string.Empty),
-                new Claim(ClaimTypes.Role, dto.Role ?? string.Empty)
+                new Claim(ClaimTypes.Role, dto.Role ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N"))
             };
 
             SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));

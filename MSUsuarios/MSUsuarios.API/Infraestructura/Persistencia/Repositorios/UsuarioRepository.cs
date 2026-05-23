@@ -160,6 +160,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             {
                 usuarios.Add(MapearUsuario(reader));
             }
+
             return usuarios;
         }
 
@@ -202,12 +203,12 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             string query = $@"
                 SELECT {ColumnasSeleccionUsuario}
                 FROM usuario
-                WHERE ci = @ci
+                WHERE UPPER(ci) = UPPER(@ci)
                 LIMIT 1";
 
             using var conn = new NpgsqlConnection(_connectionString);
             using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("ci", ObtenerCiNumerico(ci));
+            cmd.Parameters.AddWithValue("ci", NormalizarCi(ci));
             conn.Open();
 
             using var reader = cmd.ExecuteReader();
@@ -233,11 +234,11 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
 
         public bool ExisteCi(string ci)
         {
-            const string query = "SELECT COUNT(1) FROM usuario WHERE ci = @ci";
+            const string query = "SELECT COUNT(1) FROM usuario WHERE UPPER(ci) = UPPER(@ci)";
 
             using var conn = new NpgsqlConnection(_connectionString);
             using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("ci", ObtenerCiNumerico(ci));
+            cmd.Parameters.AddWithValue("ci", NormalizarCi(ci));
             conn.Open();
 
             return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
@@ -327,7 +328,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             cmd.Parameters.AddWithValue("nombres", usuario.Nombres.Trim());
             cmd.Parameters.AddWithValue("primer_apellido", usuario.ApellidoPaterno.Trim());
             AgregarParametroNullable(cmd, "segundo_apellido", usuario.ApellidoMaterno);
-            cmd.Parameters.AddWithValue("ci", ObtenerCiNumerico(usuario.Ci));
+            cmd.Parameters.AddWithValue("ci", NormalizarCi(usuario.Ci));
             cmd.Parameters.AddWithValue("ci_extension", usuario.CiExtencion.Trim().ToUpperInvariant());
             cmd.Parameters.AddWithValue("telefono", usuario.Telefono.Trim());
             cmd.Parameters.AddWithValue("email", usuario.Email.Trim().ToLowerInvariant());
@@ -348,14 +349,9 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             cmd.Parameters.AddWithValue(nombre, valor ?? DBNull.Value);
         }
 
-        private static int ObtenerCiNumerico(string ci)
+        private static string NormalizarCi(string ci)
         {
-            string ciNormalizado = ci?.Trim() ?? string.Empty;
-
-            if (!int.TryParse(ciNormalizado, out int ciNumerico))
-                throw new InvalidOperationException("El valor de CI debe ser numerico para persistirse en PostgreSQL.");
-
-            return ciNumerico;
+            return StringHelper.LimpiarCI(ci);
         }
 
         private static DateTime AsegurarUtc(DateTime fecha)
@@ -378,7 +374,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
                 ApellidoMaterno = reader.IsDBNull(reader.GetOrdinal("segundo_apellido"))
                     ? null
                     : reader.GetString(reader.GetOrdinal("segundo_apellido")),
-                Ci = reader.GetInt32(reader.GetOrdinal("ci")).ToString(),
+                Ci = reader.GetString(reader.GetOrdinal("ci")),
                 CiExtencion = reader.GetString(reader.GetOrdinal("ci_extension")),
                 Telefono = reader.GetString(reader.GetOrdinal("telefono")),
                 Email = reader.GetString(reader.GetOrdinal("email")),

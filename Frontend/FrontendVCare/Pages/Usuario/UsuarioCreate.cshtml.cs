@@ -6,23 +6,23 @@ using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace FrontendVCare.Pages.Bioquimico
+namespace FrontendVCare.Pages.Usuario
 {
-    public class BioquimicoCreateModel : BasePageModel
+    public class UsuarioCreateModel : BasePageModel
     {
         private readonly UsuarioAdapter _usuarioAdapter;
 
-        public BioquimicoCreateModel(UsuarioAdapter usuarioAdapter)
-        {
-            _usuarioAdapter = usuarioAdapter;
-        }
-
         [BindProperty]
-        public UsuarioRegistroDto Registro { get; set; } = new();
+        public UsuarioRegistroDto Input { get; set; } = new();
 
         [BindProperty]
         [RegularExpression(@"^$|^\d[A-Za-z]$", ErrorMessage = "El complemento del CI debe tener el formato 1A.")]
         public string CiComplemento { get; set; } = string.Empty;
+
+        public UsuarioCreateModel(UsuarioAdapter usuarioAdapter)
+        {
+            _usuarioAdapter = usuarioAdapter;
+        }
 
         public IActionResult OnGet()
         {
@@ -33,32 +33,33 @@ namespace FrontendVCare.Pages.Bioquimico
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostCrearUsuarioAsync()
         {
             IActionResult? acceso = ValidarAccesoAdmin();
             if (acceso != null)
                 return acceso;
 
-            Registro.Role = "Bioquimico";
-
-            ModelState.Remove("Registro.UserName");
-            ModelState.Remove("Registro.Password");
+            ModelState.Remove("Input.UserName");
+            ModelState.Remove("Input.Password");
 
             if (!ModelState.IsValid)
                 return Page();
 
-            string ciBase = Registro.Ci;
-            Registro.Ci = CiFormatoHelper.ConstruirCi(Registro.Ci, CiComplemento);
+            string ciBase = Input.Ci;
+            Input.Ci = CiFormatoHelper.ConstruirCi(Input.Ci, CiComplemento);
 
-            OperacionApiDto resultado = await _usuarioAdapter.CrearConResultadoAsync(Registro);
+            OperacionApiDto resultado = await _usuarioAdapter.CrearConResultadoAsync(Input);
             if (!resultado.Exito)
             {
-                Registro.Ci = ciBase;
+                Input.Ci = ciBase;
                 Estado.MensajeError = resultado.Mensaje;
                 return Page();
             }
 
-            return RedirectToPage("Bioquimico", new { mensaje = resultado.Mensaje });
+            return RedirectToPage("Usuario", new
+            {
+                mensaje = resultado.Mensaje
+            });
         }
     }
 }

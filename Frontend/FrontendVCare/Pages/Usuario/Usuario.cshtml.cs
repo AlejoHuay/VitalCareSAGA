@@ -3,19 +3,18 @@ using FrontendVCare.Dto;
 using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FrontendVCare.Pages.Bioquimico
+namespace FrontendVCare.Pages.Usuario
 {
-    public class BioquimicoModel : BasePageModel
+    public class UsuarioModel : BasePageModel
     {
-        private const string RolBioquimico = "Bioquimico";
         private readonly UsuarioAdapter _usuarioAdapter;
 
-        public BioquimicoModel(UsuarioAdapter usuarioAdapter)
+        public List<UsuarioDto> Usuarios { get; set; } = new();
+
+        public UsuarioModel(UsuarioAdapter usuarioAdapter)
         {
             _usuarioAdapter = usuarioAdapter;
         }
-
-        public List<UsuarioDto> Bioquimicos { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(string? filtro, string? mensaje, string? error)
         {
@@ -24,11 +23,11 @@ namespace FrontendVCare.Pages.Bioquimico
                 return acceso;
 
             CargarParametros(filtro, mensaje, error);
-            await CargarBioquimicosAsync(Estado.FiltroActual);
+            await CargarUsuariosAsync(Estado.FiltroActual);
             return Page();
         }
 
-        public async Task<IActionResult> OnPostDarBajaAsync(int id, string? filtro)
+        public async Task<IActionResult> OnPostEliminarUsuarioLogicamenteAsync(int id, string? filtro)
         {
             IActionResult? acceso = ValidarAccesoAdmin();
             if (acceso != null)
@@ -40,14 +39,14 @@ namespace FrontendVCare.Pages.Bioquimico
             if (!resultado.Exito)
             {
                 Estado.MensajeError = resultado.Mensaje;
-                await CargarBioquimicosAsync(Estado.FiltroActual);
+                await CargarUsuariosAsync(Estado.FiltroActual);
                 return Page();
             }
 
-            return RedirectToPage("Bioquimico", new
+            return RedirectToPage("Usuario", new
             {
                 filtro = Estado.FiltroActual,
-                mensaje = "Bioquimico dado de baja correctamente."
+                mensaje = "Usuario dado de baja correctamente."
             });
         }
 
@@ -58,12 +57,10 @@ namespace FrontendVCare.Pages.Bioquimico
             Estado.MensajeError = error ?? string.Empty;
         }
 
-        private async Task CargarBioquimicosAsync(string filtro)
+        private async Task CargarUsuariosAsync(string filtro)
         {
             var (resultado, usuarios) = await _usuarioAdapter.ObtenerTodosConResultadoAsync(filtro);
-            Bioquimicos = usuarios
-                .Where(u => string.Equals(u.Role?.Trim(), RolBioquimico, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            Usuarios = usuarios;
 
             if (!resultado.Exito && string.IsNullOrWhiteSpace(Estado.MensajeError))
                 Estado.MensajeError = resultado.Mensaje;

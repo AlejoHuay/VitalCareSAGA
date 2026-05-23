@@ -367,11 +367,26 @@ body {
         background-color: #f8f9fa;
     }
 
-    .table td,
-    .table th {
-        padding: 1rem;
-        vertical-align: middle;
-    }
+.table td,
+.table th {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.acciones-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+
+.acciones-inline form {
+    margin: 0;
+}
+
+.acciones-inline .btn {
+    min-width: 76px;
+}
 
 /* ALERTAS */
 

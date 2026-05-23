@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Dto;
+using FrontendVCare.Helpers;
 using FrontendVCare.Servicios;
+using System.ComponentModel.DataAnnotations;
 
 namespace FrontendVCare.Pages.Account
 {
@@ -32,6 +34,10 @@ namespace FrontendVCare.Pages.Account
 
         [BindProperty]
         public UsuarioActualizarDto UsuarioActualizar { get; set; } = new();
+
+        [BindProperty]
+        [RegularExpression(@"^$|^\d[A-Za-z]$", ErrorMessage = "El complemento del CI debe tener el formato 1A.")]
+        public string CiComplemento { get; set; } = string.Empty;
 
         public async Task OnGetAsync()
         {
@@ -71,6 +77,9 @@ namespace FrontendVCare.Pages.Account
                 CI = usuario.Ci;
                 UserName = usuario.UserName;
 
+                (string ciBase, string ciComplemento) = CiFormatoHelper.SepararCi(usuario.Ci);
+                CiComplemento = ciComplemento;
+
                 // Initialize update form with current values
                 UsuarioActualizar = new UsuarioActualizarDto
                 {
@@ -81,7 +90,7 @@ namespace FrontendVCare.Pages.Account
                     Nombres = usuario.Nombres,
                     ApellidoPaterno = usuario.ApellidoPaterno,
                     ApellidoMaterno = usuario.ApellidoMaterno ?? string.Empty,
-                    Ci = usuario.Ci,
+                    Ci = ciBase,
                     CiExtencion = usuario.CiExtencion,
                     Telefono = usuario.Telefono
                 };
@@ -106,6 +115,14 @@ namespace FrontendVCare.Pages.Account
                 }
 
                 UsuarioActualizar.IdUsuario = idUsuario.Value;
+                if (!ModelState.IsValid)
+                {
+                    await OnGetAsync();
+                    return Page();
+                }
+
+                string ciBase = UsuarioActualizar.Ci;
+                UsuarioActualizar.Ci = CiFormatoHelper.ConstruirCi(UsuarioActualizar.Ci, CiComplemento);
 
                 var (exitoso, mensaje) = await _usuarioAdapter.ActualizarAsync(UsuarioActualizar);
                 
@@ -118,6 +135,7 @@ namespace FrontendVCare.Pages.Account
                 }
                 else
                 {
+                    UsuarioActualizar.Ci = ciBase;
                     ModelState.AddModelError("", mensaje ?? "Error al actualizar el perfil.");
                     return Page();
                 }

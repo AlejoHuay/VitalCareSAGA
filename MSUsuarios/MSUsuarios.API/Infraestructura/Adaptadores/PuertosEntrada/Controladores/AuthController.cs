@@ -201,5 +201,6 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
 
             return Ok(new { mensaje = "Contraseña actualizada correctamente." });
         }
+
     }
 }

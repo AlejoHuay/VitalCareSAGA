@@ -151,6 +151,7 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             string? idUsuarioClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return int.TryParse(idUsuarioClaim, out int idSesion) ? idSesion : null;
         }
+
     }
 
 }
