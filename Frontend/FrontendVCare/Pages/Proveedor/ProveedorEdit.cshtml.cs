@@ -47,7 +47,7 @@ namespace FrontendVCare.Pages.Proveedor
         {
             if (Proveedor.Id <= 0)
             {
-                MensajeError = "ID de proveedor invalido.";
+                MensajeError = "ID de proveedor inválido.";
                 return Page();
             }
 
@@ -86,7 +86,7 @@ namespace FrontendVCare.Pages.Proveedor
 
             if (!string.IsNullOrWhiteSpace(Proveedor.Telefono) && !TelefonoRegex.IsMatch(Proveedor.Telefono.Trim()))
             {
-                MensajeError = "El telefono debe tener exactamente 8 digitos.";
+                MensajeError = "El teléfono debe tener exactamente 8 dígitos.";
                 return false;
             }
 
