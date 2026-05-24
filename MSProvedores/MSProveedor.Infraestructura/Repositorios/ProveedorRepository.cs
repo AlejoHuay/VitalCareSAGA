@@ -25,15 +25,10 @@ public class ProveedorRepository : IProveedorRepository
         return await conexion.ExecuteScalarAsync<int>(sql, new { Nombre = nombre }) > 0;
     }
 
-    // ==========================================
-    // NUEVOS MÉTODOS AÑADIDOS
-    // ==========================================
-
     public async Task<IEnumerable<Proveedor>> ObtenerTodosAsync()
     {
         using var conexion = new NpgsqlConnection(CadenaConexion);
-        // Traemos solo los activos (estado = 1). Usamos AS para que Dapper mapee bien las columnas con guion bajo.
-        var sql = @"SELECT id as Id, nombre as Nombre, telefono as Telefono, 
+           var sql = @"SELECT id as Id, nombre as Nombre, telefono as Telefono, 
                            correo_electronico as CorreoElectronico, direccion as Direccion, 
                            estado as Estado, fecha_registro as FechaRegistro, 
                            ultima_actualizacion as UltimaActualizacion, id_usuario as IdUsuario 
@@ -67,7 +62,6 @@ public class ProveedorRepository : IProveedorRepository
     public async Task<bool> EliminarAsync(int id)
     {
         using var conexion = new NpgsqlConnection(CadenaConexion);
-        // Borrado lógico: Cambiamos estado a 0
         var sql = "UPDATE public.proveedor SET estado = 0, ultima_actualizacion = CURRENT_TIMESTAMP WHERE id = @Id;";
         var filasAfectadas = await conexion.ExecuteAsync(sql, new { Id = id });
         return filasAfectadas > 0;
