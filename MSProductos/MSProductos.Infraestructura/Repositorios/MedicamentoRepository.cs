@@ -2,7 +2,7 @@ using MSProductos.Aplicacion.Helpers;
 using MSProductos.Dominio.Entidades;
 using MSProductos.Dominio.Interfaces;
 using MSProductos.Infraestructura.Conexion;
-
+using MSProductos.Infraestructura.Helpers;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -128,19 +128,23 @@ namespace MSProductos.Infraestructura.Repositorios
 
         public Medicamento? GetById(int id)
         {
-            string query = @"SELECT id,
-                                    nombre,
-                                    presentacion,
-                                    id_clasificacion,
-                                    concentracion,
-                                    precio,
-                                    stock,
-                                    estado,
-                                    fecha_registro,
-                                    ultima_actualizacion,
-                                    id_usuario
-                             FROM medicamento
-                             WHERE id = @id";
+            string query = @"SELECT 
+                            m.id,
+                            m.nombre,
+                            m.presentacion,
+                            m.id_clasificacion,
+                            c.nombre AS clasificacion,
+                            m.concentracion,
+                            m.precio,
+                            m.stock,
+                            m.estado,
+                            m.fecha_registro,
+                            m.ultima_actualizacion,
+                            m.id_usuario
+                     FROM medicamento m
+                     INNER JOIN clasificacion c
+                        ON m.id_clasificacion = c.id
+                     WHERE m.id = @id";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -209,6 +213,9 @@ namespace MSProductos.Infraestructura.Repositorios
                 Nombre = StringHelper.LimpiarEspacios(reader["nombre"].ToString()),
                 Presentacion = StringHelper.LimpiarEspacios(reader["presentacion"].ToString()),
                 IdClasificacion = Convert.ToInt32(reader["id_clasificacion"]),
+                Clasificacion = reader.HasColumn("clasificacion")
+                        ? StringHelper.LimpiarEspacios(reader["clasificacion"].ToString())
+                        : string.Empty,
                 Concentracion = StringHelper.LimpiarEspacios(reader["concentracion"].ToString()),
                 Precio = Convert.ToDecimal(reader["precio"]),
                 Stock = Convert.ToInt32(reader["stock"]),
@@ -223,28 +230,33 @@ namespace MSProductos.Infraestructura.Repositorios
 
         private string ConstruirQuery(string filtro)
         {
-            string query = @"SELECT id,
-                                   nombre,
-                                   presentacion,
-                                   id_clasificacion,
-                                   concentracion,
-                                   precio,
-                                   stock,
-                                   estado,
-                                   fecha_registro,
-                                   ultima_actualizacion,
-                                   id_usuario
-                             FROM medicamento
-                             WHERE estado = 1";
+            string query = @"SELECT 
+                            m.id,
+                            m.nombre,
+                            m.presentacion,
+                            m.id_clasificacion,
+                            c.nombre AS clasificacion,
+                            m.concentracion,
+                            m.precio,
+                            m.stock,
+                            m.estado,
+                            m.fecha_registro,
+                            m.ultima_actualizacion,
+                            m.id_usuario
+                     FROM medicamento m
+                     INNER JOIN clasificacion c
+                        ON m.id_clasificacion = c.id
+                     WHERE m.estado = 1";
 
             query += FiltroSqlHelper.ConstruirCondicionLike(
                 filtro,
-                "nombre",
-                "presentacion",
-                "concentracion"
+                "m.nombre",
+                "m.presentacion",
+                "m.concentracion",
+                "c.nombre"
             );
 
-            query += " ORDER BY nombre";
+            query += " ORDER BY m.nombre";
 
             return query;
         }
