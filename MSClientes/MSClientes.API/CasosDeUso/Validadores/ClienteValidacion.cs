@@ -106,11 +106,11 @@ namespace MSClientes.API.CasosDeUso.Validadores
             if (razonSocial.Length < 3 || razonSocial.Length > 45)
                 return Result.Fail("La razon social debe tener entre 3 y 45 caracteres.");
 
-            if (!Regex.IsMatch(razonSocial, @"^[\p{L}0-9\s\.\-&]+$"))
-                return Result.Fail("La razon social contiene caracteres no permitidos.");
+            if (!Regex.IsMatch(razonSocial, @"^[\p{L}\s]+$"))
+                return Result.Fail("La razon social solo debe contener letras y espacios.");
 
-            if (!razonSocial.Any(char.IsLetterOrDigit))
-                return Result.Fail("La razon social debe contener al menos letras o numeros.");
+            if (!razonSocial.Any(char.IsLetter))
+                return Result.Fail("La razon social debe contener al menos una letra.");
 
             return null;
         }
