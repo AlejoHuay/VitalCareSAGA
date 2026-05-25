@@ -1,13 +1,12 @@
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Dto;
+using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FrontendVCare.Pages
 {
-    public class ClienteModel : PageModel
+    public class ClienteModel : BasePageModel
     {
-        private const int IdUsuarioSistema = 1;
         private readonly ClienteApiAdapter clienteApiAdapter;
 
         public List<ClienteDto> Clientes { get; set; } = new();
@@ -39,7 +38,11 @@ namespace FrontendVCare.Pages
 
         public async Task<IActionResult> OnPostEliminarClienteLogicamenteAsync(int id)
         {
-            OperacionApiDto resultado = await clienteApiAdapter.EliminarAsync(id, IdUsuarioSistema);
+            int? idUsuarioSesion = ObtenerIdUsuarioSesion();
+            if (!idUsuarioSesion.HasValue)
+                return RedirectToPage("/Auth/Login");
+
+            OperacionApiDto resultado = await clienteApiAdapter.EliminarAsync(id, idUsuarioSesion.Value);
 
             if (!resultado.Exito)
                 return RedirectToPage("Cliente", new { error = resultado.Mensaje });

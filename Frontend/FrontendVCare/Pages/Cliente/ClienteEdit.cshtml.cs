@@ -1,13 +1,12 @@
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Dto;
+using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FrontendVCare.Pages
 {
-    public class ClienteEditModel : PageModel
+    public class ClienteEditModel : BasePageModel
     {
-        private const int IdUsuarioSistema = 1;
         private readonly ClienteApiAdapter clienteApiAdapter;
 
         [BindProperty]
@@ -33,7 +32,11 @@ namespace FrontendVCare.Pages
 
         public async Task<IActionResult> OnPostActualizarClienteAsync()
         {
-            Cliente.IdUsuario = IdUsuarioSistema;
+            int? idUsuarioSesion = ObtenerIdUsuarioSesion();
+            if (!idUsuarioSesion.HasValue)
+                return RedirectToPage("/Auth/Login");
+
+            Cliente.IdUsuario = idUsuarioSesion.Value;
             OperacionApiDto resultado = await clienteApiAdapter.ActualizarAsync(Cliente.IdCliente, Cliente);
 
             if (!resultado.Exito)

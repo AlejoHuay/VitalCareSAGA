@@ -5,55 +5,55 @@
     var modalId = "confirmarEliminarClienteModal";
 }
 
-<div class="container mt-5">
+<section class="client-page">
+    <div class="client-toolbar">
+        <div>
+            <p class="section-kicker">MSClientes</p>
+            <h1>Clientes</h1>
+        </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-success">Clientes Registrados</h2>
-
-        <a asp-page="ClienteCreate" class="btn-main">
-            + Nuevo Cliente
+        <a asp-page="ClienteCreate" class="btn btn-success">
+            Nuevo Cliente
         </a>
     </div>
 
-    <form method="get" class="mb-4">
-        <div class="card-module p-3">
-            <div class="input-group">
-                <input type="text"
-                       name="filtro"
-                       class="form-control"
-                       placeholder="Buscar por NIT o razón social..."
-                       value="@Model.FiltroActual" />
+    <form method="get" class="search-panel">
+        <div class="input-group">
+            <input type="text"
+                   name="filtro"
+                   class="form-control"
+                   placeholder="Buscar por NIT, razon social o correo..."
+                   value="@Model.FiltroActual" />
 
-                <button type="submit" class="btn btn-success btn-fixed">
-                    Buscar
-                </button>
+            <button type="submit" class="btn btn-success">
+                Buscar
+            </button>
 
-                <a asp-page="Cliente" class="btn btn-secondary btn-fixed">
-                    Limpiar
-                </a>
-            </div>
+            <a asp-page="Cliente" class="btn btn-outline-secondary">
+                Limpiar
+            </a>
         </div>
     </form>
 
     @if (!string.IsNullOrEmpty(Model.Mensaje))
     {
-        <div class="alert alert-success shadow-sm">@Model.Mensaje</div>
+        <div class="alert alert-success">@Model.Mensaje</div>
     }
 
     @if (!string.IsNullOrEmpty(Model.MensajeError))
     {
-        <div class="alert alert-danger shadow-sm">@Model.MensajeError</div>
+        <div class="alert alert-danger">@Model.MensajeError</div>
     }
 
-    <div class="card-module">
-        <table class="table table-hover align-middle">
-            <caption class="visually-hidden">Tabla de clientes registrados con NIT, razón social, correo electrónico y acciones disponibles.</caption>
-            <thead class="table-success">
+    <div class="table-shell">
+        <table class="table table-hover align-middle mb-0">
+            <caption class="visually-hidden">Tabla de clientes registrados con NIT, razon social, correo electronico y acciones.</caption>
+            <thead>
                 <tr>
                     <th>NIT</th>
-                    <th>Razón Social</th>
-                    <th>Correo Electrónico</th>
-                    <th style="width:170px">Acciones</th>
+                    <th>Razon Social</th>
+                    <th>Correo Electronico</th>
+                    <th class="actions-column">Acciones</th>
                 </tr>
             </thead>
 
@@ -67,24 +67,22 @@
                             <td>@cliente.RazonSocial</td>
                             <td>@cliente.CorreoElectronico</td>
                             <td>
-                                <form method="post"
-                                      asp-page="ClienteEdit"
-                                      asp-page-handler="CargarClienteParaEdicion"
-                                      style="display:inline;">
-                                    <input type="hidden" name="id" value="@cliente.IdCliente" />
-                                    <button type="submit" class="btn btn-warning btn-sm">
+                                <div class="d-flex gap-2">
+                                    <a asp-page="ClienteEdit"
+                                       asp-route-id="@cliente.IdCliente"
+                                       class="btn btn-warning btn-sm">
                                         Editar
-                                    </button>
-                                </form>
+                                    </a>
 
-                                <button type="button"
-                                        class="btn btn-danger btn-sm"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#@modalId"
-                                        data-id="@cliente.IdCliente"
-                                        data-nombre="@cliente.RazonSocial">
-                                    Eliminar
-                                </button>
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#@modalId"
+                                            data-id="@cliente.IdCliente"
+                                            data-nombre="@cliente.RazonSocial">
+                                        Eliminar
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -120,7 +118,7 @@
             </div>
         </div>
     </div>
-</div>
+</section>
 
 @section Scripts {
     <script>
