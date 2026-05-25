@@ -16,8 +16,4 @@
     <ProjectReference Include="..\MSProductos.Infraestructura\MSProductos.Infraestructura.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Adaptadores\Gateways\" />
-  </ItemGroup>
-
 </Project>
