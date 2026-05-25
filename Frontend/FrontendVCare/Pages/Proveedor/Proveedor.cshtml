@@ -54,8 +54,7 @@
                     <th>Teléfono</th>
                     <th>Correo</th>
                     <th>Dirección</th>
-                    <th style="width:170px">Acciones</th>
-                </tr>
+                    <th style="width:200px">Acciones</th> 
             </thead>
 
             <tbody>
@@ -69,22 +68,25 @@
                             <td>@(proveedor.CorreoElectronico ?? "-")</td>
                             <td>@(proveedor.Direccion ?? "-")</td>
                             <td>
-                                <!-- ✅ Botón Editar corregido - Usa GET con ID en la URL -->
-                                <a asp-page="ProveedorEdit" 
-                                   asp-route-id="@proveedor.Id" 
-                                   class="btn btn-warning btn-sm">
-                                    <i class="bi bi-pencil"></i> Editar
-                                </a>
+                                <!-- Aquí está la magia: d-flex los pone lado a lado, gap-2 les da espacio -->
+                                <div class="d-flex gap-2">
+                                    <!-- Botón Editar -->
+                                    <a asp-page="ProveedorEdit" 
+                                       asp-route-id="@proveedor.Id" 
+                                       class="btn btn-warning btn-sm">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
 
-                                <!-- Botón Eliminar (sin cambios) -->
-                                <button type="button"
-                                        class="btn btn-danger btn-sm"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#@modalId"
-                                        data-id="@proveedor.Id"
-                                        data-nombre="@proveedor.Nombre">
-                                    <i class="bi bi-trash"></i> Eliminar
-                                </button>
+                                    <!-- Botón Eliminar -->
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#@modalId"
+                                            data-id="@proveedor.Id"
+                                            data-nombre="@proveedor.Nombre">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -112,7 +114,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form method="post" asp-page-handler="EliminarProveedor">
+                    <!-- Formulario ajustado para mayor seguridad de enrutamiento -->
+                    <form method="post" asp-page="Proveedor" asp-page-handler="EliminarProveedor">
                         <input type="hidden" name="id" id="proveedorEliminarId" />
                         <button type="submit" class="btn btn-danger">Eliminar</button>
                     </form>

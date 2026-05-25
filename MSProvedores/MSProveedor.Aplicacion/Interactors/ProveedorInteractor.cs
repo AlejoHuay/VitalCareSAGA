@@ -25,7 +25,15 @@ public class ProveedorInteractor : IProveedorInputPort
 
         if (await _repository.ExisteNombreAsync(dto.Nombre)) return Result<int>.Falla("El nombre ya existe.");
 
-        var entidad = new Proveedor { Nombre = dto.Nombre, Telefono = dto.Telefono, CorreoElectronico = dto.CorreoElectronico, Direccion = dto.Direccion, IdUsuario = dto.IdUsuario };
+        var entidad = new Proveedor 
+        { 
+            Nombre = dto.Nombre, 
+            Telefono = dto.Telefono, 
+            CorreoElectronico = dto.CorreoElectronico, 
+            Direccion = dto.Direccion, 
+            IdUsuario = dto.IdUsuario
+        };
+        
         int idGenerado = await _repository.CrearAsync(entidad);
         return Result<int>.Exito(idGenerado, "Proveedor creado.");
     }
@@ -38,6 +46,7 @@ public class ProveedorInteractor : IProveedorInputPort
 
     public async Task<Result<Proveedor>> ObtenerPorIdAsync(int id)
     {
+        // El repositorio ya filtra usando: WHERE id = @Id AND estado = 1
         var proveedor = await _repository.ObtenerPorIdAsync(id);
         if (proveedor == null) return Result<Proveedor>.Falla("Proveedor no encontrado.");
         return Result<Proveedor>.Exito(proveedor);
@@ -56,18 +65,20 @@ public class ProveedorInteractor : IProveedorInputPort
         existe.CorreoElectronico = dto.CorreoElectronico;
         existe.Direccion = dto.Direccion;
         existe.IdUsuario = dto.IdUsuario;
-
+        
         await _repository.ActualizarAsync(existe);
         return Result<bool>.Exito(true, "Proveedor actualizado.");
     }
 
     public async Task<Result<bool>> EliminarProveedorAsync(int id)
     {
+        // 1. Verificamos que exista y esté activo
         var existe = await _repository.ObtenerPorIdAsync(id);
         if (existe == null) return Result<bool>.Falla("Proveedor no encontrado.");
 
-        await _repository.EliminarAsync(id);
-        return Result<bool>.Exito(true, "Proveedor eliminado.");
+         await _repository.EliminarAsync(id);
+        
+        return Result<bool>.Exito(true, "Proveedor eliminado lógicamente.");
     }
 
     private static Result<bool> ValidarProveedor(ProveedorCreateDto dto)
