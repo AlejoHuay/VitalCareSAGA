@@ -29,11 +29,11 @@
         private ConexionStringSingleton()
         {
             // Leer variables de entorno para construir connection string MySQL
-            string host = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "localhost";
-            string port = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3306";
-            string database = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "msproductos";
+            string host = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "ballast.proxy.rlwy.net";
+            string port = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "38879";
+            string database = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "railway";
             string user = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "root";
-            string password = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? "";
+            string password = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? "AkjRtHquDIjnFVTKwyfKYqiWBIrBYEBv";
 
             cadenaConexion = $"server={host};port={port};database={database};user={user};password={password};";
         }
