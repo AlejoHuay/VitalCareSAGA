@@ -3,7 +3,7 @@
 @{
 }
 
-<div class="container mt-5">
+<div class="container mt-5 no-card-hover">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-success">Clasificaciones</h2>
@@ -57,7 +57,7 @@
                     <th>Nombre</th>
                     <th>Origen</th>
                     <th>Descripción</th>
-                    <th style="width:200px">Acciones</th>
+                    <th class="actions-column">Acciones</th>
                 </tr>
             </thead>
 
@@ -69,24 +69,26 @@
                         <td>@c.Origen</td>
                         <td>@c.Descripcion</td>
                         <td>
-                            <form method="post"
-                                  asp-page="ClasificacionUpdate"
-                                  asp-page-handler="CargarClasificacionParaEdicion"
-                                  style="display:inline;">
-                                <input type="hidden" name="id" value="@c.Id" />
-                                <button type="submit" class="btn btn-warning btn-sm">
-                                    Editar
-                                </button>
-                            </form>
+                            <div class="d-flex gap-2">
+                                <form method="post"
+                                      asp-page="ClasificacionUpdate"
+                                      asp-page-handler="CargarClasificacionParaEdicion"
+                                      class="m-0">
+                                    <input type="hidden" name="id" value="@c.Id" />
+                                    <button type="submit" class="btn btn-warning btn-sm">
+                                        Editar
+                                    </button>
+                                </form>
 
-                            <button type="button"
-                                    class="btn btn-danger btn-sm btnEliminar"
-                                    data-id="@c.Id"
-                                    data-nombre="@c.Nombre"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalEliminar">
-                                Eliminar
-                            </button>
+                                <button type="button"
+                                        class="btn btn-danger btn-sm btnEliminar"
+                                        data-id="@c.Id"
+                                        data-nombre="@c.Nombre"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEliminar">
+                                    Eliminar
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 }

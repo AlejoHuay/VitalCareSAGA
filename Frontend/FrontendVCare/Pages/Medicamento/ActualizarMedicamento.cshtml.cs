@@ -3,6 +3,7 @@ using FrontendVCare.Dto.ClasificacionDtos;
 using FrontendVCare.Dto.MedicamentoDtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Text.RegularExpressions;
 
 namespace FrontendVCare.Pages.Medicamento
 {
@@ -43,7 +44,6 @@ namespace FrontendVCare.Pages.Medicamento
         [BindProperty]
         public int Stock { get; set; }
 
-        [TempData]
         public string? MensajeError { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
@@ -62,6 +62,16 @@ namespace FrontendVCare.Pages.Medicamento
 
             if (!ModelState.IsValid)
             {
+                Medicamento = await _medicamentoAdapter.GetByIdAsync(Id);
+                MensajeError = "Revisa los datos del medicamento. Hay campos obligatorios o con formato incorrecto.";
+                return Page();
+            }
+
+            string? mensajeValidacion = ValidarMedicamento();
+            if (!string.IsNullOrEmpty(mensajeValidacion))
+            {
+                Medicamento = await _medicamentoAdapter.GetByIdAsync(Id);
+                MensajeError = mensajeValidacion;
                 return Page();
             }
 
@@ -84,14 +94,41 @@ namespace FrontendVCare.Pages.Medicamento
                 IdUsuario = idUsuario.Value
             };
 
-            bool exito = await _medicamentoAdapter.UpdateAsync(medicamentoActualizado);
+            var (exito, mensaje) = await _medicamentoAdapter.UpdateWithMessageAsync(medicamentoActualizado);
             if (exito)
             {
                 return RedirectToPage("/Medicamento/Medicamento", new { mensaje = "Medicamento actualizado correctamente" });
             }
 
-            MensajeError = "Error al actualizar el medicamento.";
+            Medicamento = await _medicamentoAdapter.GetByIdAsync(Id);
+            MensajeError = mensaje ?? "Error al actualizar el medicamento.";
             return Page();
+        }
+
+        private string? ValidarMedicamento()
+        {
+            if (Id <= 0)
+                return "ID de medicamento inválido.";
+
+            if (string.IsNullOrWhiteSpace(Nombre))
+                return "El nombre del medicamento es obligatorio.";
+
+            if (!Regex.IsMatch(Nombre.Trim(), @"^[\p{L}0-9\s]+$"))
+                return "El nombre del medicamento no debe contener signos ni caracteres especiales.";
+
+            if (IdClasificacion <= 0)
+                return "La clasificación es obligatoria.";
+
+            if (string.IsNullOrWhiteSpace(Concentracion))
+                return "La concentración es obligatoria.";
+
+            if (Precio < 0)
+                return "El precio no puede ser negativo.";
+
+            if (Stock < 0)
+                return "El stock no puede ser negativo.";
+
+            return null;
         }
 
         private async Task<IActionResult> CargarMedicamentoAsync(int id)

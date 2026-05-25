@@ -136,6 +136,11 @@ body {
         box-shadow: 0 12px 30px rgba(0,0,0,0.15);
     }
 
+.no-card-hover .card-module:hover {
+    transform: none;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
     .card-module a:not(.btn) {
         display: inline-block;
         margin-top: 15px;

@@ -35,6 +35,7 @@ namespace FrontendVCare.Pages.Medicamento
 
             Medicamentos = await _medicamentoAdapter.GetAllAsync();
             Clasificaciones = await _clasificacionAdapter.GetAllAsync();
+            CompletarNombresDeClasificacion();
 
             if (!string.IsNullOrWhiteSpace(filtro))
             {
@@ -45,6 +46,22 @@ namespace FrontendVCare.Pages.Medicamento
                         (!string.IsNullOrEmpty(m.Clasificacion) && m.Clasificacion.Contains(filtro, StringComparison.OrdinalIgnoreCase))
                     )
                     .ToList();
+            }
+        }
+
+        private void CompletarNombresDeClasificacion()
+        {
+            Dictionary<int, string> nombresPorId = Clasificaciones
+                .GroupBy(c => c.Id)
+                .ToDictionary(g => g.Key, g => g.First().Nombre);
+
+            foreach (MedicamentoDto medicamento in Medicamentos)
+            {
+                if (!string.IsNullOrWhiteSpace(medicamento.Clasificacion))
+                    continue;
+
+                if (nombresPorId.TryGetValue(medicamento.IdClasificacion, out string? nombreClasificacion))
+                    medicamento.Clasificacion = nombreClasificacion;
             }
         }
 

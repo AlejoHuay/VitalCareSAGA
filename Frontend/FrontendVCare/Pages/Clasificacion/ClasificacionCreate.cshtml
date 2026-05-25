@@ -20,7 +20,7 @@
                     <form method="post" asp-page-handler="CrearClasificacion">
 
                         <div class="form-floating mb-3">
-                            <input asp-for="Nombre" class="form-control" placeholder="Nombre" required />
+                            <input asp-for="Nombre" class="form-control" placeholder="Nombre" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" title="Solo se permiten letras y espacios." required />
                             <label class="ms-2">Nombre de Clasificación</label>
                         </div>
 

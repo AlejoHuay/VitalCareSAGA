@@ -34,9 +34,9 @@ namespace MSProductos.Dominio.Validadores
             if (nombre.Length < 3 || nombre.Length > 100)
                 return Result.Fail("El nombre debe tener entre 3 y 100 caracteres.");
 
-            string patron = @"^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-().,]+$";
+            string patron = @"^[\p{L}0-9\s]+$";
             if (!Regex.IsMatch(nombre, patron))
-                return Result.Fail("El nombre contiene caracteres inválidos.");
+                return Result.Fail("El nombre del medicamento no debe contener signos ni caracteres especiales.");
 
             return null;
         }
@@ -51,9 +51,9 @@ namespace MSProductos.Dominio.Validadores
             if (presentacion.Length < 3 || presentacion.Length > 50)
                 return Result.Fail("La presentación debe tener entre 3 y 50 caracteres.");
 
-            string patron = @"^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-().,]+$";
+            string patron = @"^[\p{L}0-9\s]+$";
             if (!Regex.IsMatch(presentacion, patron))
-                return Result.Fail("La presentación contiene caracteres inválidos.");
+                return Result.Fail("La presentación no debe contener signos ni caracteres especiales.");
 
             return null;
         }

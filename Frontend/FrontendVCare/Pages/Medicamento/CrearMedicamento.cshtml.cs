@@ -3,6 +3,7 @@ using FrontendVCare.Dto.ClasificacionDtos;
 using FrontendVCare.Dto.MedicamentoDtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Text.RegularExpressions;
 
 namespace FrontendVCare.Pages.Medicamento
 {
@@ -24,7 +25,6 @@ namespace FrontendVCare.Pages.Medicamento
 
         public List<ClasificacionDto> Clasificaciones { get; set; } = new();
 
-        [TempData]
         public string? MensajeError { get; set; }
 
         public async Task OnGetAsync()
@@ -38,6 +38,14 @@ namespace FrontendVCare.Pages.Medicamento
 
             if (!ModelState.IsValid)
             {
+                MensajeError = "Revisa los datos del medicamento. Hay campos obligatorios o con formato incorrecto.";
+                return Page();
+            }
+
+            string? mensajeValidacion = ValidarMedicamento();
+            if (!string.IsNullOrEmpty(mensajeValidacion))
+            {
+                MensajeError = mensajeValidacion;
                 return Page();
             }
 
@@ -50,14 +58,37 @@ namespace FrontendVCare.Pages.Medicamento
 
             Medicamento.IdUsuario = idUsuario.Value;
 
-            bool exito = await _medicamentoAdapter.CreateAsync(Medicamento);
+            var (exito, mensaje) = await _medicamentoAdapter.CreateWithMessageAsync(Medicamento);
             if (exito)
             {
                 return RedirectToPage("/Medicamento/Medicamento", new { mensaje = "Medicamento creado correctamente" });
             }
 
-            MensajeError = "Error al crear el medicamento.";
+            MensajeError = mensaje ?? "Error al crear el medicamento.";
             return Page();
+        }
+
+        private string? ValidarMedicamento()
+        {
+            if (string.IsNullOrWhiteSpace(Medicamento.Nombre))
+                return "El nombre del medicamento es obligatorio.";
+
+            if (!Regex.IsMatch(Medicamento.Nombre.Trim(), @"^[\p{L}0-9\s]+$"))
+                return "El nombre del medicamento no debe contener signos ni caracteres especiales.";
+
+            if (Medicamento.IdClasificacion <= 0)
+                return "La clasificación es obligatoria.";
+
+            if (string.IsNullOrWhiteSpace(Medicamento.Concentracion))
+                return "La concentración es obligatoria.";
+
+            if (Medicamento.Precio < 0)
+                return "El precio no puede ser negativo.";
+
+            if (Medicamento.Stock < 0)
+                return "El stock no puede ser negativo.";
+
+            return null;
         }
     }
 }

@@ -1,7 +1,7 @@
 @page
 @model FrontendVCare.Pages.Medicamento.MedicamentoPageModel
 
-<div class="container mt-5">
+<div class="container mt-5 no-card-hover">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-success">Medicamentos</h2>
@@ -49,7 +49,7 @@
                     <th>Presentación</th>
                     <th>Clasificación</th>
                     <th>Precio (Bs)</th>
-                    <th style="width:180px">Acciones</th>
+                    <th class="actions-column">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -61,19 +61,21 @@
                         <td>@medicamento.Clasificacion</td>
                         <td>@medicamento.Precio.ToString("N2")</td>
                         <td>
-                            <a asp-page="/Medicamento/ActualizarMedicamento"
-                               asp-route-id="@medicamento.Id"
-                               class="btn btn-warning btn-sm me-1">
-                                Editar
-                            </a>
-                            <button type="button"
-                                    class="btn btn-danger btn-sm btnEliminar"
-                                    data-id="@medicamento.Id"
-                                    data-nombre="@medicamento.Nombre"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalEliminar">
-                                Eliminar
-                            </button>
+                            <div class="d-flex gap-2">
+                                <a asp-page="/Medicamento/ActualizarMedicamento"
+                                   asp-route-id="@medicamento.Id"
+                                   class="btn btn-warning btn-sm">
+                                    Editar
+                                </a>
+                                <button type="button"
+                                        class="btn btn-danger btn-sm btnEliminar"
+                                        data-id="@medicamento.Id"
+                                        data-nombre="@medicamento.Nombre"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEliminar">
+                                    Eliminar
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 }

@@ -2,6 +2,7 @@ using FrontendVCare.Dto.ClasificacionDtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using FrontendVCare.Adaptadores;
+using System.Text.RegularExpressions;
 
 namespace FrontendVCare.Pages.Clasificacion
 {
@@ -28,7 +29,6 @@ namespace FrontendVCare.Pages.Clasificacion
         [BindProperty]
         public string Descripcion { get; set; } = string.Empty;
 
-        [TempData]
         public string? MensajeError { get; set; }
 
         // Cargar clasificación para edición
@@ -97,7 +97,28 @@ namespace FrontendVCare.Pages.Clasificacion
 
                 if (string.IsNullOrWhiteSpace(Nombre))
                 {
-                    MensajeError = "El nombre es requerido.";
+                    MensajeError = "El nombre de la clasificación es obligatorio.";
+                    Clasificacion = await _clasificacionAdapter.GetByIdAsync(Id);
+                    return Page();
+                }
+
+                if (!Regex.IsMatch(Nombre.Trim(), @"^[\p{L}\s]+$"))
+                {
+                    MensajeError = "El nombre de la clasificación solo debe contener letras y espacios.";
+                    Clasificacion = await _clasificacionAdapter.GetByIdAsync(Id);
+                    return Page();
+                }
+
+                if (string.IsNullOrWhiteSpace(Origen))
+                {
+                    MensajeError = "El origen es obligatorio.";
+                    Clasificacion = await _clasificacionAdapter.GetByIdAsync(Id);
+                    return Page();
+                }
+
+                if (string.IsNullOrWhiteSpace(Descripcion))
+                {
+                    MensajeError = "La descripción es obligatoria.";
                     Clasificacion = await _clasificacionAdapter.GetByIdAsync(Id);
                     return Page();
                 }
