@@ -26,9 +26,19 @@ namespace FrontendVCare.Adaptadores
             return _adapter.PostAsync("api/medicamentos", medicamento);
         }
 
+        public Task<(bool Success, string? Message)> CreateWithMessageAsync(MedicamentoDto medicamento)
+        {
+            return _adapter.PostWithMessageAsync("api/medicamentos", medicamento);
+        }
+
         public Task<bool> UpdateAsync(MedicamentoDto medicamento)
         {
             return _adapter.PutAsync($"api/medicamentos/{medicamento.Id}", medicamento);
+        }
+
+        public Task<(bool Success, string? Message)> UpdateWithMessageAsync(MedicamentoDto medicamento)
+        {
+            return _adapter.PutWithMessageAsync($"api/medicamentos/{medicamento.Id}", medicamento);
         }
 
         public Task<bool> DeleteAsync(int id)

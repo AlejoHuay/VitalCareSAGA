@@ -30,9 +30,9 @@ namespace MSProductos.Dominio.Validadores
             if (nombre.Length < 3 || nombre.Length > 45)
                 return Result.Fail("El nombre debe tener entre 3 y 45 caracteres.");
 
-            string patron = @"^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]+$";
+            string patron = @"^[\p{L}\s]+$";
             if (!Regex.IsMatch(nombre, patron))
-                return Result.Fail("El nombre contiene caracteres inválidos.");
+                return Result.Fail("El nombre de la clasificación solo debe contener letras y espacios.");
 
             if (Regex.IsMatch(nombre, @"^(.)\1+$"))
                 return Result.Fail("El nombre no puede estar compuesto por un único carácter repetido.");

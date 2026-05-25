@@ -2,6 +2,7 @@ using FrontendVCare.Dto.ClasificacionDtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using FrontendVCare.Adaptadores;
+using System.Text.RegularExpressions;
 
 namespace FrontendVCare.Pages.Clasificacion
 {
@@ -36,7 +37,25 @@ namespace FrontendVCare.Pages.Clasificacion
             {
                 if (string.IsNullOrWhiteSpace(Nombre))
                 {
-                    MensajeError = "El nombre es requerido.";
+                    MensajeError = "El nombre de la clasificación es obligatorio.";
+                    return Page();
+                }
+
+                if (!Regex.IsMatch(Nombre.Trim(), @"^[\p{L}\s]+$"))
+                {
+                    MensajeError = "El nombre de la clasificación solo debe contener letras y espacios.";
+                    return Page();
+                }
+
+                if (string.IsNullOrWhiteSpace(Origen))
+                {
+                    MensajeError = "El origen es obligatorio.";
+                    return Page();
+                }
+
+                if (string.IsNullOrWhiteSpace(Descripcion))
+                {
+                    MensajeError = "La descripción es obligatoria.";
                     return Page();
                 }
 

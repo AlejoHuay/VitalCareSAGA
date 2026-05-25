@@ -17,7 +17,7 @@
                             <input type="hidden" asp-for="Id" />
 
                             <div class="form-floating mb-3">
-                                <input asp-for="Nombre" class="form-control" placeholder="Nombre" required />
+                                <input asp-for="Nombre" class="form-control" placeholder="Nombre" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 ]+" title="No se permiten signos ni caracteres especiales." required />
                                 <label class="ms-2">Nombre</label>
                             </div>
 
