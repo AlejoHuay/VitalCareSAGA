@@ -16,15 +16,16 @@ namespace FrontendVCare.Pages.Clasificacion
 
         public List<ClasificacionDto> Clasificaciones { get; set; } = new();
 
-        [TempData]
         public string? Mensaje { get; set; }
 
-        [TempData]
         public string? MensajeError { get; set; }
 
         // Obtener lista de clasificaciones con filtro opcional
-        public async Task OnGetAsync(string filtro = "")
+        public async Task OnGetAsync(string filtro = "", string? mensaje = null, string? error = null)
         {
+            Mensaje = mensaje;
+            MensajeError = error;
+
             try
             {
                 Clasificaciones = await _clasificacionAdapter.GetAllAsync();

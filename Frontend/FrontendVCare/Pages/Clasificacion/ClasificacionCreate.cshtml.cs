@@ -23,7 +23,6 @@ namespace FrontendVCare.Pages.Clasificacion
         [BindProperty]
         public string Descripcion { get; set; } = string.Empty;
 
-        [TempData]
         public string? MensajeError { get; set; }
 
         public void OnGet()
