@@ -40,9 +40,9 @@
         <div class="alert alert-success shadow-sm">@Model.Mensaje</div>
     }
 
-    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    @if (!string.IsNullOrEmpty(Model.Estado.MensajeError))
     {
-        <div class="alert alert-danger shadow-sm">@Model.MensajeError</div>
+        <div class="alert alert-danger shadow-sm">@Model.Estado.MensajeError</div>
     }
 
     <div class="card-module">
@@ -54,7 +54,8 @@
                     <th>Teléfono</th>
                     <th>Correo</th>
                     <th>Dirección</th>
-                    <th style="width:200px">Acciones</th> 
+                    <th style="width:200px">Acciones</th>
+                </tr>
             </thead>
 
             <tbody>
@@ -68,16 +69,13 @@
                             <td>@(proveedor.CorreoElectronico ?? "-")</td>
                             <td>@(proveedor.Direccion ?? "-")</td>
                             <td>
-                                <!-- Aquí está la magia: d-flex los pone lado a lado, gap-2 les da espacio -->
                                 <div class="d-flex gap-2">
-                                    <!-- Botón Editar -->
                                     <a asp-page="ProveedorEdit" 
                                        asp-route-id="@proveedor.Id" 
                                        class="btn btn-warning btn-sm">
                                         <i class="bi bi-pencil"></i> Editar
                                     </a>
 
-                                    <!-- Botón Eliminar -->
                                     <button type="button"
                                             class="btn btn-danger btn-sm"
                                             data-bs-toggle="modal"
@@ -114,7 +112,6 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <!-- Formulario ajustado para mayor seguridad de enrutamiento -->
                     <form method="post" asp-page="Proveedor" asp-page-handler="EliminarProveedor">
                         <input type="hidden" name="id" id="proveedorEliminarId" />
                         <button type="submit" class="btn btn-danger">Eliminar</button>

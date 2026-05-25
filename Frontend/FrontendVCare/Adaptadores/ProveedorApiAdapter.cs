@@ -58,9 +58,9 @@ namespace FrontendVCare.Adaptadores
             return await LeerResultadoAsync(response, "Proveedor actualizado correctamente.");
         }
 
-        public async Task<OperacionApiDto> EliminarAsync(int id)
+        public async Task<OperacionApiDto> EliminarAsync(int id, int idUsuario)
         {
-            HttpResponseMessage response = await httpClient.DeleteAsync($"api/proveedor/{id}");
+            HttpResponseMessage response = await httpClient.DeleteAsync($"api/proveedor/{id}?idUsuario={idUsuario}");
             return await LeerResultadoAsync(response, "Proveedor eliminado correctamente.");
         }
 

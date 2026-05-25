@@ -14,7 +14,7 @@
                 </div>
 
                 <div class="med-card-body p-4">
-                    <form method="post" asp-page-handler="CrearProveedor">
+                    <form method="post">
                         <div class="form-floating mb-3">
                             <input asp-for="Proveedor.Nombre"
                                    class="form-control"
@@ -46,9 +46,9 @@
                             <label class="ms-2">Direccion</label>
                         </div>
 
-                        @if (!string.IsNullOrEmpty(Model.MensajeError))
+                        @if (!string.IsNullOrEmpty(Model.Estado.MensajeError))
                         {
-                            <div class="alert alert-danger">@Model.MensajeError</div>
+                            <div class="alert alert-danger">@Model.Estado.MensajeError</div>
                         }
 
                         <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">

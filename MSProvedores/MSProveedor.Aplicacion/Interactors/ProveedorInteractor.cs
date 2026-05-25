@@ -46,7 +46,6 @@ public class ProveedorInteractor : IProveedorInputPort
 
     public async Task<Result<Proveedor>> ObtenerPorIdAsync(int id)
     {
-        // El repositorio ya filtra usando: WHERE id = @Id AND estado = 1
         var proveedor = await _repository.ObtenerPorIdAsync(id);
         if (proveedor == null) return Result<Proveedor>.Falla("Proveedor no encontrado.");
         return Result<Proveedor>.Exito(proveedor);
@@ -72,7 +71,6 @@ public class ProveedorInteractor : IProveedorInputPort
 
     public async Task<Result<bool>> EliminarProveedorAsync(int id)
     {
-        // 1. Verificamos que exista y esté activo
         var existe = await _repository.ObtenerPorIdAsync(id);
         if (existe == null) return Result<bool>.Falla("Proveedor no encontrado.");
 
