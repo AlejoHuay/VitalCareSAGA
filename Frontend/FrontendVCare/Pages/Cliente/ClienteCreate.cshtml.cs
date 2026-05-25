@@ -31,6 +31,7 @@ namespace FrontendVCare.Pages
                 return RedirectToPage("/Auth/Login");
 
             Cliente.IdUsuario = idUsuarioSesion.Value;
+            AplicarConsumidorFinalSiCorresponde();
             OperacionApiDto resultado = await clienteApiAdapter.CrearAsync(Cliente);
 
             if (!resultado.Exito)
@@ -40,6 +41,16 @@ namespace FrontendVCare.Pages
             }
 
             return RedirectToPage("Cliente", new { mensaje = resultado.Mensaje });
+        }
+
+        private void AplicarConsumidorFinalSiCorresponde()
+        {
+            if (!Cliente.EsConsumidorFinal)
+                return;
+
+            Cliente.Nit = "CF";
+            Cliente.RazonSocial = "Consumidor Final";
+            Cliente.CorreoElectronico = string.Empty;
         }
     }
 }

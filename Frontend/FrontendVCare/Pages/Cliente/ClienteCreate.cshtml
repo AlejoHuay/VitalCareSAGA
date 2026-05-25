@@ -11,7 +11,7 @@
             <p>Completa los datos para registrar un cliente.</p>
         </div>
 
-        <form method="post" asp-page-handler="CrearCliente" class="form-body">
+        <form method="post" asp-page-handler="CrearCliente" class="form-body" id="clienteForm">
             <div class="mb-4">
                 <label class="form-label fw-bold text-muted d-block mb-3">Tipo de registro</label>
 
@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="form-floating mb-3">
-                    <input asp-for="Cliente.RazonSocial" class="form-control" placeholder="Razon Social" minlength="3" maxlength="45" required />
+                    <input asp-for="Cliente.RazonSocial" class="form-control" placeholder="Razon Social" minlength="3" maxlength="45" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" title="Solo se permiten letras y espacios." required />
                     <label>Razon Social / Nombre Completo</label>
                 </div>
 
@@ -62,7 +62,7 @@
 
             <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                 <a asp-page="Cliente" class="btn btn-secondary px-4">Volver</a>
-                <button type="submit" class="btn btn-success px-5 fw-bold">
+                <button type="submit" class="btn btn-success px-5 fw-bold" id="guardarClienteBtn">
                     Guardar
                 </button>
             </div>
@@ -78,7 +78,11 @@
             const bloqueInformativo = document.getElementById('bloqueConsumidorFinal');
             const contenedor = document.getElementById('datosClienteFiscal');
             const correoGroup = document.getElementById('correoElectronicoGroup');
+            const form = document.getElementById('clienteForm');
+            const guardarBtn = document.getElementById('guardarClienteBtn');
+            const nit = document.getElementById('Cliente_Nit');
             const razonSocial = document.getElementById('Cliente_RazonSocial');
+            const correoElectronico = document.getElementById('Cliente_CorreoElectronico');
 
             const actualizarFormulario = () => {
                 const esConsumidorFinal = opcionConsumidorFinal.checked;
@@ -86,10 +90,32 @@
                 contenedor.style.display = esConsumidorFinal ? 'none' : '';
                 correoGroup.style.display = esConsumidorFinal ? 'none' : '';
                 razonSocial.required = !esConsumidorFinal;
+
+                if (esConsumidorFinal) {
+                    nit.value = 'CF';
+                    razonSocial.value = 'Consumidor Final';
+                    correoElectronico.value = '';
+                } else {
+                    if (nit.value === 'CF') nit.value = '';
+                    if (razonSocial.value === 'Consumidor Final') razonSocial.value = '';
+                }
             };
 
             opcionFormal.addEventListener('change', actualizarFormulario);
             opcionConsumidorFinal.addEventListener('change', actualizarFormulario);
+            razonSocial.addEventListener('input', () => {
+                razonSocial.value = razonSocial.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g, '');
+            });
+            form.addEventListener('submit', (event) => {
+                if (form.dataset.submitting === 'true') {
+                    event.preventDefault();
+                    return;
+                }
+
+                form.dataset.submitting = 'true';
+                guardarBtn.disabled = true;
+                guardarBtn.textContent = 'Guardando...';
+            });
             actualizarFormulario();
         })();
     </script>

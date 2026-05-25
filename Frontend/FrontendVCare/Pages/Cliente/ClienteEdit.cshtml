@@ -11,7 +11,7 @@
             <p>Modifica los datos del cliente seleccionado.</p>
         </div>
 
-        <form method="post" asp-page-handler="ActualizarCliente" class="form-body">
+        <form method="post" asp-page-handler="ActualizarCliente" class="form-body" id="clienteForm">
             <input type="hidden" asp-for="Cliente.IdCliente" />
 
             <div class="mb-4">
@@ -47,7 +47,7 @@
                 </div>
 
                 <div class="form-floating mb-3">
-                    <input asp-for="Cliente.RazonSocial" class="form-control" placeholder="Razon Social" minlength="3" maxlength="45" required />
+                    <input asp-for="Cliente.RazonSocial" class="form-control" placeholder="Razon Social" minlength="3" maxlength="45" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" title="Solo se permiten letras y espacios." required />
                     <label>Razon Social / Nombre Completo</label>
                 </div>
 
@@ -64,7 +64,7 @@
 
             <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                 <a asp-page="Cliente" class="btn btn-secondary px-4">Volver</a>
-                <button type="submit" class="btn btn-success px-5 fw-bold">
+                <button type="submit" class="btn btn-success px-5 fw-bold" id="guardarClienteBtn">
                     Actualizar
                 </button>
             </div>
@@ -80,6 +80,8 @@
             const bloqueInformativo = document.getElementById('bloqueConsumidorFinal');
             const contenedor = document.getElementById('datosClienteFiscal');
             const correoGroup = document.getElementById('correoElectronicoGroup');
+            const form = document.getElementById('clienteForm');
+            const guardarBtn = document.getElementById('guardarClienteBtn');
             const razonSocial = document.getElementById('Cliente_RazonSocial');
 
             const actualizarFormulario = () => {
@@ -92,6 +94,19 @@
 
             opcionFormal.addEventListener('change', actualizarFormulario);
             opcionConsumidorFinal.addEventListener('change', actualizarFormulario);
+            razonSocial.addEventListener('input', () => {
+                razonSocial.value = razonSocial.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g, '');
+            });
+            form.addEventListener('submit', (event) => {
+                if (form.dataset.submitting === 'true') {
+                    event.preventDefault();
+                    return;
+                }
+
+                form.dataset.submitting = 'true';
+                guardarBtn.disabled = true;
+                guardarBtn.textContent = 'Guardando...';
+            });
             actualizarFormulario();
         })();
     </script>
