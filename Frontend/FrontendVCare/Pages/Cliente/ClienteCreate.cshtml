@@ -78,7 +78,9 @@
             const bloqueInformativo = document.getElementById('bloqueConsumidorFinal');
             const contenedor = document.getElementById('datosClienteFiscal');
             const correoGroup = document.getElementById('correoElectronicoGroup');
+            const nit = document.getElementById('Cliente_Nit');
             const razonSocial = document.getElementById('Cliente_RazonSocial');
+            const correoElectronico = document.getElementById('Cliente_CorreoElectronico');
 
             const actualizarFormulario = () => {
                 const esConsumidorFinal = opcionConsumidorFinal.checked;
@@ -86,6 +88,15 @@
                 contenedor.style.display = esConsumidorFinal ? 'none' : '';
                 correoGroup.style.display = esConsumidorFinal ? 'none' : '';
                 razonSocial.required = !esConsumidorFinal;
+
+                if (esConsumidorFinal) {
+                    nit.value = 'CF';
+                    razonSocial.value = 'Consumidor Final';
+                    correoElectronico.value = '';
+                } else {
+                    if (nit.value === 'CF') nit.value = '';
+                    if (razonSocial.value === 'Consumidor Final') razonSocial.value = '';
+                }
             };
 
             opcionFormal.addEventListener('change', actualizarFormulario);
