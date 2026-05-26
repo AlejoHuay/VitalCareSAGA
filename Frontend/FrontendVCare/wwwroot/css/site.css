@@ -196,51 +196,6 @@ body {
         background-color: var(--verde-vital);
     }
 
-/* MEDICAMENTOS DESTACADOS */
-
-.med-card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    transition: transform .3s ease, box-shadow .3s ease;
-    position: relative;
-    overflow: hidden;
-    will-change: transform;
-}
-
-    .med-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-    }
-
-/* icono */
-
-.med-icon {
-    font-size: 40px;
-    margin-bottom: 10px;
-}
-
-.med-card:hover .med-icon {
-    animation: floatIcon 1s ease-in-out;
-}
-
-@keyframes floatIcon {
-
-    0% {
-        transform: translateY(0px);
-    }
-
-    50% {
-        transform: translateY(-6px);
-    }
-
-    100% {
-        transform: translateY(0px);
-    }
-}
-
 /* titulo */
 
 .med-title {
@@ -709,4 +664,14 @@ body {
     .client-toolbar .btn {
         width: 100%;
     }
+}
+
+.form-label {
+    display: block;
+    width: 100%;
+    font-size: 15px;
+    font-weight: 600;
+    color: #2c2c2c;
+    margin-bottom: 8px;
+    text-align: left;
 }
