@@ -24,7 +24,7 @@ namespace FrontendVCare.Pages.Account
                 
                 if (TempData["PasswordError"] != null)
                 {
-                    PasswordError = TempData["PasswordError"].ToString();
+                    PasswordError = TempData["PasswordError"]?.ToString();
                 }
             }
             catch (Exception ex)
