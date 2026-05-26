@@ -21,10 +21,10 @@
                             <input asp-for="Proveedor.Nombre"
                                    class="form-control"
                                    placeholder="Nombre"
-                                   pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+"
-                                   title="El nombre solo puede contener letras."
+                                   pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$"
+                                   title="El nombre solo puede contener letras y espacios."
                                    required />
-                            <label class="ms-2">Nombre</label>
+                            <label class="ms-2">Nombre *</label>
                         </div>
 
                         <div class="form-floating mb-3">
@@ -33,14 +33,19 @@
                                    placeholder="Teléfono"
                                    inputmode="numeric"
                                    maxlength="8"
-                                   pattern="\d{8}"
-                                   title="El teléfono debe tener exactamente 8 dígitos." />
-                            <label class="ms-2">Teléfono</label>
+                                   pattern="^\d{8}$"
+                                   title="El teléfono debe tener exactamente 8 dígitos."
+                                   required />
+                            <label class="ms-2">Teléfono *</label>
                         </div>
 
                         <div class="form-floating mb-3">
-                            <input asp-for="Proveedor.CorreoElectronico" type="email" class="form-control" placeholder="Correo electrónico" />
-                            <label class="ms-2">Correo electrónico</label>
+                            <input asp-for="Proveedor.CorreoElectronico" 
+                                   type="email" 
+                                   class="form-control" 
+                                   placeholder="Correo electrónico" 
+                                   required />
+                            <label class="ms-2">Correo electrónico *</label>
                         </div>
 
                         <div class="form-floating mb-3">

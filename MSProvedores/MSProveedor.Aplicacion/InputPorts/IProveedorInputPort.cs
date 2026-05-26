@@ -10,5 +10,5 @@ public interface IProveedorInputPort
     Task<Result<IEnumerable<Proveedor>>> ObtenerTodosAsync();
     Task<Result<Proveedor>> ObtenerPorIdAsync(int id);
     Task<Result<bool>> ActualizarProveedorAsync(int id, ProveedorCreateDto dto);
-    Task<Result<bool>> EliminarProveedorAsync(int id);
+    Task<Result<bool>> EliminarProveedorAsync(int id, int idUsuario);
 }

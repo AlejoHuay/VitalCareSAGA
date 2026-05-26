@@ -6,6 +6,7 @@ namespace MSProveedor.API.Adaptadores.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+
 public class ProveedorController : ControllerBase
 {
     private readonly IProveedorInputPort _interactor;
@@ -41,9 +42,9 @@ public class ProveedorController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Eliminar(int id)
+    public async Task<IActionResult> Eliminar(int id, [FromQuery] int idUsuario)
     {
-        var res = await _interactor.EliminarProveedorAsync(id);
+        var res = await _interactor.EliminarProveedorAsync(id, idUsuario);
         return res.Success ? Ok(new { Mensaje = res.Message }) : NotFound(new { Error = res.Message });
     }
 }
