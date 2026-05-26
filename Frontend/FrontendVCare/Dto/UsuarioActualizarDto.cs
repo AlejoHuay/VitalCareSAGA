@@ -8,7 +8,7 @@ namespace FrontendVCare.Dto
 
         [Required(ErrorMessage = "El campo Email es obligatorio.")]
         [StringLength(255, ErrorMessage = "El email no puede exceder 255 caracteres.")]
-        [EmailAddress(ErrorMessage = "El formato del email no es valido.")]
+        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]{2,}$", ErrorMessage = "El formato del email no es valido.")]
         public string Email { get; set; } = string.Empty;
 
         public string Role { get; set; } = string.Empty;
@@ -30,10 +30,10 @@ namespace FrontendVCare.Dto
         public string? ApellidoMaterno { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El numero de carnet es obligatorio.")]
-        [RegularExpression(@"^\d{8}$", ErrorMessage = "El CI debe tener 8 digitos numericos.")]
+        [RegularExpression(@"^\d{6,8}$", ErrorMessage = "El CI debe tener entre 6 y 8 digitos numericos.")]
         public string Ci { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "La extension del CI es obligatoria.")]
+        [Required(ErrorMessage = "Debe seleccionar el lugar de expedición del CI.")]
         public string CiExtencion { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El telefono es obligatorio.")]

@@ -21,8 +21,8 @@ namespace FrontendVCare.Pages.Bioquimico
         public UsuarioRegistroDto Registro { get; set; } = new();
 
         [BindProperty]
-        [RegularExpression(@"^$|^\d[A-Za-z]$", ErrorMessage = "El complemento del CI debe tener el formato 1A.")]
-        public string CiComplemento { get; set; } = string.Empty;
+        [RegularExpression(@"^$|^\d[A-Za-z]$", ErrorMessage = "El complemento del CI es opcional, pero si lo ingresas debe tener el formato 1A.")]
+        public string? CiComplemento { get; set; }
 
         public IActionResult OnGet()
         {
@@ -49,6 +49,10 @@ namespace FrontendVCare.Pages.Bioquimico
 
             string ciBase = Registro.Ci;
             Registro.Ci = CiFormatoHelper.ConstruirCi(Registro.Ci, CiComplemento);
+
+            Registro.CiExtencion = Registro.CiExtencion.Trim().ToUpperInvariant();
+
+            Registro.Email = Registro.Email.Trim().ToLowerInvariant();
 
             OperacionApiDto resultado = await _usuarioAdapter.CrearConResultadoAsync(Registro);
             if (!resultado.Exito)

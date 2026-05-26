@@ -20,8 +20,8 @@ namespace FrontendVCare.Pages.Bioquimico
         public UsuarioActualizarDto Input { get; set; } = new();
 
         [BindProperty]
-        [RegularExpression(@"^$|^\d[A-Za-z]$", ErrorMessage = "El complemento del CI debe tener el formato 1A.")]
-        public string CiComplemento { get; set; } = string.Empty;
+        [RegularExpression(@"^$|^\d[A-Za-z0-9]{1,2}$", ErrorMessage = "El complemento del CI es opcional, pero si lo ingresas debe tener hasta 2 caracteres. Ej. 1A.")]
+        public string? CiComplemento { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -68,6 +68,9 @@ namespace FrontendVCare.Pages.Bioquimico
 
             string ciBase = Input.Ci;
             Input.Ci = CiFormatoHelper.ConstruirCi(Input.Ci, CiComplemento);
+
+            Input.CiExtencion = Input.CiExtencion.Trim().ToUpperInvariant();
+            Input.Email = Input.Email.Trim().ToLowerInvariant();
 
             OperacionApiDto resultado = await _usuarioAdapter.ActualizarConResultadoAsync(Input);
             if (!resultado.Exito)
