@@ -1,12 +1,12 @@
 using FrontendVCare.Dto.ClasificacionDtos;
+using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using FrontendVCare.Adaptadores;
 using System.Text.RegularExpressions;
 
 namespace FrontendVCare.Pages.Clasificacion
 {
-    public class ClasificacionCreateModel : PageModel
+    public class ClasificacionCreateModel : BasePageModel
     {
         private readonly ClasificacionAdapter _clasificacionAdapter;
 
@@ -26,8 +26,13 @@ namespace FrontendVCare.Pages.Clasificacion
 
         public string? MensajeError { get; set; }
 
-        public void OnGet()
+        public IActionResult OnGet()
         {
+            IActionResult? acceso = ValidarAcceso("Admin", "Bioquimico");
+            if (acceso != null)
+                return acceso;
+
+            return Page();
         }
 
         // Crear clasificación

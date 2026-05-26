@@ -1,11 +1,11 @@
 using FrontendVCare.Dto.ClasificacionDtos;
+using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using FrontendVCare.Adaptadores;
 
 namespace FrontendVCare.Pages.Clasificacion
 {
-    public class ClasificacionModel : PageModel
+    public class ClasificacionModel : BasePageModel
     {
         private readonly ClasificacionAdapter _clasificacionAdapter;
 
@@ -21,8 +21,13 @@ namespace FrontendVCare.Pages.Clasificacion
         public string? MensajeError { get; set; }
 
         // Obtener lista de clasificaciones con filtro opcional
-        public async Task OnGetAsync(string filtro = "", string? mensaje = null, string? error = null)
+        public async Task<IActionResult> OnGetAsync(string filtro = "", string? mensaje = null, string? error = null)
         {
+            // Valida que el usuario tenga rol Admin o Bioquimico
+            IActionResult? acceso = ValidarAcceso("Admin", "Bioquimico");
+            if (acceso != null)
+                return acceso;
+
             Mensaje = mensaje;
             MensajeError = error;
 
@@ -45,6 +50,8 @@ namespace FrontendVCare.Pages.Clasificacion
             {
                 MensajeError = "No se pudieron cargar las clasificaciones.";
             }
+
+            return Page();
         }
 
         // Eliminar una clasificación por id

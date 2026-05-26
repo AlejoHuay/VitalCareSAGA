@@ -1,12 +1,12 @@
 using FrontendVCare.Dto.ClasificacionDtos;
+using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using FrontendVCare.Adaptadores;
 using System.Text.RegularExpressions;
 
 namespace FrontendVCare.Pages.Clasificacion
 {
-    public class ClasificacionUpdateModel : PageModel
+    public class ClasificacionUpdateModel : BasePageModel
     {
         private readonly ClasificacionAdapter _clasificacionAdapter;
 
@@ -34,6 +34,10 @@ namespace FrontendVCare.Pages.Clasificacion
         // Cargar clasificación para edición
         public async Task<IActionResult> OnGetAsync(int id)
         {
+            IActionResult? acceso = ValidarAcceso("Admin", "Bioquimico");
+            if (acceso != null)
+                return acceso;
+
             try
             {
                 Clasificacion = await _clasificacionAdapter.GetByIdAsync(id);
