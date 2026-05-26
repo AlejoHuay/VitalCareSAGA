@@ -105,36 +105,147 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="currentPassword" class="form-label">Contraseña Actual</label>
-                        <input type="password" id="currentPassword" name="currentPassword" class="form-control" placeholder="Tu contraseña actual" required>
+                        <div class="input-group">
+                            <input type="password" id="currentPassword" name="currentPassword" class="form-control" placeholder="Tu contraseña actual" required>
+                            <button class="btn btn-outline-secondary" type="button" id="toggleCurrent" tabindex="-1">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="newPassword" class="form-label">Nueva Contraseña</label>
-                        <input type="password" id="newPassword" name="newPassword" class="form-control" placeholder="Tu nueva contraseña" required>
+                        <div class="input-group">
+                            <input type="password" id="newPassword" name="newPassword" class="form-control" placeholder="Tu nueva contraseña" required>
+                            <button class="btn btn-outline-secondary" type="button" id="toggleNew" tabindex="-1">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <small id="passwordHint" class="form-text" style="display: none; color: #dc3545; margin-top: 0.25rem;"></small>
                     </div>
 
                     <div class="mb-3">
                         <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Confirma tu nueva contraseña" required>
-                    </div>
-
-                    <div class="alert alert-info" role="alert">
-                        <small>
-                            <strong>Requisitos de contraseña:</strong><br>
-                            • Al menos 8 caracteres<br>
-                            • Una letra mayúscula<br>
-                            • Una letra minúscula<br>
-                            • Al menos un número
-                        </small>
+                        <div class="input-group">
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Confirma tu nueva contraseña" required>
+                            <button class="btn btn-outline-secondary" type="button" id="toggleConfirm" tabindex="-1">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <small id="matchHint" class="form-text" style="display: none; color: #dc3545; margin-top: 0.25rem;"></small>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="submitPasswordBtn" disabled>
                         <i class="bi bi-check-lg"></i> Cambiar Contraseña
                     </button>
                 </div>
             </form>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const currentPasswordInput = document.getElementById('currentPassword');
+                    const newPasswordInput = document.getElementById('newPassword');
+                    const confirmPasswordInput = document.getElementById('confirmPassword');
+                    const toggleCurrentBtn = document.getElementById('toggleCurrent');
+                    const toggleNewBtn = document.getElementById('toggleNew');
+                    const toggleConfirmBtn = document.getElementById('toggleConfirm');
+                    const passwordHint = document.getElementById('passwordHint');
+                    const matchHint = document.getElementById('matchHint');
+                    const submitBtn = document.getElementById('submitPasswordBtn');
+                    
+                    const requirements = {
+                        length: { regex: /.{8,}/, text: 'Al menos 8 caracteres' },
+                        uppercase: { regex: /[A-Z]/, text: 'Una letra mayúscula' },
+                        lowercase: { regex: /[a-z]/, text: 'Una letra minúscula' },
+                        number: { regex: /\d/, text: 'Al menos un número' }
+                    };
+
+                    // Toggle visibility functions
+                    function togglePasswordVisibility(input, btn) {
+                        const isPassword = input.type === 'password';
+                        input.type = isPassword ? 'text' : 'password';
+                        
+                        const icon = btn.querySelector('i');
+                        if (isPassword) {
+                            icon.classList.remove('bi-eye');
+                            icon.classList.add('bi-eye-slash');
+                        } else {
+                            icon.classList.remove('bi-eye-slash');
+                            icon.classList.add('bi-eye');
+                        }
+                    }
+
+                    toggleCurrentBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        togglePasswordVisibility(currentPasswordInput, toggleCurrentBtn);
+                    });
+
+                    toggleNewBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        togglePasswordVisibility(newPasswordInput, toggleNewBtn);
+                    });
+
+                    toggleConfirmBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        togglePasswordVisibility(confirmPasswordInput, toggleConfirmBtn);
+                    });
+
+                    function validatePassword(password) {
+                        const failed = [];
+                        
+                        Object.keys(requirements).forEach(key => {
+                            if (!requirements[key].regex.test(password)) {
+                                failed.push(requirements[key].text);
+                            }
+                        });
+                        
+                        return failed;
+                    }
+
+                    function updateValidation() {
+                        const password = newPasswordInput.value;
+                        const confirmPassword = confirmPasswordInput.value;
+                        const failed = validatePassword(password);
+                        
+                        // Update password strength hint
+                        if (password.length === 0) {
+                            passwordHint.style.display = 'none';
+                            newPasswordInput.classList.remove('is-invalid', 'is-valid');
+                        } else if (failed.length > 0) {
+                            passwordHint.textContent = 'Falta: ' + failed.join(', ');
+                            passwordHint.style.display = 'block';
+                            newPasswordInput.classList.add('is-invalid');
+                            newPasswordInput.classList.remove('is-valid');
+                        } else {
+                            passwordHint.style.display = 'none';
+                            newPasswordInput.classList.add('is-valid');
+                            newPasswordInput.classList.remove('is-invalid');
+                        }
+                        
+                        // Update password match hint
+                        if (password.length > 0 && confirmPassword.length > 0 && password !== confirmPassword) {
+                            matchHint.textContent = 'Las contraseñas no coinciden';
+                            matchHint.style.display = 'block';
+                            confirmPasswordInput.classList.add('is-invalid');
+                        } else if (confirmPassword.length > 0 && password === confirmPassword) {
+                            matchHint.style.display = 'none';
+                            confirmPasswordInput.classList.remove('is-invalid');
+                            confirmPasswordInput.classList.add('is-valid');
+                        } else {
+                            matchHint.style.display = 'none';
+                            confirmPasswordInput.classList.remove('is-invalid', 'is-valid');
+                        }
+                        
+                        // Enable/disable submit button
+                        submitBtn.disabled = !(failed.length === 0 && password === confirmPassword && password.length > 0);
+                    }
+
+                    newPasswordInput.addEventListener('input', updateValidation);
+                    confirmPasswordInput.addEventListener('input', updateValidation);
+                });
+            </script>
         </div>
     </div>
 </div>
