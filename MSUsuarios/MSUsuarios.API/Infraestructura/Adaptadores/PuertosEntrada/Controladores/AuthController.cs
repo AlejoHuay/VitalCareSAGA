@@ -104,12 +104,12 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             if (passwordActual == nuevaPassword)
                 return BadRequest(new { mensaje = "La nueva contrasena debe ser diferente a la actual." });
 
-            Result resultado = _usuarioService.CambiarPassword(idUsuario, passwordActual, nuevaPassword);
+            Result resultado = _usuarioService.CambiarPassword(idUsuario, passwordActual, nuevaPassword, idUsuario);
             if (!resultado.IsSuccess)
                 return BadRequest(new { mensaje = resultado.Error });
 
-            return Ok(new { mensaje = "Contraseña actualizada correctamente." });
+            return Ok(new { mensaje = "Contraseña actualizada correctamente." });}
         }
 
-    }
 }
+

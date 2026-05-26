@@ -172,7 +172,7 @@ namespace MSUsuarios.App.Servicios
             return _repository.GetAll(StringHelper.LimpiarTexto(filtro)).Select(MapearDto);
         }
 
-        public Result CambiarPassword(int idUsuario, string passwordActual, string nuevaPassword)
+        public Result CambiarPassword(int idUsuario, string passwordActual, string nuevaPassword, int idUsuarioAuditoria)
         {
             Usuario? usuario = _repository.GetById(idUsuario);
             if (usuario == null)
@@ -184,7 +184,7 @@ namespace MSUsuarios.App.Servicios
                 return resultadoValidacion;
 
             string passwordHash = PasswordHelper.Hash(nuevaPassword);
-            int filasAfectadas = _repository.CambiarPassword(usuario.IdUsuario, passwordHash, false);
+            int filasAfectadas = _repository.CambiarPassword(usuario.IdUsuario, passwordHash, false, idUsuarioAuditoria);
             if (filasAfectadas <= 0)
                 return Result.Fail("No se pudo actualizar la contrasena.");
 

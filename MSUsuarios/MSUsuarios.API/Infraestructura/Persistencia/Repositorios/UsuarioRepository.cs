@@ -268,13 +268,14 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
         }
 
-        public int CambiarPassword(int idUsuario, string nuevoPasswordHash, bool mustChangePassword)
+        public int CambiarPassword(int idUsuario, string nuevoPasswordHash, bool mustChangePassword, int idUsuarioAuditoria)
         {
             const string query = @"
                 UPDATE usuario
                 SET password_hash = @password_hash,
                     must_change_password = @must_change_password,
-                    ultima_actualizacion = @ultima_actualizacion
+                    ultima_actualizacion = @ultima_actualizacion,
+                    usuario_auditoria_id = @usuario_auditoria_id
                 WHERE id = @id";
 
             using var conn = new NpgsqlConnection(_connectionString);
@@ -283,6 +284,7 @@ namespace MSUsuarios.Infraestructura.Persistencia.Repositorios
             cmd.Parameters.AddWithValue("password_hash", nuevoPasswordHash);
             cmd.Parameters.AddWithValue("must_change_password", mustChangePassword);
             cmd.Parameters.AddWithValue("ultima_actualizacion", DateTime.UtcNow);
+            cmd.Parameters.AddWithValue("usuario_auditoria_id", idUsuarioAuditoria);
             conn.Open();
 
             return cmd.ExecuteNonQuery();
