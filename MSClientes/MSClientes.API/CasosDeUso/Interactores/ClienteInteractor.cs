@@ -40,9 +40,9 @@ namespace MSClientes.API.CasosDeUso.Interactores
                 return (false, validacion.Error);
 
             if (clienteRepository.Insert(cliente) <= 0)
-                return (false, "No se pudo registrar el cliente.");
+                return (false, "No se pudo crear el cliente.");
 
-            return (true, "Cliente registrado correctamente.");
+            return (true, "Cliente creado correctamente.");
         }
 
         public (bool Exito, string Mensaje) Actualizar(int id, Cliente cliente)

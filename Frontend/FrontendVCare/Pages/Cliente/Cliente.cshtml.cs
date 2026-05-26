@@ -31,7 +31,7 @@ namespace FrontendVCare.Pages
             }
             catch (HttpRequestException)
             {
-                MensajeError = "No se pudo cargar clientes. Verifica que MSClientes este ejecutandose y que la base de datos responda.";
+                MensajeError = "No se pudieron cargar los clientes. Verifica que MSClientes esté ejecutándose y que la base de datos responda.";
                 Clientes = new List<ClienteDto>();
             }
         }

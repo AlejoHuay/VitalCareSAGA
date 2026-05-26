@@ -32,13 +32,13 @@ namespace MSClientes.API.CasosDeUso.Validadores
         private static Result? ValidarNitObligatorioYEspacios(string nit)
         {
             if (nit == null || nit.Length == 0)
-                return Result.Fail("El NIT es obligatorio.");
+                return Result.Fail("El NIT no puede estar vacío.");
 
             if (string.IsNullOrWhiteSpace(nit))
-                return Result.Fail("El NIT no debe contener solo espacios.");
+                return Result.Fail("El NIT no puede estar vacío.");
 
             if (nit.Any(c => c == '\t' || c == '\n' || c == '\r'))
-                return Result.Fail("El NIT no debe contener tabs ni saltos de linea.");
+                return Result.Fail("El NIT no debe contener tabulaciones ni saltos de línea.");
 
             if (!nit.Equals(nit.Trim(), StringComparison.Ordinal))
                 return Result.Fail("El NIT no debe contener espacios al inicio o al final.");
@@ -55,22 +55,22 @@ namespace MSClientes.API.CasosDeUso.Validadores
                 return Result.Fail("El NIT no debe contener signos positivos ni negativos.");
 
             if (Regex.IsMatch(nit, @"^\d+\.\d+$"))
-                return Result.Fail("El NIT no debe contener numeros decimales.");
+                return Result.Fail("El NIT no debe contener números decimales.");
 
             bool contieneLetras = nit.Any(char.IsLetter);
             bool contieneSimbolos = nit.Any(c => !char.IsLetterOrDigit(c) && !char.IsWhiteSpace(c));
 
             if (contieneLetras && contieneSimbolos)
-                return Result.Fail("El NIT no debe mezclar letras con simbolos o caracteres especiales.");
+                return Result.Fail("El NIT solo acepta números.");
 
             if (contieneLetras && nit.Any(char.IsWhiteSpace))
-                return Result.Fail("El NIT no debe contener texto ni espacios.");
+                return Result.Fail("El NIT solo acepta números.");
 
             if (contieneLetras)
-                return Result.Fail("El NIT solo debe contener numeros, no letras.");
+                return Result.Fail("El NIT solo acepta números.");
 
             if (contieneSimbolos)
-                return Result.Fail("El NIT no debe contener simbolos ni caracteres especiales.");
+                return Result.Fail("El NIT solo acepta números.");
 
             return null;
         }
@@ -78,13 +78,13 @@ namespace MSClientes.API.CasosDeUso.Validadores
         private static Result? ValidarNitLongitudYContenido(string nit)
         {
             if (nit.Length < 5)
-                return Result.Fail("El NIT debe contener entre 5 y 12 digitos; faltan digitos.");
+                return Result.Fail("El NIT debe contener entre 5 y 12 dígitos; faltan dígitos.");
 
             if (nit.Length > 12)
-                return Result.Fail("El NIT debe contener entre 5 y 12 digitos; sobran digitos.");
+                return Result.Fail("El NIT debe contener entre 5 y 12 dígitos; sobran dígitos.");
 
             if (!Regex.IsMatch(nit, @"^\d{5,12}$"))
-                return Result.Fail("El NIT debe contener entre 5 y 12 digitos numericos.");
+                return Result.Fail("El NIT debe contener entre 5 y 12 dígitos numéricos.");
 
             if (nit.All(c => c == '0'))
                 return Result.Fail("El NIT no puede estar compuesto solo por ceros.");
@@ -95,22 +95,22 @@ namespace MSClientes.API.CasosDeUso.Validadores
         private static Result? ValidarRazonSocial(string razonSocial)
         {
             if (string.IsNullOrWhiteSpace(razonSocial))
-                return Result.Fail("La razon social es obligatoria.");
+                return Result.Fail("La razón social no puede estar vacía.");
 
             if (!razonSocial.Equals(razonSocial.Trim(), StringComparison.Ordinal))
-                return Result.Fail("La razon social no debe contener espacios al inicio o al final.");
+                return Result.Fail("La razón social no debe contener espacios al inicio o al final.");
 
             if (razonSocial.Any(c => c == '\t' || c == '\n' || c == '\r'))
-                return Result.Fail("La razon social no debe contener tabs ni saltos de linea.");
+                return Result.Fail("La razón social no debe contener tabulaciones ni saltos de línea.");
 
             if (razonSocial.Length < 3 || razonSocial.Length > 45)
-                return Result.Fail("La razon social debe tener entre 3 y 45 caracteres.");
+                return Result.Fail("La razón social debe tener entre 3 y 45 caracteres.");
 
             if (!Regex.IsMatch(razonSocial, @"^[\p{L}\s]+$"))
-                return Result.Fail("La razon social solo debe contener letras y espacios.");
+                return Result.Fail("La razón social solo debe contener letras y espacios.");
 
             if (!razonSocial.Any(char.IsLetter))
-                return Result.Fail("La razon social debe contener al menos una letra.");
+                return Result.Fail("La razón social debe contener al menos una letra.");
 
             return null;
         }
@@ -121,10 +121,10 @@ namespace MSClientes.API.CasosDeUso.Validadores
                 return null;
 
             if (correoElectronico.Length > 45)
-                return Result.Fail("El correo electronico no puede superar los 45 caracteres.");
+                return Result.Fail("El correo electrónico no puede superar los 45 caracteres.");
 
             if (!Regex.IsMatch(correoElectronico, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                return Result.Fail("El correo electronico no tiene un formato valido.");
+                return Result.Fail("El correo electrónico no tiene un formato válido.");
 
             return null;
         }
