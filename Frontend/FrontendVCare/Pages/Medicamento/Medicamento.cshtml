@@ -41,7 +41,7 @@
         </div>
     }
 
-    <div class="card-module">
+    <div class="card shadow-sm">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-success">
                 <tr>
@@ -49,7 +49,7 @@
                     <th>Presentación</th>
                     <th>Clasificación</th>
                     <th>Precio (Bs)</th>
-                    <th class="actions-column">Acciones</th>
+                    <th style="width:170px">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -61,12 +61,13 @@
                         <td>@medicamento.Clasificacion</td>
                         <td>@medicamento.Precio.ToString("N2")</td>
                         <td>
-                            <div class="d-flex gap-2">
+                            <div class="acciones-inline">
                                 <a asp-page="/Medicamento/ActualizarMedicamento"
-                                   asp-route-id="@medicamento.Id"
-                                   class="btn btn-warning btn-sm">
+                                asp-route-id="@medicamento.Id"
+                                class="btn btn-warning btn-sm">
                                     Editar
                                 </a>
+
                                 <button type="button"
                                         class="btn btn-danger btn-sm btnEliminar"
                                         data-id="@medicamento.Id"
