@@ -1,13 +1,13 @@
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Dto.ClasificacionDtos;
 using FrontendVCare.Dto.MedicamentoDtos;
+using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Text.RegularExpressions;
 
 namespace FrontendVCare.Pages.Medicamento
 {
-    public class CrearMedicamentoModel : PageModel
+    public class CrearMedicamentoModel : BasePageModel
     {
         private readonly MedicamentoAdapter _medicamentoAdapter;
         private readonly ClasificacionAdapter _clasificacionAdapter;
@@ -27,9 +27,14 @@ namespace FrontendVCare.Pages.Medicamento
 
         public string? MensajeError { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
+            IActionResult? acceso = ValidarAcceso("Admin", "Bioquimico");
+            if (acceso != null)
+                return acceso;
+
             Clasificaciones = await _clasificacionAdapter.GetAllAsync();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostCrearMedicamentoAsync()

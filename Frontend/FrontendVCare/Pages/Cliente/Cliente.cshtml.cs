@@ -19,8 +19,13 @@ namespace FrontendVCare.Pages
             this.clienteApiAdapter = clienteApiAdapter;
         }
 
-        public async Task OnGetAsync(string? filtro, string? mensaje, string? error)
+        public async Task<IActionResult> OnGetAsync(string? filtro, string? mensaje, string? error)
         {
+            // Valida que el usuario tenga rol Admin o Bioquimico
+            IActionResult? acceso = ValidarAcceso("Admin", "Bioquimico");
+            if (acceso != null)
+                return acceso;
+
             FiltroActual = filtro?.Trim() ?? string.Empty;
             Mensaje = mensaje ?? string.Empty;
             MensajeError = error ?? string.Empty;
@@ -34,6 +39,8 @@ namespace FrontendVCare.Pages
                 MensajeError = "No se pudo cargar clientes. Verifica que MSClientes este ejecutandose y que la base de datos responda.";
                 Clientes = new List<ClienteDto>();
             }
+
+            return Page();
         }
 
         public async Task<IActionResult> OnPostEliminarClienteLogicamenteAsync(int id)

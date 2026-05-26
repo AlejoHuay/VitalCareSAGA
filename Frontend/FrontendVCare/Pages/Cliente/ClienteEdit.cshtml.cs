@@ -21,6 +21,10 @@ namespace FrontendVCare.Pages
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
+            IActionResult? acceso = ValidarAcceso("Admin", "Bioquimico");
+            if (acceso != null)
+                return acceso;
+
             ClienteDto? cliente = await clienteApiAdapter.ObtenerPorIdAsync(id);
 
             if (cliente == null)

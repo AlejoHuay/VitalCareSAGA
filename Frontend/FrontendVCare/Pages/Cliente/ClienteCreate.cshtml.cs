@@ -19,9 +19,14 @@ namespace FrontendVCare.Pages
             this.clienteApiAdapter = clienteApiAdapter;
         }
 
-        public void OnGet()
+        public IActionResult OnGet()
         {
+            IActionResult? acceso = ValidarAcceso("Admin", "Bioquimico");
+            if (acceso != null)
+                return acceso;
+
             Cliente.EsConsumidorFinal = false;
+            return Page();
         }
 
         public async Task<IActionResult> OnPostCrearClienteAsync()

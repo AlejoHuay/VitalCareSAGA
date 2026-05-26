@@ -1,12 +1,12 @@
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Dto.ClasificacionDtos;
 using FrontendVCare.Dto.MedicamentoDtos;
+using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FrontendVCare.Pages.Medicamento
 {
-    public class MedicamentoPageModel : PageModel
+    public class MedicamentoPageModel : BasePageModel
     {
         private readonly MedicamentoAdapter _medicamentoAdapter;
         private readonly ClasificacionAdapter _clasificacionAdapter;
@@ -28,8 +28,13 @@ namespace FrontendVCare.Pages.Medicamento
         [TempData]
         public string? MensajeError { get; set; }
 
-        public async Task OnGetAsync(string filtro = "", string? mensaje = null, string? error = null)
+        public async Task<IActionResult> OnGetAsync(string filtro = "", string? mensaje = null, string? error = null)
         {
+            // Valida que el usuario tenga rol Admin o Bioquimico
+            IActionResult? acceso = ValidarAcceso("Admin", "Bioquimico");
+            if (acceso != null)
+                return acceso;
+
             Mensaje = mensaje;
             MensajeError = error;
 
@@ -47,6 +52,8 @@ namespace FrontendVCare.Pages.Medicamento
                     )
                     .ToList();
             }
+
+            return Page();
         }
 
         private void CompletarNombresDeClasificacion()
