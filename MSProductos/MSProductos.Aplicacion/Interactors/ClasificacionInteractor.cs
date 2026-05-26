@@ -116,12 +116,11 @@ namespace MSProductos.Aplicacion.Interactors
 
         public Result EliminarLogicamente(int id, int idUsuario)
         {
-            /*
+            
             if (_repository.TieneMedicamentosActivosAsociados(id))
                 return Result.Fail(
                     "No se puede eliminar porque tiene medicamentos activos asociados."
                 );
-            */
 
             var clasificacion = new Clasificacion
             {
