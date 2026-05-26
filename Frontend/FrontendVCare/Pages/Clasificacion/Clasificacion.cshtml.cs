@@ -59,7 +59,7 @@ namespace FrontendVCare.Pages.Clasificacion
         {
             try
             {
-                int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+                int? idUsuario = ObtenerIdUsuarioSesion();
 
                 if (idUsuario == null || idUsuario == 0)
                 {

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using FrontendVCare.Helpers;
 using FrontendVCare.Servicios;
 
 namespace FrontendVCare.Pages.Account
@@ -20,7 +21,7 @@ namespace FrontendVCare.Pages.Account
         {
             try
             {
-                Usuario = HttpContext.Session.GetString("UserName") ?? "Usuario";
+                Usuario = JwtSessionHelper.ObtenerUserName(HttpContext) ?? "Usuario";
                 
                 if (TempData["PasswordError"] != null)
                 {
@@ -37,7 +38,7 @@ namespace FrontendVCare.Pages.Account
         {
             try
             {
-                string? token = HttpContext.Session.GetString("Token");
+                string? token = JwtSessionHelper.ObtenerToken(HttpContext);
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     TempData["PasswordError"] = "Sesión expirada. Por favor inicia sesión de nuevo.";

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using FrontendVCare.Helpers;
 using FrontendVCare.Servicios;
 
 namespace FrontendVCare.Pages.Auth
@@ -27,12 +28,12 @@ namespace FrontendVCare.Pages.Auth
 
         private async Task CerrarSesionAsync()
         {
-            string token = HttpContext.Session.GetString("Token") ?? string.Empty;
+            string? token = JwtSessionHelper.ObtenerToken(HttpContext);
 
             if (!string.IsNullOrWhiteSpace(token))
                 await _authClient.LogoutAsync(token);
 
-            HttpContext.Session.Clear();
+            JwtSessionHelper.EliminarToken(HttpContext);
         }
     }
 }

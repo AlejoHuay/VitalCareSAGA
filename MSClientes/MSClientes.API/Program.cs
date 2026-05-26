@@ -1,4 +1,7 @@
+using System.Text;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using MSClientes.API.AdaptadoresDeInterfaz.Gateways;
 using MSClientes.API.CasosDeUso.Interactores;
 using MSClientes.API.CasosDeUso.PuertosEntrada;
@@ -28,6 +31,33 @@ builder.Services.AddScoped<IClienteRepository>(provider =>
 builder.Services.AddScoped<IResult<Cliente>, ClienteValidacion>();
 builder.Services.AddScoped<IClienteInputPort, ClienteInteractor>();
 
+// Configuración JWT
+string jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
+    ?? throw new InvalidOperationException("No se encontro JWT_KEY en variables de entorno.");
+string jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+    ?? throw new InvalidOperationException("No se encontro JWT_ISSUER en variables de entorno.");
+string jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+    ?? throw new InvalidOperationException("No se encontro JWT_AUDIENCE en variables de entorno.");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ClockSkew = TimeSpan.Zero,
+            RoleClaimType = System.Security.Claims.ClaimTypes.Role
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -50,6 +80,7 @@ app.UseCors("AllowFrontend");
 
 // app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

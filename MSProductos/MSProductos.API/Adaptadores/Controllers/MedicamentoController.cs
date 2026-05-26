@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MSProductos.Aplicacion.DTOs;
 using MSProductos.Aplicacion.InputPorts;
@@ -7,6 +8,7 @@ namespace MSProductos.API.Adaptadores.Controllers
 {
     [ApiController]
     [Route("api/medicamentos")]
+    [Authorize(Roles = "Admin,Bioquimico")]
     public class MedicamentoController : ControllerBase
     {
         private readonly IMedicamentoInputPort _inputPort;

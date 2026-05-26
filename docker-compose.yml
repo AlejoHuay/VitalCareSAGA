@@ -13,6 +13,13 @@ services:
       - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING}
       - MONGODB_DATABASE=${MONGODB_DATABASE}
       - MONGODB_COLLECTION=${MONGODB_COLLECTION}
+      # JWT Configuration
+      - JWT_KEY=${JWT_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+      # Frontend Base URL
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
     ports:
       - "${MSCLIENTES_PORT}:${MSCLIENTES_PORT}"
     networks:
@@ -35,6 +42,13 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      # JWT Configuration
+      - JWT_KEY=${JWT_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+      # Frontend Base URL
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
     ports:
       - "${MSPRODUCTOS_PORT}:${MSPRODUCTOS_PORT}"
     networks:
@@ -50,6 +64,13 @@ services:
       dockerfile: Dockerfile.MSProveedor
     container_name: vitalcare-msproveedor
     environment:
+      # JWT Configuration
+      - JWT_KEY=${JWT_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+      # Frontend Base URL
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:${MSPROVEEDOR_PORT}
       - POSTGRES_PROVEEDOR_HOST=${POSTGRES_PROVEEDOR_HOST}

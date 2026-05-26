@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MSProductos.Aplicacion.DTOs;
 using MSProductos.Aplicacion.InputPorts;
 using MSProductos.Dominio.Entidades;
@@ -7,6 +8,7 @@ namespace MSProductos.API.Adaptadores.Controllers
 {
     [ApiController]
     [Route("api/clasificaciones")]
+    [Authorize(Roles = "Admin,Bioquimico")]
     public class ClasificacionController : ControllerBase
     {
         private readonly IClasificacionInputPort _inputPort;

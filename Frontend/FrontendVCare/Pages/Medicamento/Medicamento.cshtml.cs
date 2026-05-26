@@ -74,7 +74,7 @@ namespace FrontendVCare.Pages.Medicamento
 
         public async Task<IActionResult> OnPostEliminarAsync(int id)
         {
-            int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+            int? idUsuario = ObtenerIdUsuarioSesion();
             if (idUsuario == null || idUsuario.Value == 0)
             {
                 return RedirectToPage("/Medicamento/Medicamento", new { error = "No se encontró el usuario. Por favor, inicia sesión nuevamente." });

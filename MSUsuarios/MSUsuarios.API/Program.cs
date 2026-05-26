@@ -62,6 +62,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Configuración JWT
 string jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
     ?? builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("No se encontro JWT_KEY en variables de entorno ni Jwt:Key en configuracion.");
@@ -112,7 +113,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
+            RoleClaimType = System.Security.Claims.ClaimTypes.Role
         };
     });
 

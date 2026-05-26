@@ -9,7 +9,6 @@ using MSUsuarios.Infraestructura.Ayudadores;
 namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
 {
     [ApiController]
-    [Authorize]
     [Route("api/usuarios")]
     public class UsuariosController : ControllerBase
     {
@@ -20,6 +19,7 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             _usuarioService = usuarioService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("GetUsers")]
         public IActionResult GetAllUsers([FromQuery] string? filtro)
         {
@@ -30,6 +30,7 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             return Ok(new { mensaje = "Usuarios obtenidos correctamente.", data = usuarios });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("getUser")]
         public IActionResult GetOneUser([FromQuery]  string? email, [FromQuery] string? userName)
         {
@@ -48,6 +49,7 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
         }
 
         [HttpGet("getUserById")]
+        [Authorize(Roles = "Admin,Bioquimico")]
         public IActionResult GetUserById([FromQuery] string id)
         {
             if (!int.TryParse(id, out int idUsuario))
@@ -61,6 +63,7 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
         }
 
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("CrearUsuario")]
         public IActionResult CrearUsuario([FromBody] UsuarioRegistroDto dto)
         {
@@ -87,6 +90,7 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("EliminarUsuario")]
         public IActionResult EliminarUsuario([FromQuery] string idUsuario, [FromQuery] string? idUsuarioSesion)
         {
@@ -107,7 +111,8 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             return Ok(new { mensaje = "Usuario eliminado correctamente.", StatusCode = 204 });
 
         }
-
+        [Authorize(Roles = "Admin")]
+        
         [HttpPut("actualizarUsuario")]
         public IActionResult ActualizarUsuario([FromBody] UsuarioActualizarDto dto, [FromQuery] string? idUsuarioSesion)
         {

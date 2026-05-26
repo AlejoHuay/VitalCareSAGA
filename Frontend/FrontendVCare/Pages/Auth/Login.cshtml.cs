@@ -22,7 +22,8 @@ namespace FrontendVCare.Pages.Auth
 
         public IActionResult OnGet()
         {
-            if (!string.IsNullOrWhiteSpace(HttpContext.Session.GetString("Token")))
+            string? token = JwtSessionHelper.ObtenerToken(HttpContext);
+            if (!string.IsNullOrWhiteSpace(token))
                 return RedirectToPage("/Index");
 
             return Page();
