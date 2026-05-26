@@ -28,7 +28,7 @@ public class ProveedorRepository : IProveedorRepository
     public async Task<IEnumerable<Proveedor>> ObtenerTodosAsync()
     {
         using var conexion = new NpgsqlConnection(CadenaConexion);
-           var sql = @"SELECT id as Id, nombre as Nombre, telefono as Telefono, 
+        var sql = @"SELECT id as Id, nombre as Nombre, telefono as Telefono, 
                            correo_electronico as CorreoElectronico, direccion as Direccion, 
                            estado as Estado, fecha_registro as FechaRegistro, 
                            ultima_actualizacion as UltimaActualizacion, id_usuario as IdUsuario 
@@ -59,11 +59,15 @@ public class ProveedorRepository : IProveedorRepository
         return filasAfectadas > 0;
     }
 
-    public async Task<bool> EliminarAsync(int id)
+    public async Task<bool> EliminarAsync(int id, int idUsuario)
     {
         using var conexion = new NpgsqlConnection(CadenaConexion);
-        var sql = "UPDATE public.proveedor SET estado = 0, ultima_actualizacion = CURRENT_TIMESTAMP WHERE id = @Id;";
-        var filasAfectadas = await conexion.ExecuteAsync(sql, new { Id = id });
+        var sql = @"UPDATE public.proveedor 
+                    SET estado = 0, 
+                        id_usuario = @IdUsuario, 
+                        ultima_actualizacion = CURRENT_TIMESTAMP 
+                    WHERE id = @Id;";
+        var filasAfectadas = await conexion.ExecuteAsync(sql, new { Id = id, IdUsuario = idUsuario });
         return filasAfectadas > 0;
     }
 }

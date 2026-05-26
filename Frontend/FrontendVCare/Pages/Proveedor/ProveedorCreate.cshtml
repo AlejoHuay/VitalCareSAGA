@@ -19,31 +19,39 @@
                             <input asp-for="Proveedor.Nombre"
                                    class="form-control"
                                    placeholder="Nombre"
-                                   pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+"
-                                   title="El nombre solo puede contener letras."
+                                   pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$"
+                                   title="El nombre solo puede contener letras y espacios."
                                    required />
-                            <label class="ms-2">Nombre</label>
+                            <label class="ms-2">Nombre *</label>
                         </div>
 
                         <div class="form-floating mb-3">
+                            <!-- ✅ Tildes corregidas, required y asterisco añadidos -->
                             <input asp-for="Proveedor.Telefono"
                                    class="form-control"
-                                   placeholder="Telefono"
+                                   placeholder="Teléfono"
                                    inputmode="numeric"
                                    maxlength="8"
-                                   pattern="\d{8}"
-                                   title="El telefono debe tener exactamente 8 digitos." />
-                            <label class="ms-2">Telefono</label>
+                                   pattern="^\d{8}$"
+                                   title="El teléfono debe tener exactamente 8 dígitos."
+                                   required />
+                            <label class="ms-2">Teléfono *</label>
                         </div>
 
                         <div class="form-floating mb-3">
-                            <input asp-for="Proveedor.CorreoElectronico" type="email" class="form-control" placeholder="Correo electronico" />
-                            <label class="ms-2">Correo electronico</label>
+                            <!-- ✅ Tildes corregidas -->
+                            <input asp-for="Proveedor.CorreoElectronico" 
+                                   type="email" 
+                                   class="form-control" 
+                                   placeholder="Correo electrónico" 
+                                   required />
+                            <label class="ms-2">Correo electrónico *</label>
                         </div>
 
                         <div class="form-floating mb-3">
-                            <textarea asp-for="Proveedor.Direccion" class="form-control" style="height: 110px" placeholder="Direccion"></textarea>
-                            <label class="ms-2">Direccion</label>
+                            <!-- ✅ Tildes corregidas -->
+                            <textarea asp-for="Proveedor.Direccion" class="form-control" style="height: 110px" placeholder="Dirección"></textarea>
+                            <label class="ms-2">Dirección</label>
                         </div>
 
                         @if (!string.IsNullOrEmpty(Model.Estado.MensajeError))
