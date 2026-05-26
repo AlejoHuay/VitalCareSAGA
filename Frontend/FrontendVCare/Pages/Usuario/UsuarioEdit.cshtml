@@ -31,7 +31,6 @@
                         <div class="form-floating mb-3">
                             <input asp-for="Input.Email" class="form-control" placeholder="Email" />
                             <label class="ms-2">Correo Electronico</label>
-                            <span asp-validation-for="Input.Email" class="text-danger"></span>
                         </div>
 
                         <div class="form-floating mb-3">
@@ -54,6 +53,33 @@
                         {
                             <div class="alert alert-danger mb-4">
                                 @Model.Estado.MensajeError
+                            </div>
+                        }
+                        else if (!ViewContext.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger mb-4">
+                                @{
+                                    string[] ordenCampos =
+                                    [
+                                        "Input.Email",
+                                        "Input.Role",
+                                        "Input.Activo"
+                                    ];
+
+                                    string primerError = "Error de validación.";
+
+                                    foreach (string campo in ordenCampos)
+                                    {
+                                        if (ViewContext.ModelState.TryGetValue(campo, out var entry)
+                                            && entry.Errors.Count > 0)
+                                        {
+                                            primerError = entry.Errors.First().ErrorMessage;
+                                            break;
+                                        }
+                                    }
+
+                                    @primerError
+                                }
                             </div>
                         }
 

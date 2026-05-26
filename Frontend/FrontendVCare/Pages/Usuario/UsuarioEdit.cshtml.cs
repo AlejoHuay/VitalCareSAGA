@@ -64,6 +64,9 @@ namespace FrontendVCare.Pages.Usuario
             if (!ModelState.IsValid)
                 return Page();
 
+            Input.Email = Input.Email.Trim().ToLowerInvariant();
+            Input.Role = Input.Role.Trim();
+
             OperacionApiDto resultado = await _usuarioAdapter.ActualizarConResultadoAsync(Input);
             if (!resultado.Exito)
             {
