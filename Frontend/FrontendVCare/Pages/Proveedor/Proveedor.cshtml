@@ -5,7 +5,7 @@
     var modalId = "confirmarEliminarProveedorModal";
 }
 
-<div class="container mt-5 no-card-hover">
+<div class="container mt-5">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-success">Proveedores Registrados</h2>
@@ -45,8 +45,8 @@
         <div class="alert alert-danger shadow-sm">@Model.Estado.MensajeError</div>
     }
 
-    <div class="card shadow-sm">
-        <table class="table table-hover align-middle mb-0">
+    <div class="card-module">
+        <table class="table table-hover align-middle">
             <caption class="visually-hidden">Tabla de proveedores registrados con nombre, teléfono, correo, dirección y acciones disponibles.</caption>
             <thead class="table-success">
                 <tr>
@@ -54,7 +54,7 @@
                     <th>Teléfono</th>
                     <th>Correo</th>
                     <th>Dirección</th>
-                    <th style="width:170px">Acciones</th>
+                    <th style="width:200px">Acciones</th>
                 </tr>
             </thead>
 
@@ -73,7 +73,7 @@
                                     <a asp-page="ProveedorEdit" 
                                        asp-route-id="@proveedor.Id" 
                                        class="btn btn-warning btn-sm">
-                                        Editar
+                                        <i class="bi bi-pencil"></i> Editar
                                     </a>
 
                                     <button type="button"
@@ -82,7 +82,7 @@
                                             data-bs-target="#@modalId"
                                             data-id="@proveedor.Id"
                                             data-nombre="@proveedor.Nombre">
-                                        Eliminar
+                                        <i class="bi bi-trash"></i> Eliminar
                                     </button>
                                 </div>
                             </td>

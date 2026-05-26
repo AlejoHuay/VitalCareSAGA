@@ -57,13 +57,11 @@ namespace FrontendVCare.Pages.Proveedor
                 return Page();
             }
 
-            // 1. Limpiamos los datos (Trim) ANTES de validar
             Proveedor.Nombre = Proveedor.Nombre?.Trim() ?? string.Empty;
-            Proveedor.Telefono = Proveedor.Telefono?.Trim() ?? string.Empty; // Ahora asume que vendrá algo, no null
+            Proveedor.Telefono = Proveedor.Telefono?.Trim() ?? string.Empty; 
             Proveedor.CorreoElectronico = Proveedor.CorreoElectronico?.Trim() ?? string.Empty;
             Proveedor.Direccion = string.IsNullOrWhiteSpace(Proveedor.Direccion) ? null : Proveedor.Direccion.Trim();
 
-            // 2. Validamos usando el método interno
             if (!ValidarProveedor())
                 return Page();
 
@@ -86,7 +84,6 @@ namespace FrontendVCare.Pages.Proveedor
             return RedirectToPage("Proveedor", new { mensaje = resultado.Mensaje });
         }
 
-        // ✅ Método de validación actualizado con las mismas reglas de Crear
         private bool ValidarProveedor()
         {
             if (string.IsNullOrWhiteSpace(Proveedor.Nombre))
@@ -120,7 +117,7 @@ namespace FrontendVCare.Pages.Proveedor
                 return false;
             }
 
-            // ✅ Ahora es OBLIGATORIO
+            // Teléfono OBLIGATORIO
             if (string.IsNullOrWhiteSpace(Proveedor.Telefono))
             {
                 Estado.MensajeError = "El teléfono es un campo obligatorio.";

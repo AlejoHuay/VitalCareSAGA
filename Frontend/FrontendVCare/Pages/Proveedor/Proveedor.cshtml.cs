@@ -38,7 +38,7 @@ namespace FrontendVCare.Pages.Proveedor
             }
             catch (HttpRequestException)
             {
-                Estado.MensajeError = "No se pudo cargar proveedores. Verifica que MSProveedor este ejecutandose y que Neon responda.";
+                Estado.MensajeError = "No se pudo cargar proveedores. Verifica que el microservicio esté ejecutándose.";
                 Proveedores = new List<ProveedorDto>();
             }
 
