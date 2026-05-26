@@ -16,61 +16,140 @@
                         <form method="post" asp-page-handler="ActualizarMedicamento">
                             <input type="hidden" asp-for="Id" />
 
-                            <div class="form-floating mb-3">
-                                <input asp-for="Nombre" class="form-control" placeholder="Nombre" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 ]+" title="No se permiten signos ni caracteres especiales." required />
-                                <label class="ms-2">Nombre</label>
+                            <!-- Nombre -->
+                            <div class="mb-3 text-start">
+                                <label class="form-label fw-semibold">
+                                    Nombre
+                                </label>
+
+                                <input asp-for="Nombre"
+                                       class="form-control"
+                                       placeholder="Ej: Mentisan"
+                                       pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 ]+"
+                                       title="No se permiten signos ni caracteres especiales."
+                                       required />
                             </div>
 
-                            <div class="form-floating mb-3">
-                                <select asp-for="Presentacion" class="form-select" required>
-                                    <option value="" disabled>Seleccione</option>
-                                    <option value="Cápsulas" selected="@(Model.Presentacion == "Cápsulas" ? "selected" : null)">Cápsulas</option>
-                                    <option value="Crema" selected="@(Model.Presentacion == "Crema" ? "selected" : null)">Crema</option>
-                                    <option value="Gotas" selected="@(Model.Presentacion == "Gotas" ? "selected" : null)">Gotas</option>
-                                    <option value="Inyectable" selected="@(Model.Presentacion == "Inyectable" ? "selected" : null)">Inyectable</option>
-                                    <option value="Jarabe" selected="@(Model.Presentacion == "Jarabe" ? "selected" : null)">Jarabe</option>
-                                    <option value="Polvo" selected="@(Model.Presentacion == "Polvo" ? "selected" : null)">Polvo</option>
-                                    <option value="Pomada" selected="@(Model.Presentacion == "Pomada" ? "selected" : null)">Pomada</option>
-                                    <option value="Suspensión" selected="@(Model.Presentacion == "Suspensión" ? "selected" : null)">Suspensión</option>
-                                    <option value="Tabletas" selected="@(Model.Presentacion == "Tabletas" ? "selected" : null)">Tabletas</option>
+                            <!-- Presentación -->
+                            <div class="mb-3 text-start">
+                                <label class="form-label fw-semibold">
+                                    Presentación
+                                </label>
+
+                                <select asp-for="Presentacion"
+                                        class="form-select"
+                                        required>
+                                    <option value="" disabled>
+                                        Seleccione una presentación
+                                    </option>
+
+                                    <option value="Cápsulas">Cápsulas</option>
+                                    <option value="Crema">Crema</option>
+                                    <option value="Gotas">Gotas</option>
+                                    <option value="Inyectable">Inyectable</option>
+                                    <option value="Jarabe">Jarabe</option>
+                                    <option value="Polvo">Polvo</option>
+                                    <option value="Pomada">Pomada</option>
+                                    <option value="Suspensión">Suspensión</option>
+                                    <option value="Tabletas">Tabletas</option>
                                 </select>
-                                <label class="ms-2">Presentación</label>
                             </div>
 
-                            <div class="form-floating mb-3">
-                                <select asp-for="IdClasificacion" class="form-select" required>
-                                    <option value="" disabled>Seleccione</option>
+                            <!-- Clasificación -->
+                            <div class="mb-3 text-start">
+                                <label class="form-label fw-semibold">
+                                    Clasificación
+                                </label>
+
+                                <select asp-for="IdClasificacion"
+                                        class="form-select"
+                                        required>
+
+                                    <option value="" disabled>
+                                        Seleccione una clasificación
+                                    </option>
+
                                     @foreach (var clasificacion in Model.Clasificaciones)
                                     {
-                                        <option value="@clasificacion.Id" selected="@(clasificacion.Id == Model.IdClasificacion ? "selected" : null)">@clasificacion.Nombre</option>
+                                        <option value="@clasificacion.Id">
+                                            @clasificacion.Nombre
+                                        </option>
                                     }
                                 </select>
-                                <label class="ms-2">Clasificación</label>
                             </div>
 
-                            <div class="form-floating mb-3">
-                                <input asp-for="Concentracion" class="form-control" placeholder="Concentración" required />
-                                <label class="ms-2">Concentración</label>
+                            <!-- Concentración -->
+                            <div class="mb-3 text-start">
+
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label fw-semibold mb-0">
+                                        Concentración
+                                    </label>
+
+                                    <small class="text-muted">
+                                        Ej: 500 mg, 5 ml o 0.9 %
+                                    </small>
+                                </div>
+
+                                <input asp-for="Concentracion"
+                                       class="form-control"
+                                       placeholder="Ingrese la concentración"
+                                       required />
                             </div>
 
-                            <div class="form-floating mb-3">
-                                <input asp-for="Precio" class="form-control" placeholder="Precio" type="number" step="0.01" min="0" required />
-                                <label class="ms-2">Precio</label>
+                            <!-- Precio -->
+                            <div class="mb-3 text-start">
+                                <label class="form-label fw-semibold">
+                                    Precio
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text bg-light text-success fw-bold">
+                                        Bs.
+                                    </span>
+
+                                    <input asp-for="Precio"
+                                           class="form-control"
+                                           placeholder="0.00"
+                                           type="number"
+                                           step="0.01"
+                                           min="0"
+                                           required />
+                                </div>
                             </div>
 
-                            <div class="form-floating mb-3">
-                                <input asp-for="Stock" class="form-control" placeholder="Stock" type="number" min="0" required />
-                                <label class="ms-2">Stock</label>
+                            <!-- Stock -->
+                            <div class="mb-3 text-start">
+                                <label class="form-label fw-semibold">
+                                    Stock
+                                </label>
+
+                                <input asp-for="Stock"
+                                       class="form-control"
+                                       placeholder="0"
+                                       type="number"
+                                       min="0"
+                                       required />
                             </div>
 
                             @if (!string.IsNullOrEmpty(Model.MensajeError))
                             {
-                                <div class="alert alert-danger">@Model.MensajeError</div>
+                                <div class="alert alert-danger">
+                                    @Model.MensajeError
+                                </div>
                             }
 
                             <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                                <a asp-page="/Medicamento/Medicamento" class="btn btn-secondary">Volver</a>
-                                <button type="submit" class="btn btn-success px-5 fw-bold shadow-sm">Actualizar</button>
+                                <a asp-page="/Medicamento/Medicamento"
+                                   class="btn btn-secondary">
+                                    Volver
+                                </a>
+
+                                <button type="submit"
+                                        class="btn btn-success px-5 fw-bold shadow-sm">
+                                    Actualizar
+                                </button>
                             </div>
                         </form>
                     }
