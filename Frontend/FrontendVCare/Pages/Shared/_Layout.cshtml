@@ -108,6 +108,14 @@
                                             Gestionar Clasificación
                                         </a>
                                     </li>
+                                    @if (esAdministrador)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Proveedor/Proveedor">
+                                                Gestionar Proveedores
+                                            </a>
+                                        </li>
+                                    }
                                 </ul>
                             </li>
 
