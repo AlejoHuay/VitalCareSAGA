@@ -52,6 +52,8 @@ namespace FrontendVCare.Pages.Usuario
                 MustChangePassword = (byte)Math.Max(usuario.MustChangePassword, (sbyte)0)
             };
 
+            ModelState.Clear();
+
             return Page();
         }
 
