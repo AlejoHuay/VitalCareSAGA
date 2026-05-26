@@ -32,9 +32,9 @@ namespace FrontendVCare.Adaptadores
             return _adapter.PutWithMessageAsync($"api/clasificaciones/{clasificacion.Id}", clasificacion);
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public Task<bool> DeleteAsync(int id, int idUsuario)
         {
-            return _adapter.DeleteAsync($"api/clasificaciones/{id}");
+            return _adapter.DeleteAsync($"api/clasificaciones/{id}?idUsuario={idUsuario}");
         }
     }
 }

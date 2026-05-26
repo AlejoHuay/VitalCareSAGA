@@ -52,23 +52,38 @@ namespace FrontendVCare.Pages.Clasificacion
         {
             try
             {
-                bool exito = await _clasificacionAdapter.DeleteAsync(id);
+                int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+
+                if (idUsuario == null || idUsuario == 0)
+                {
+                    return RedirectToPage(new
+                    {
+                        error = "No se encontró la sesión del usuario."
+                    });
+                }
+
+                bool exito = await _clasificacionAdapter.DeleteAsync(id, idUsuario.Value);
 
                 if (exito)
                 {
-                    Mensaje = "Clasificación eliminada correctamente.";
+                    return RedirectToPage(new
+                    {
+                        mensaje = "Clasificación eliminada correctamente."
+                    });
                 }
-                else
+
+                return RedirectToPage(new
                 {
-                    MensajeError = "Error al eliminar la clasificación.";
-                }
+                    error = "Error al eliminar la clasificación."
+                });
             }
             catch (Exception ex)
             {
-                MensajeError = $"Ocurrió un error: {ex.Message}";
+                return RedirectToPage(new
+                {
+                    error = $"Ocurrió un error: {ex.Message}"
+                });
             }
-
-            return RedirectToPage();
         }
     }
 }
