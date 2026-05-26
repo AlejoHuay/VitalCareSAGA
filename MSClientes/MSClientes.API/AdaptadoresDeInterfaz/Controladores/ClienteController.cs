@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MSClientes.API.CasosDeUso.PuertosEntrada;
 using MSClientes.API.Entidades;
@@ -6,6 +7,7 @@ namespace MSClientes.API.AdaptadoresDeInterfaz.Controladores
 {
     [ApiController]
     [Route("api/clientes")]
+    [Authorize(Roles = "Admin,Bioquimico")]
     public class ClienteController : ControllerBase
     {
         private readonly IClienteInputPort clienteInputPort;

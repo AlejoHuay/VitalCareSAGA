@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using FrontendVCare.Helpers;
 
 namespace FrontendVCare.Pages
 {
@@ -9,8 +10,8 @@ namespace FrontendVCare.Pages
 
         public void OnGet()
         {
-            Usuario = HttpContext.Session.GetString("UserName");
-            Role = HttpContext.Session.GetString("Role")?.Trim() ?? "Usuario";
+            Usuario = JwtSessionHelper.ObtenerUserName(HttpContext);
+            Role = JwtSessionHelper.ObtenerRole(HttpContext)?.Trim() ?? "Usuario";
         }
     }   
 }

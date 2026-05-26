@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using FrontendVCare.Helpers;
 
 namespace FrontendVCare.Pages.Base
 {
@@ -14,11 +15,11 @@ namespace FrontendVCare.Pages.Base
         /// <returns>Redirige a Login si no autenticado, a Index si rol no permitido, null si permitido</returns>
         protected IActionResult? ValidarAcceso(params string[] rolesPermitidos)
         {
-            string? usuario = HttpContext.Session.GetString("UserName");
+            string? usuario = JwtSessionHelper.ObtenerUserName(HttpContext);
             if (string.IsNullOrWhiteSpace(usuario))
                 return RedirectToPage("/Auth/Login");
 
-            string role = HttpContext.Session.GetString("Role")?.Trim() ?? string.Empty;
+            string role = JwtSessionHelper.ObtenerRole(HttpContext)?.Trim() ?? string.Empty;
             
             bool tieneAcceso = rolesPermitidos.Any(r => r.Equals(role, StringComparison.OrdinalIgnoreCase));
             if (!tieneAcceso)
@@ -37,7 +38,7 @@ namespace FrontendVCare.Pages.Base
 
         protected int? ObtenerIdUsuarioSesion()
         {
-            return HttpContext.Session.GetInt32("IdUsuario");
+            return JwtSessionHelper.ObtenerIdUsuario(HttpContext);
         }
     }
 }

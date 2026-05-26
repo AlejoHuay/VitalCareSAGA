@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FrontendVCare.Dto;
 using FrontendVCare.Dto.Auth;
+using FrontendVCare.Helpers;
 using Microsoft.AspNetCore.Http;
 
 namespace FrontendVCare.Adaptadores
@@ -152,12 +153,16 @@ namespace FrontendVCare.Adaptadores
 
         private int? ObtenerIdUsuarioSesion()
         {
-            return _httpContextAccessor.HttpContext?.Session.GetInt32("IdUsuario");
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext == null) return null;
+            return JwtSessionHelper.ObtenerIdUsuario(httpContext);
         }
 
         private string? ObtenerToken()
         {
-            return _httpContextAccessor.HttpContext?.Session.GetString("Token");
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext == null) return null;
+            return JwtSessionHelper.ObtenerToken(httpContext);
         }
 
         private async Task<HttpResponseMessage> GetConTokenAsync(string url)

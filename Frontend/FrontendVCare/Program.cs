@@ -16,15 +16,10 @@ builder.Logging.AddDebug();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddDistributedMemoryCache();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromHours(8);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
 
+// Registrar el manejador de tokens JWT
+builder.Services.AddScoped<JwtTokenHandler>();
 
 builder.Services.AddHttpClient<ClienteApiAdapter>(client =>
 {
@@ -32,7 +27,8 @@ builder.Services.AddHttpClient<ClienteApiAdapter>(client =>
         ?? builder.Configuration["ApiUrls:MSClientes"]
         ?? "http://localhost:5055/";
     client.BaseAddress = new Uri(baseUrl);
-});
+})
+.AddHttpMessageHandler<JwtTokenHandler>();
 
 builder.Services.AddHttpClient<ClasificacionAdapter>(client =>
 {
@@ -40,7 +36,8 @@ builder.Services.AddHttpClient<ClasificacionAdapter>(client =>
         ?? builder.Configuration["ApiUrls:MSProductos"]
         ?? "http://localhost:5141/";
     client.BaseAddress = new Uri(baseUrl);
-});
+})
+.AddHttpMessageHandler<JwtTokenHandler>();
 
 builder.Services.AddHttpClient<ProveedorApiAdapter>(client =>
 {
@@ -48,7 +45,8 @@ builder.Services.AddHttpClient<ProveedorApiAdapter>(client =>
         ?? builder.Configuration["ApiUrls:MSProveedor"]
         ?? "http://localhost:5297/";
     client.BaseAddress = new Uri(baseUrl);
-});
+})
+.AddHttpMessageHandler<JwtTokenHandler>();
 
 // Registrar HttpClient para AuthClient
 builder.Services.AddHttpClient<AuthClient>(client =>
@@ -57,7 +55,8 @@ builder.Services.AddHttpClient<AuthClient>(client =>
         ?? builder.Configuration["ApiUrls:MSAuth"]
         ?? "http://localhost:5281/";
     client.BaseAddress = new Uri(baseUrl);
-});
+})
+.AddHttpMessageHandler<JwtTokenHandler>();
 
 // Registrar HttpClient para Usuarios
 builder.Services.AddHttpClient<UsuarioAdapter>(client =>
@@ -66,7 +65,8 @@ builder.Services.AddHttpClient<UsuarioAdapter>(client =>
         ?? builder.Configuration["ApiUrls:MSAuth"]
         ?? "http://localhost:5281/";
     client.BaseAddress = new Uri(baseUrl);
-});
+})
+.AddHttpMessageHandler<JwtTokenHandler>();
 
 // Registrar adaptadores de Auth
 builder.Services.AddScoped<LoginResponseAdapter>();
@@ -79,7 +79,8 @@ builder.Services.AddHttpClient<AdapterJSON<ClasificacionDto>>(client =>
         ?? builder.Configuration["ApiUrls:MSProductos"]
         ?? "http://localhost:5141/";
     client.BaseAddress = new Uri(baseUrl);
-});
+})
+.AddHttpMessageHandler<JwtTokenHandler>();
 
 // Registrar ClasificacionAdapter
 builder.Services.AddScoped<ClasificacionAdapter>(sp =>
@@ -94,7 +95,8 @@ builder.Services.AddHttpClient<AdapterJSON<MedicamentoDto>>(client =>
         ?? builder.Configuration["ApiUrls:MSProductos"]
         ?? "http://localhost:5141/";
     client.BaseAddress = new Uri(baseUrl);
-});
+})
+.AddHttpMessageHandler<JwtTokenHandler>();
 
 builder.Services.AddScoped<MedicamentoAdapter>(sp =>
 {
@@ -115,7 +117,6 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRouting();
-app.UseSession();
 app.UseAuthorization();
 
 app.MapStaticAssets();

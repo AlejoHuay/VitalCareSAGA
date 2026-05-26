@@ -6,52 +6,98 @@ namespace FrontendVCare.Helpers
 {
     public static class JwtSessionHelper
     {
+        private const string TokenCookieName = "Authorization";
         private const string ClaimIdUsuario = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
         private const string ClaimUserName = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name";
         private const string ClaimRole = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
 
+        /// <summary>
+        /// Guarda el token en una cookie HTTP y extrae los datos del usuario
+        /// </summary>
         public static void GuardarSesion(HttpContext context, UsuarioLoginResponseDto respuesta)
         {
-            context.Session.SetString("Token", respuesta.Token);
+            // Guardar token en cookie HttpOnly
+            context.Response.Cookies.Append(
+                TokenCookieName,
+                respuesta.Token,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false, // Cambiar a true en producción
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                }
+            );
 
-            if (respuesta.IdUsuario > 0)
-                context.Session.SetInt32("IdUsuario", respuesta.IdUsuario);
-
-            if (!string.IsNullOrWhiteSpace(respuesta.UserName))
-                context.Session.SetString("UserName", respuesta.UserName);
-
-            if (!string.IsNullOrWhiteSpace(respuesta.Role))
-                context.Session.SetString("Role", respuesta.Role);
-
-            context.Session.SetString("MustChangePassword", respuesta.MustChangePassword.ToString());
-
+            // Extraer y guardar datos del usuario desde el token
             CompletarSesionDesdeTokenSiFalta(context, respuesta.Token);
+        }
+
+        /// <summary>
+        /// Obtiene el token JWT desde la cookie
+        /// </summary>
+        public static string? ObtenerToken(HttpContext context)
+        {
+            context.Request.Cookies.TryGetValue(TokenCookieName, out string? token);
+            return string.IsNullOrWhiteSpace(token) ? null : token;
+        }
+
+        /// <summary>
+        /// Elimina el token de la cookie
+        /// </summary>
+        public static void EliminarToken(HttpContext context)
+        {
+            context.Response.Cookies.Delete(TokenCookieName);
         }
 
         private static void CompletarSesionDesdeTokenSiFalta(HttpContext context, string token)
         {
             Dictionary<string, string> claims = LeerClaims(token);
 
-            if (context.Session.GetInt32("IdUsuario") == null
-                && claims.TryGetValue(ClaimIdUsuario, out string? idUsuarioValue)
-                && int.TryParse(idUsuarioValue, out int idUsuario))
-            {
-                context.Session.SetInt32("IdUsuario", idUsuario);
-            }
+            // Estos métodos ahora solo leen desde claims, no desde Session
+            // Los datos se obtienen dinámicamente del token cada vez que se necesitan
+        }
 
-            if (string.IsNullOrWhiteSpace(context.Session.GetString("UserName"))
-                && claims.TryGetValue(ClaimUserName, out string? userName)
-                && !string.IsNullOrWhiteSpace(userName))
-            {
-                context.Session.SetString("UserName", userName);
-            }
+        /// <summary>
+        /// Obtiene el ID del usuario desde el token
+        /// </summary>
+        public static int? ObtenerIdUsuario(HttpContext context)
+        {
+            string? token = ObtenerToken(context);
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
 
-            if (string.IsNullOrWhiteSpace(context.Session.GetString("Role"))
-                && claims.TryGetValue(ClaimRole, out string? role)
-                && !string.IsNullOrWhiteSpace(role))
-            {
-                context.Session.SetString("Role", role);
-            }
+            Dictionary<string, string> claims = LeerClaims(token);
+            if (claims.TryGetValue(ClaimIdUsuario, out string? idValue) && int.TryParse(idValue, out int id))
+                return id;
+
+            return null;
+        }
+
+        /// <summary>
+        /// Obtiene el nombre de usuario desde el token
+        /// </summary>
+        public static string? ObtenerUserName(HttpContext context)
+        {
+            string? token = ObtenerToken(context);
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            Dictionary<string, string> claims = LeerClaims(token);
+            return claims.TryGetValue(ClaimUserName, out string? userName) ? userName : null;
+        }
+
+        /// <summary>
+        /// Obtiene el rol desde el token
+        /// </summary>
+        public static string? ObtenerRole(HttpContext context)
+        {
+            string? token = ObtenerToken(context);
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            Dictionary<string, string> claims = LeerClaims(token);
+            return claims.TryGetValue(ClaimRole, out string? role) ? role : null;
         }
 
         private static Dictionary<string, string> LeerClaims(string token)

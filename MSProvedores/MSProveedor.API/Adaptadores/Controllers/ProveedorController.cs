@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MSProveedor.Aplicacion.DTOs;
 using MSProveedor.Aplicacion.InputPorts;
@@ -6,7 +7,7 @@ namespace MSProveedor.API.Adaptadores.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-
+[Authorize(Roles = "Admin,Bioquimico")]
 public class ProveedorController : ControllerBase
 {
     private readonly IProveedorInputPort _interactor;

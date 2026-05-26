@@ -54,7 +54,7 @@ namespace FrontendVCare.Pages.Medicamento
                 return Page();
             }
 
-            int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+            int? idUsuario = ObtenerIdUsuarioSesion();
             if (idUsuario == null || idUsuario.Value == 0)
             {
                 MensajeError = "No se encontró el usuario. Por favor, inicia sesión nuevamente.";

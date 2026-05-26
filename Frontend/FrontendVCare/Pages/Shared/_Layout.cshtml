@@ -1,7 +1,9 @@
 
+@using FrontendVCare.Helpers;
+
 @{
-    string usuarioSesion = Context.Session.GetString("UserName") ?? string.Empty;
-    string roleSesion = Context.Session.GetString("Role")?.Trim() ?? string.Empty;
+    string usuarioSesion = JwtSessionHelper.ObtenerUserName(Context) ?? string.Empty;
+    string roleSesion = JwtSessionHelper.ObtenerRole(Context)?.Trim() ?? string.Empty;
     bool estaAutenticado = !string.IsNullOrWhiteSpace(usuarioSesion);
     bool esAdministrador = roleSesion.Equals("Admin", StringComparison.OrdinalIgnoreCase);
 }

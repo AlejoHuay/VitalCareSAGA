@@ -139,12 +139,18 @@ namespace FrontendVCare.Pages.Proveedor
         private int ObtenerIdUsuarioActual()
         {
             var claimId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("id");
-            if (int.TryParse(claimId, out int id)) return id;
+            if (int.TryParse(claimId, out int id))
+            {
+                return id;
+            }
 
-            var sessionid = HttpContext.Session.GetInt32("UsuarioId") ?? HttpContext.Session.GetInt32("IdUsuario");
-            if (sessionid.HasValue) return sessionid.Value;
+            int? sessionId = ObtenerIdUsuarioSesion();
+            if (sessionId.HasValue)
+            {
+                return sessionId.Value;
+            }
 
-            return 0; 
+            return 0;
         }
     }
 }
