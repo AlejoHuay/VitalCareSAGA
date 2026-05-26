@@ -105,8 +105,8 @@ namespace MSUsuarios.Dominio.Validadores
             if (ci!.Contains(' '))
                 return Result.Fail("El numero de carnet no debe contener espacios.");
 
-            if (!Regex.IsMatch(ci, @"^\d{8}(?:-\d[A-Za-z])?$"))
-                return Result.Fail("El CI debe tener 8 digitos y un complemento opcional de hasta dos caracteres (Ej. 10000000-1B).");
+            if (!Regex.IsMatch(ci, @"^\d{6,8}(?:-[A-Za-z0-9]{1,2})?$")) 
+                return Result.Fail("El CI debe tener entre 6 y 8 digitos y un complemento opcional de hasta dos caracteres. Ej. 12345678-1B."); 
 
             return null;
         }
@@ -114,9 +114,11 @@ namespace MSUsuarios.Dominio.Validadores
         private Result? ValidarCiExtension(string? ciExtension)
         {
             if (string.IsNullOrWhiteSpace(ciExtension))
-                return Result.Fail("La extension del CI es obligatoria.");
+                return Result.Fail("Debe seleccionar el lugar de expedición del CI.");
 
-            if (!ExtensionesValidas.Contains(ciExtension!))
+            ciExtension = ciExtension.Trim().ToUpperInvariant();
+
+            if (!ExtensionesValidas.Contains(ciExtension))
                 return Result.Fail("La extension del CI no es valida.");
 
             return null;

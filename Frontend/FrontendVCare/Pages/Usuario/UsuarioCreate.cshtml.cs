@@ -16,8 +16,8 @@ namespace FrontendVCare.Pages.Usuario
         public UsuarioRegistroDto Input { get; set; } = new();
 
         [BindProperty]
-        [RegularExpression(@"^$|^\d[A-Za-z]$", ErrorMessage = "El complemento del CI debe tener el formato 1A.")]
-        public string CiComplemento { get; set; } = string.Empty;
+        [RegularExpression(@"^$|^\d[A-Za-z0-9]{1,2}$", ErrorMessage = "El complemento del CI es opcional, pero si lo ingresas debe tener hasta 2 caracteres. Ej. 1A.")]
+        public string? CiComplemento { get; set; }
 
         public UsuarioCreateModel(UsuarioAdapter usuarioAdapter)
         {
@@ -47,6 +47,9 @@ namespace FrontendVCare.Pages.Usuario
 
             string ciBase = Input.Ci;
             Input.Ci = CiFormatoHelper.ConstruirCi(Input.Ci, CiComplemento);
+
+            Input.CiExtencion = Input.CiExtencion.Trim().ToUpperInvariant();
+            Input.Email = Input.Email.Trim().ToLowerInvariant();
 
             OperacionApiDto resultado = await _usuarioAdapter.CrearConResultadoAsync(Input);
             if (!resultado.Exito)

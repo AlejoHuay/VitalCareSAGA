@@ -52,6 +52,8 @@ namespace FrontendVCare.Pages.Usuario
                 MustChangePassword = (byte)Math.Max(usuario.MustChangePassword, (sbyte)0)
             };
 
+            ModelState.Clear();
+
             return Page();
         }
 
@@ -63,6 +65,9 @@ namespace FrontendVCare.Pages.Usuario
 
             if (!ModelState.IsValid)
                 return Page();
+
+            Input.Email = Input.Email.Trim().ToLowerInvariant();
+            Input.Role = Input.Role.Trim();
 
             OperacionApiDto resultado = await _usuarioAdapter.ActualizarConResultadoAsync(Input);
             if (!resultado.Exito)
