@@ -37,8 +37,8 @@ namespace FrontendVCare.Pages.Proveedor
             if (acceso != null) return acceso;
 
             Proveedor.Nombre = Proveedor.Nombre?.Trim() ?? string.Empty;
-            Proveedor.Telefono = string.IsNullOrWhiteSpace(Proveedor.Telefono) ? null : Proveedor.Telefono.Trim();
-            Proveedor.CorreoElectronico = string.IsNullOrWhiteSpace(Proveedor.CorreoElectronico) ? null : Proveedor.CorreoElectronico.Trim();
+            Proveedor.Telefono = Proveedor.Telefono?.Trim() ?? string.Empty; 
+            Proveedor.CorreoElectronico = Proveedor.CorreoElectronico?.Trim() ?? string.Empty;
             Proveedor.Direccion = string.IsNullOrWhiteSpace(Proveedor.Direccion) ? null : Proveedor.Direccion.Trim();
 
             if (!ValidarProveedor())
@@ -96,7 +96,13 @@ namespace FrontendVCare.Pages.Proveedor
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(Proveedor.Telefono) && !TelefonoRegex.IsMatch(Proveedor.Telefono))
+            if (string.IsNullOrWhiteSpace(Proveedor.Telefono))
+            {
+                Estado.MensajeError = "El teléfono es un campo obligatorio.";
+                return false;
+            }
+
+            if (!TelefonoRegex.IsMatch(Proveedor.Telefono))
             {
                 Estado.MensajeError = "El teléfono debe tener exactamente 8 dígitos.";
                 return false;
