@@ -20,7 +20,7 @@
                         <label class="choice-box" for="tipoClienteFormal">
                             <input asp-for="Cliente.EsConsumidorFinal" id="tipoClienteFormal" type="radio" value="false" class="form-check-input me-2" />
                             <span class="fw-semibold d-block mb-1">Cliente con datos fiscales</span>
-                            <span class="text-muted small">Registra NIT, razon social y correo electronico.</span>
+                            <span class="text-muted small">Registra NIT, razón social y correo electrónico opcional.</span>
                         </label>
                     </div>
 
@@ -28,30 +28,30 @@
                         <label class="choice-box" for="tipoConsumidorFinal">
                             <input asp-for="Cliente.EsConsumidorFinal" id="tipoConsumidorFinal" type="radio" value="true" class="form-check-input me-2" />
                             <span class="fw-semibold d-block mb-1">Consumidor Final</span>
-                            <span class="text-muted small">NIT = CF y razon social = Consumidor Final.</span>
+                            <span class="text-muted small">NIT = CF y razón social = Consumidor Final.</span>
                         </label>
                     </div>
                 </div>
             </div>
 
             <div id="bloqueConsumidorFinal" class="alert alert-success border-0 mb-4" style="display:none;">
-                Se registrara el cliente como <strong>Consumidor Final</strong>.
+                Se registrará el cliente como <strong>Consumidor Final</strong>.
             </div>
 
             <div id="datosClienteFiscal">
                 <div class="form-floating mb-3">
-                    <input asp-for="Cliente.Nit" class="form-control" placeholder="NIT" inputmode="numeric" />
+                    <input asp-for="Cliente.Nit" class="form-control" placeholder="NIT" inputmode="numeric" pattern="[0-9]*" title="El NIT solo acepta números." required />
                     <label>NIT / CI</label>
                 </div>
 
                 <div class="form-floating mb-3">
-                    <input asp-for="Cliente.RazonSocial" class="form-control" placeholder="Razon Social" minlength="3" maxlength="45" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" title="Solo se permiten letras y espacios." required />
-                    <label>Razon Social / Nombre Completo</label>
+                    <input asp-for="Cliente.RazonSocial" class="form-control" placeholder="Razón Social" minlength="3" maxlength="45" pattern="[\p{L} ]+" title="Solo se permiten letras y espacios." required />
+                    <label>Razón Social / Nombre Completo</label>
                 </div>
 
                 <div id="correoElectronicoGroup" class="form-floating mb-3">
-                    <input asp-for="Cliente.CorreoElectronico" type="email" class="form-control" placeholder="Correo Electronico" maxlength="45" />
-                    <label>Correo Electronico</label>
+                    <input asp-for="Cliente.CorreoElectronico" type="email" class="form-control" placeholder="Correo electrónico opcional" maxlength="45" />
+                    <label>Correo electrónico (opcional)</label>
                 </div>
             </div>
 
@@ -89,7 +89,11 @@
                 bloqueInformativo.style.display = esConsumidorFinal ? '' : 'none';
                 contenedor.style.display = esConsumidorFinal ? 'none' : '';
                 correoGroup.style.display = esConsumidorFinal ? 'none' : '';
+                nit.required = !esConsumidorFinal;
                 razonSocial.required = !esConsumidorFinal;
+                nit.disabled = esConsumidorFinal;
+                razonSocial.disabled = esConsumidorFinal;
+                correoElectronico.disabled = esConsumidorFinal;
 
                 if (esConsumidorFinal) {
                     nit.value = 'CF';
@@ -103,10 +107,40 @@
 
             opcionFormal.addEventListener('change', actualizarFormulario);
             opcionConsumidorFinal.addEventListener('change', actualizarFormulario);
+            nit.addEventListener('input', () => {
+                nit.value = nit.value.replace(/\D/g, '');
+            });
             razonSocial.addEventListener('input', () => {
-                razonSocial.value = razonSocial.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g, '');
+                razonSocial.value = razonSocial.value.replace(/[^\p{L} ]/gu, '');
             });
             form.addEventListener('submit', (event) => {
+                const esConsumidorFinal = opcionConsumidorFinal.checked;
+                if (!esConsumidorFinal) {
+                    if (!nit.value.trim()) {
+                        event.preventDefault();
+                        nit.setCustomValidity('El NIT no puede estar vacío.');
+                        nit.reportValidity();
+                        return;
+                    }
+
+                    if (!/^\d+$/.test(nit.value.trim())) {
+                        event.preventDefault();
+                        nit.setCustomValidity('El NIT solo acepta números.');
+                        nit.reportValidity();
+                        return;
+                    }
+
+                    if (!razonSocial.value.trim()) {
+                        event.preventDefault();
+                        razonSocial.setCustomValidity('La razón social no puede estar vacía.');
+                        razonSocial.reportValidity();
+                        return;
+                    }
+                }
+
+                nit.setCustomValidity('');
+                razonSocial.setCustomValidity('');
+
                 if (form.dataset.submitting === 'true') {
                     event.preventDefault();
                     return;

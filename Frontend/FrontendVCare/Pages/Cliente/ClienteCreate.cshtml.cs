@@ -32,6 +32,14 @@ namespace FrontendVCare.Pages
 
             Cliente.IdUsuario = idUsuarioSesion.Value;
             AplicarConsumidorFinalSiCorresponde();
+
+            string? errorFormulario = ValidarFormulario();
+            if (errorFormulario != null)
+            {
+                MensajeError = errorFormulario;
+                return Page();
+            }
+
             OperacionApiDto resultado = await clienteApiAdapter.CrearAsync(Cliente);
 
             if (!resultado.Exito)
@@ -51,6 +59,23 @@ namespace FrontendVCare.Pages
             Cliente.Nit = "CF";
             Cliente.RazonSocial = "Consumidor Final";
             Cliente.CorreoElectronico = string.Empty;
+        }
+
+        private string? ValidarFormulario()
+        {
+            if (Cliente.EsConsumidorFinal)
+                return null;
+
+            if (string.IsNullOrWhiteSpace(Cliente.Nit))
+                return "El NIT no puede estar vacío.";
+
+            if (!Cliente.Nit.Trim().All(char.IsDigit))
+                return "El NIT solo acepta números.";
+
+            if (string.IsNullOrWhiteSpace(Cliente.RazonSocial))
+                return "La razón social no puede estar vacía.";
+
+            return null;
         }
     }
 }

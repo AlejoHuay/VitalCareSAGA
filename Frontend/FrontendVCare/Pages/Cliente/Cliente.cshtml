@@ -22,7 +22,7 @@
             <input type="text"
                    name="filtro"
                    class="form-control"
-                   placeholder="Buscar por NIT, razon social o correo..."
+                   placeholder="Buscar por NIT, razón social o correo..."
                    value="@Model.FiltroActual" />
 
             <button type="submit" class="btn btn-success">
@@ -47,12 +47,12 @@
 
     <div class="table-shell">
         <table class="table table-hover align-middle mb-0">
-            <caption class="visually-hidden">Tabla de clientes registrados con NIT, razon social, correo electronico y acciones.</caption>
+            <caption class="visually-hidden">Tabla de clientes registrados con NIT, razón social, correo electrónico y acciones.</caption>
             <thead class="table-success">
                 <tr>
                     <th>NIT</th>
-                    <th>Razon Social</th>
-                    <th>Correo Electronico</th>
+                    <th>Razón Social</th>
+                    <th>Correo Electrónico</th>
                     <th class="actions-column">Acciones</th>
                 </tr>
             </thead>
@@ -101,11 +101,11 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header text-white bg-success">
-                    <h5 class="modal-title" id="@(modalId)Label">Confirmar eliminacion</h5>
+                    <h5 class="modal-title" id="@(modalId)Label">Confirmar eliminación</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-2">Seguro que deseas eliminar este cliente?</p>
+                    <p class="mb-2">¿Seguro que deseas eliminar este cliente?</p>
                     <p class="fw-semibold mb-0" id="clienteEliminarNombre"></p>
                 </div>
                 <div class="modal-footer">
