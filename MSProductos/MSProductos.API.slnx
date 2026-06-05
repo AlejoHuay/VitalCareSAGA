@@ -1,6 +1,6 @@
 <Solution>
   <Project Path="MSProductos.API/MSProductos.API.csproj" />
-  <Project Path="MSProductos.CasosDeUso/MSProductos.CasosDeUso.csproj" />
-  <Project Path="MSProductos.Dominio/MSProductos.Dominio.csproj" />
+  <Project Path="MSProductos.Aplicacion/MSProductos.Aplicacion.csproj" />
+  <Project Path="MSProductos.Domain/MSProductos.Dominio.csproj" />
   <Project Path="MSProductos.Infraestructura/MSProductos.Infraestructura.csproj" />
 </Solution>
