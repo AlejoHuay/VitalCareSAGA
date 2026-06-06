@@ -5,9 +5,42 @@ namespace FrontendVCare.Adaptadores
 {
     public class ClasificacionAdapter
     {
-        private readonly AdapterJSON<ClasificacionDto> _adapter;
+        private readonly IAdapter<ClasificacionDto> _adapter;
+        public ClasificacionAdapter(IAdapter<ClasificacionDto> adapter)
+        {
+            _adapter = adapter;
+        }
+        public Task<List<ClasificacionDto>> GetListAsync(string url)
+        {
+            return _adapter.GetListAsync(url);
+        }
 
-        public ClasificacionAdapter(AdapterJSON<ClasificacionDto> adapter)
+        public Task<ClasificacionDto?> GetAsync(string url)
+        {
+            return _adapter.GetAsync(url);
+        }
+
+        public Task<bool> PostAsync(string url, ClasificacionDto data)
+        {
+            return _adapter.PostAsync(url, data);
+        }
+
+        public Task<(bool Success, string? Message)> PostWithMessageAsync(string url, ClasificacionDto data)
+        {
+            return _adapter.PostWithMessageAsync(url, data);
+        }
+
+        public Task<bool> PutAsync(string url, ClasificacionDto data)
+        {
+            return _adapter.PutAsync(url, data);
+        }
+
+        public Task<(bool Success, string? Message)> PutWithMessageAsync(string url, ClasificacionDto data)
+        {
+            return _adapter.PutWithMessageAsync(url, data);
+        }
+
+        public Task<bool> DeleteAsync(string url)
         {
             _adapter = adapter;
         }

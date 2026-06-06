@@ -50,5 +50,61 @@ namespace FrontendVCare.Adaptadores
         {
             return _adapter.DeleteAsync($"api/medicamentos/{id}?idUsuario={idUsuario}");
         }
+
+        public Task<MedicamentoDto?> GetAsync(string url)
+        {
+            return _adapter.GetAsync(url);
+        }
+
+        public Task<(bool Success, string? Message)> PostWithMessageAsync(
+            string url,
+            MedicamentoDto data)
+        {
+            return _adapter.PostWithMessageAsync(url, data);
+        }
+
+        public Task<(bool Success, string? Message)> PutWithMessageAsync(
+            string url,
+            MedicamentoDto data)
+        {
+            return _adapter.PutWithMessageAsync(url, data);
+        }
+
+        public Task<bool> DeleteAsync(string url)
+        {
+            return _adapter.DeleteAsync(url);
+        }
+
+        public Task<List<MedicamentoDto>> GetAllAsync()
+        {
+            return GetListAsync("api/medicamentos");
+        }
+
+        public Task<MedicamentoDto?> GetByIdAsync(int id)
+        {
+            return GetAsync($"api/medicamentos/{id}");
+        }
+
+        public Task<(bool Success, string? Message)> CreateWithMessageAsync(
+            MedicamentoDto medicamento)
+        {
+            return PostWithMessageAsync(
+                "api/medicamentos",
+                medicamento);
+        }
+
+        public Task<(bool Success, string? Message)> UpdateWithMessageAsync(
+            MedicamentoDto medicamento)
+        {
+            return PutWithMessageAsync(
+                $"api/medicamentos/{medicamento.Id}",
+                medicamento);
+        }
+
+        public Task<bool> DeleteAsync(int id, int idUsuario)
+        {
+            return DeleteAsync(
+                $"api/medicamentos/{id}?idUsuario={idUsuario}");
+        }
     }
 }
