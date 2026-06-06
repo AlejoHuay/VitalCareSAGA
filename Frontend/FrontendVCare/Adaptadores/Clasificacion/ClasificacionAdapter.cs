@@ -5,11 +5,11 @@ namespace FrontendVCare.Adaptadores
 {
     public class ClasificacionAdapter : IAdapter<ClasificacionDto>
     {
-    private readonly IAdapter<ClasificacionDto> _adapter;
-
-    public ClasificacionAdapter(IAdapter<ClasificacionDto> adapter)
+        private readonly IAdapter<ClasificacionDto> _adapter;
+        public ClasificacionAdapter(IAdapter<ClasificacionDto> adapter)
+        {
+            _adapter = adapter;
         }
-
         public Task<List<ClasificacionDto>> GetListAsync(string url)
         {
             return _adapter.GetListAsync(url);
