@@ -30,6 +30,15 @@ builder.Services.AddHttpClient<ClienteApiAdapter>(client =>
 })
 .AddHttpMessageHandler<JwtTokenHandler>();
 
+builder.Services.AddHttpClient<ClasificacionAdapter>(client =>
+{
+    string baseUrl = Environment.GetEnvironmentVariable("MSPRODUCTOS_URL")
+        ?? builder.Configuration["ApiUrls:MSProductos"]
+        ?? "http://localhost:5141/";
+    client.BaseAddress = new Uri(baseUrl);
+})
+.AddHttpMessageHandler<JwtTokenHandler>();
+
 builder.Services.AddHttpClient<ProveedorApiAdapter>(client =>
 {
     string baseUrl = Environment.GetEnvironmentVariable("MSPROVEEDOR_URL") 
@@ -73,10 +82,12 @@ builder.Services.AddHttpClient<AdapterJSON<ClasificacionDto>>(client =>
 })
 .AddHttpMessageHandler<JwtTokenHandler>();
 
-builder.Services.AddScoped<IAdapter<ClasificacionDto>>(sp =>
-    sp.GetRequiredService<AdapterJSON<ClasificacionDto>>());
-
-builder.Services.AddScoped<ClasificacionAdapter>();
+// Registrar ClasificacionAdapter
+builder.Services.AddScoped<ClasificacionAdapter>(sp =>
+{
+    var adapterJson = sp.GetRequiredService<AdapterJSON<ClasificacionDto>>();
+    return new ClasificacionAdapter(adapterJson);
+});
 
 builder.Services.AddHttpClient<AdapterJSON<MedicamentoDto>>(client =>
 {
@@ -87,10 +98,11 @@ builder.Services.AddHttpClient<AdapterJSON<MedicamentoDto>>(client =>
 })
 .AddHttpMessageHandler<JwtTokenHandler>();
 
-builder.Services.AddScoped<IAdapter<MedicamentoDto>>(sp =>
-    sp.GetRequiredService<AdapterJSON<MedicamentoDto>>());
-
-builder.Services.AddScoped<MedicamentoAdapter>();
+builder.Services.AddScoped<MedicamentoAdapter>(sp =>
+{
+    var adapterJson = sp.GetRequiredService<AdapterJSON<MedicamentoDto>>();
+    return new MedicamentoAdapter(adapterJson);
+});
 
 var app = builder.Build();
 

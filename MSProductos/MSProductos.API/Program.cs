@@ -2,14 +2,12 @@ using System.Text;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using MSProductos.CasosDeUso.PuertosEntrada;
-using MSProductos.CasosDeUso;
+using MSProductos.Aplicacion.InputPorts;
+using MSProductos.Aplicacion.Interactors;
 using MSProductos.Dominio.Entidades;
+using MSProductos.Dominio.Interfaces;
 using MSProductos.Dominio.Validadores;
-using MSProductos.CasosDeUso.PuertosSalida;
-using MSProductos.Infraestructura.Persistencia.Repositorios;
-using MSProductos.Infraestructura.Creadores;
-
+using MSProductos.Infraestructura.Repositorios;
 
 Env.Load("../../.env");
 
@@ -23,18 +21,16 @@ builder.Services.AddSwaggerGen();
 
 // Dependencias
 
-builder.Services.AddScoped<RepositoryCreator<Clasificacion>, ClasificacionRepositoryCreator>();
-builder.Services.AddScoped<RepositoryCreator<Medicamento>, MedicamentoRepositoryCreator>();
-
-builder.Services.AddScoped<IClasificacionRepository>(sp =>
-    (IClasificacionRepository)sp.GetRequiredService<RepositoryCreator<Clasificacion>>().CreateRepo());
-
-builder.Services.AddScoped<IMedicamentoRepository>(sp =>
-    (IMedicamentoRepository)sp.GetRequiredService<RepositoryCreator<Medicamento>>().CreateRepo());
+builder.Services.AddScoped<IClasificacionRepository, ClasificacionRepository>();
 
 builder.Services.AddScoped<IClasificacionInputPort, ClasificacionInteractor>();
+
 builder.Services.AddScoped<IResult<Clasificacion>, ClasificacionValidador>();
+
+builder.Services.AddScoped<IMedicamentoRepository, MedicamentoRepository>();
+
 builder.Services.AddScoped<IMedicamentoInputPort, MedicamentoInteractor>();
+
 builder.Services.AddScoped<IResult<Medicamento>, MedicamentoValidator>();
 
 // Configuración JWT

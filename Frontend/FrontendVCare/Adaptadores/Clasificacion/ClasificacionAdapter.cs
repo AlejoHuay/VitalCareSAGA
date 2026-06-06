@@ -3,7 +3,7 @@ using FrontendVCare.Dto.ClasificacionDtos;
 
 namespace FrontendVCare.Adaptadores
 {
-    public class ClasificacionAdapter : IAdapter<ClasificacionDto>
+    public class ClasificacionAdapter
     {
         private readonly IAdapter<ClasificacionDto> _adapter;
         public ClasificacionAdapter(IAdapter<ClasificacionDto> adapter)
@@ -42,32 +42,32 @@ namespace FrontendVCare.Adaptadores
 
         public Task<bool> DeleteAsync(string url)
         {
-            return _adapter.DeleteAsync(url);
+            _adapter = adapter;
         }
 
         public Task<List<ClasificacionDto>> GetAllAsync()
         {
-            return GetListAsync($"api/clasificaciones");
+            return _adapter.GetListAsync($"api/clasificaciones");
         }
 
         public Task<ClasificacionDto?> GetByIdAsync(int id)
         {
-            return GetAsync($"api/clasificaciones/{id}");
+            return _adapter.GetAsync($"api/clasificaciones/{id}");
         }
 
         public Task<(bool Success, string? Message)> CreateAsync(ClasificacionDto clasificacion)
         {
-            return PostWithMessageAsync($"api/clasificaciones", clasificacion);
+            return _adapter.PostWithMessageAsync($"api/clasificaciones", clasificacion);
         }
 
         public Task<(bool Success, string? Message)> UpdateAsync(ClasificacionDto clasificacion)
         {
-            return PutWithMessageAsync($"api/clasificaciones/{clasificacion.Id}", clasificacion);
+            return _adapter.PutWithMessageAsync($"api/clasificaciones/{clasificacion.Id}", clasificacion);
         }
 
         public Task<bool> DeleteAsync(int id, int idUsuario)
         {
-            return DeleteAsync($"api/clasificaciones/{id}?idUsuario={idUsuario}");
+            return _adapter.DeleteAsync($"api/clasificaciones/{id}?idUsuario={idUsuario}");
         }
     }
 }
