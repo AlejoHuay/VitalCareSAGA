@@ -1,0 +1,6 @@
+@MSVentas.API_HostAddress = http://localhost:5069
+
+GET {{MSVentas.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
