@@ -1,0 +1,92 @@
+@page
+@model FrontendVCare.Pages.Ventas.ReporteVentasPorRolModel
+
+@{
+    ViewData["Title"] = "Reporte por Rol";
+    decimal total = Model.Reporte.Sum(item => item.TotalVentas);
+    int cantidad = Model.Reporte.Sum(item => item.CantidadVentas);
+}
+
+<div class="container mt-5 no-card-hover">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-success">Reporte de ventas por rol</h2>
+            <p class="text-muted mb-0">Resumen de ventas agrupadas por rol de usuario</p>
+        </div>
+        <a asp-page="/Ventas/Venta" class="btn btn-outline-success">Volver a ventas</a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            @Model.MensajeError
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form method="get" class="mb-4">
+        <div class="card-module p-3">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label asp-for="Desde" class="form-label">Desde</label>
+                    <input asp-for="Desde" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Hasta" class="form-label">Hasta</label>
+                    <input asp-for="Hasta" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-success btn-fixed">Filtrar</button>
+                    <a asp-page="/Ventas/ReporteVentasPorRol" class="btn btn-secondary btn-fixed">Limpiar</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Cantidad de ventas</p>
+                    <h3 class="fw-bold mb-0">@cantidad</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Total vendido</p>
+                    <h3 class="fw-bold mb-0">Bs @total.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-success">
+                <tr>
+                    <th>Rol</th>
+                    <th>Cantidad de ventas</th>
+                    <th>Total vendido (Bs)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Reporte.Count == 0)
+                {
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-4">No hay datos para mostrar.</td>
+                    </tr>
+                }
+                @foreach (var item in Model.Reporte)
+                {
+                    <tr>
+                        <td class="fw-semibold">@item.Rol</td>
+                        <td>@item.CantidadVentas</td>
+                        <td>@item.TotalVentas.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
