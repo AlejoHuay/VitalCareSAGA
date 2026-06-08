@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
-using ProyectoArqSoft.Domain.Models;
-using ProyectoArqSoft.Application.Interfaces;
+using MSVentas.Dominio.Modelos;
+using MSVentas.App.Interfaces;
 
-namespace ProyectoArqSoft.Domain.Validators
+namespace MSVentas.Dominio.Validadores
 {
     public class VentaValidacion : IResult<Venta>
     {

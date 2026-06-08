@@ -1,12 +1,12 @@
 using MySql.Data.MySqlClient;
-using ProyectoArqSoft.Application.Ports.Output;
-using ProyectoArqSoft.Domain.Validators;
-using ProyectoArqSoft.Domain.Models;
-using ProyectoArqSoft.Infrastructure.Helpers;
-using ProyectoArqSoft.Infrastructure.Persistence.Connection;
+using MSVentas.Dominio.Puertos.PuertoSalida;
+using MSVentas.Dominio.Validadores;
+using MSVentas.Dominio.Modelos;
+using MSVentas.Infraestructura.Ayudadores;
+using MSVentas.Infraestructura.Persistencia.Conexion;
 using System.Data;
 
-namespace ProyectoArqSoft.Infrastructure.Persistence.Repositories
+namespace MSVentas.Infraestructura.Persistencia.Repositorios
 {
     public class VentaRepository : IVentaRepository
     {

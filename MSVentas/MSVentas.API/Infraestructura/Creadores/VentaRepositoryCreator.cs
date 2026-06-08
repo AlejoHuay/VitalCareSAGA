@@ -1,7 +1,7 @@
-using ProyectoArqSoft.Application.Ports.Output;
-using ProyectoArqSoft.Infrastructure.Persistence.Repositories;
+using MSVentas.Dominio.Puertos.PuertoSalida;
+using MSVentas.Infraestructura.Persistencia.Repositorios;
 
-namespace ProyectoArqSoft.Infrastructure.Creadores
+namespace MSVentas.Infraestructura.Creadores
 {
     public class VentaRepositoryCreator
     {

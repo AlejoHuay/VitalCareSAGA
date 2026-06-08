@@ -1,8 +1,8 @@
 using System.Data;
-using ProyectoArqSoft.Domain.DTOs;
-using ProyectoArqSoft.Domain.Validators;
+using MSVentas.App.DTOs;
+using MSVentas.Dominio.Validadores;
 
-namespace ProyectoArqSoft.Application.Interfaces
+namespace MSVentas.App.Interfaces
 {
     public interface IUsuarioService
     {

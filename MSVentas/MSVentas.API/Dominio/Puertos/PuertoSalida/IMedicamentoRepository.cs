@@ -1,7 +1,7 @@
-using ProyectoArqSoft.Domain.Models;
+using MSVentas.Dominio.Modelos;
 using System.Data;
 
-namespace ProyectoArqSoft.Application.Ports.Output
+namespace MSVentas.Dominio.Puertos.PuertoSalida
 {
     public interface IMedicamentoRepository : IRepository<Medicamento>
     {

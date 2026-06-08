@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace ProyectoArqSoft.Application.Ports.Output
+namespace MSVentas.Dominio.Puertos.PuertoSalida
 {
     public interface IRepository<T> 
     {

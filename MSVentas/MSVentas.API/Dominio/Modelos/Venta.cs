@@ -1,4 +1,4 @@
-namespace ProyectoArqSoft.Domain.Models
+namespace MSVentas.Dominio.Modelos
 {
     public class Venta
     {

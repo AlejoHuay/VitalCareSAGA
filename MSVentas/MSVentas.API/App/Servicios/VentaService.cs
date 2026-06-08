@@ -1,12 +1,12 @@
-using ProyectoArqSoft.Application.Interfaces;
-using ProyectoArqSoft.Application.Ports.Output;
-using ProyectoArqSoft.Domain.DTOs;
-using ProyectoArqSoft.Domain.Models;
-using ProyectoArqSoft.Infrastructure.Helpers;
-using ProyectoArqSoft.Domain.Validators;
+using MSVentas.App.Interfaces;
+using MSVentas.Dominio.Puertos.PuertoSalida;
+using MSVentas.App.DTOs;
+using MSVentas.Dominio.Modelos;
+using MSVentas.Infraestructura.Ayudadores;
+using MSVentas.Dominio.Validadores;
 using System.Data;
 
-namespace ProyectoArqSoft.Application.Services
+namespace MSVentas.App.Servicios
 {
     public class VentaService : IVentaService
     {

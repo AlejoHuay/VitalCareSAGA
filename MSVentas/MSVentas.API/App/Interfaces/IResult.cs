@@ -1,6 +1,6 @@
-using ProyectoArqSoft.Domain.Validators;
+using MSVentas.Dominio.Validadores;
 
-namespace ProyectoArqSoft.Application.Interfaces
+namespace MSVentas.App.Interfaces
 {
     public interface IResult<T>
     {

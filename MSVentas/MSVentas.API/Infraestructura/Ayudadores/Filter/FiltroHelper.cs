@@ -1,6 +1,6 @@
-using ProyectoArqSoft.Domain.Validators;
+using MSVentas.Dominio.Validadores;
 
-namespace ProyectoArqSoft.Infrastructure.Helpers
+namespace MSVentas.Infraestructura.Ayudadores
 {
     public static class FiltroHelper
     {

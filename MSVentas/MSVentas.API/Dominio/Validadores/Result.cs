@@ -1,4 +1,4 @@
-namespace ProyectoArqSoft.Domain.Validators
+namespace MSVentas.Dominio.Validadores
 {
     public class    Result
     {

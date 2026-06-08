@@ -1,9 +1,9 @@
-using ProyectoArqSoft.Domain.DTOs;
-using ProyectoArqSoft.Domain.Models;
-using ProyectoArqSoft.Domain.Validators;
+using MSVentas.App.DTOs;
+using MSVentas.Dominio.Modelos;
+using MSVentas.Dominio.Validadores;
 using System.Data;
 
-namespace ProyectoArqSoft.Application.Interfaces
+namespace MSVentas.App.Interfaces
 {
     public interface IVentaService
     {

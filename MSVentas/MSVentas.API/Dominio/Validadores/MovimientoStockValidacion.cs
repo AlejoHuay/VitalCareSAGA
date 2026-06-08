@@ -1,7 +1,7 @@
-using ProyectoArqSoft.Application.Interfaces;
-using ProyectoArqSoft.Domain.DTOs;
+using MSVentas.App.Interfaces;
+using MSVentas.App.DTOs;
 
-namespace ProyectoArqSoft.Domain.Validators
+namespace MSVentas.Dominio.Validadores
 {
     public class MovimientoStockValidacion : IResult<MovimientoStockDTO>
     {

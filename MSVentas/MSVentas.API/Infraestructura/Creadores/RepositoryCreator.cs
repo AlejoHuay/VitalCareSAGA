@@ -1,6 +1,6 @@
-using ProyectoArqSoft.Application.Ports.Output;
+using MSVentas.Dominio.Puertos.PuertoSalida;
 
-namespace ProyectoArqSoft.Infrastructure.Creadores
+namespace MSVentas.Infraestructura.Creadores
 {
     public abstract class RepositoryCreator<T> //Clase creadora
     {

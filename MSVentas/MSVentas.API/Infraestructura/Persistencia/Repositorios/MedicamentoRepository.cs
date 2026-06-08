@@ -1,11 +1,11 @@
 using MySql.Data.MySqlClient;
-using ProyectoArqSoft.Infrastructure.Helpers;
-using ProyectoArqSoft.Domain.Models;
+using MSVentas.Infraestructura.Ayudadores;
+using MSVentas.Dominio.Modelos;
 using System.Data;
-using ProyectoArqSoft.Application.Ports.Output;
-using ProyectoArqSoft.Infrastructure.Persistence.Connection;
+using MSVentas.Dominio.Puertos.PuertoSalida;
+using MSVentas.Infraestructura.Persistencia.Conexion;
 
-namespace ProyectoArqSoft.Infrastructure.Persistence.Repositories
+namespace MSVentas.Infraestructura.Persistencia.Repositorios
 {
     public class MedicamentoRepository : IMedicamentoRepository
     {

@@ -1,7 +1,7 @@
-using ProyectoArqSoft.Domain.DTOs;
-using ProyectoArqSoft.Domain.Models;
+using MSVentas.App.DTOs;
+using MSVentas.Dominio.Modelos;
 
-namespace ProyectoArqSoft.Application.Ports.Output
+namespace MSVentas.Dominio.Puertos.PuertoSalida
 {
     public interface IUsuarioRepository : IRepository<Usuario>
     {
