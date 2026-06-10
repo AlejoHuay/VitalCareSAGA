@@ -1,6 +1,7 @@
 using DotNetEnv;
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Adaptadores.Auth;
+using FrontendVCare.Adaptadores.Ventas;
 using FrontendVCare.Dto;
 using FrontendVCare.Dto.ClasificacionDtos;
 using FrontendVCare.Dto.MedicamentoDtos;
@@ -64,6 +65,15 @@ builder.Services.AddHttpClient<UsuarioAdapter>(client =>
     string baseUrl = Environment.GetEnvironmentVariable("MSUSUARIOS_URL")
         ?? builder.Configuration["ApiUrls:MSAuth"]
         ?? "http://localhost:5281/";
+    client.BaseAddress = new Uri(baseUrl);
+})
+.AddHttpMessageHandler<JwtTokenHandler>();
+
+builder.Services.AddHttpClient<VentaAdapter>(client =>
+{
+    string baseUrl = Environment.GetEnvironmentVariable("MSVENTAS_URL")
+        ?? builder.Configuration["ApiUrls:MSVentas"]
+        ?? "http://localhost:5069/";
     client.BaseAddress = new Uri(baseUrl);
 })
 .AddHttpMessageHandler<JwtTokenHandler>();
