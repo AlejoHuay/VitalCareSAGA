@@ -27,14 +27,14 @@ namespace MSVentas.Infraestructura.Persistencia.Conexion
 
         private ConexionStringSingleton()
         {
-            IConfigurationRoot configuracion = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
-                .Build();
+            // Leer variables de entorno para construir connection string MySQL
+            string host = Environment.GetEnvironmentVariable("MYSQL_VENTAS_HOST") ?? "acela.proxy.rlwy.net";
+            string port = Environment.GetEnvironmentVariable("MYSQL_VENTAS_PORT") ?? "45747";
+            string database = Environment.GetEnvironmentVariable("MYSQL_VENTAS_DATABASE") ?? "railway";
+            string user = Environment.GetEnvironmentVariable("MYSQL_VENTAS_USER") ?? "root";
+            string password = Environment.GetEnvironmentVariable("MYSQL_VENTAS_PASSWORD") ?? "XUsAFDPWDAmdAHSyXvdvRJIzCKcZppDB";
 
-            cadenaConexion = configuracion.GetConnectionString("MySqlConnection")
-                ?? throw new Exception("No se encontró la cadena de conexión 'MySqlConnection'.");
+            cadenaConexion = $"server={host};port={port};database={database};user={user};password={password};";
         }
 
         //Metodos

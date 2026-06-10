@@ -3,9 +3,9 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
 WORKDIR /src
 COPY ["MSProductos/MSProductos.API/MSProductos.API.csproj", "MSProductos/MSProductos.API/"]
-COPY ["MSProductos/MSProductos.CasosDeUso/MSProductos.CasosDeUso.csproj", "MSProductos/MSProductos.CasosDeUso/"]
+COPY ["MSProductos/MSProductos.Aplicacion/MSProductos.Aplicacion.csproj", "MSProductos/MSProductos.Aplicacion/"]
 COPY ["MSProductos/MSProductos.Infraestructura/MSProductos.Infraestructura.csproj", "MSProductos/MSProductos.Infraestructura/"]
-COPY ["MSProductos/MSProductos.Dominio/MSProductos.Dominio.csproj", "MSProductos/MSProductos.Dominio/"]
+COPY ["MSProductos/MSProductos.Domain/MSProductos.Dominio.csproj", "MSProductos/MSProductos.Domain/"]
 
 RUN dotnet restore "MSProductos/MSProductos.API/MSProductos.API.csproj"
 

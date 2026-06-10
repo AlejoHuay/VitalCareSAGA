@@ -121,6 +121,35 @@ services:
       - vitalcare-network
     restart: unless-stopped
 
+  # Microservicio - MSVentas (MySQL Railway)
+  msventas:
+    build:
+      context: .
+      dockerfile: Dockerfile.MSVentas
+    container_name: vitalcare-msventas
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:${MSVENTAS_PORT}
+      - MYSQL_VENTAS_HOST=${MYSQL_VENTAS_HOST}
+      - MYSQL_VENTAS_PORT=${MYSQL_VENTAS_PORT}
+      - MYSQL_VENTAS_DATABASE=${MYSQL_VENTAS_DATABASE}
+      - MYSQL_VENTAS_USER=${MYSQL_VENTAS_USER}
+      - MYSQL_VENTAS_PASSWORD=${MYSQL_VENTAS_PASSWORD}
+      # JWT Configuration
+      - JWT_KEY=${JWT_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+      # Frontend Base URL
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+    ports:
+      - "${MSVENTAS_PORT}:${MSVENTAS_PORT}"
+    networks:
+      - vitalcare-network
+    restart: unless-stopped
+    depends_on:
+      - msusuarios
+
   # Frontend - FrontendVCare (Razor Pages)
   frontend:
     build:
@@ -134,6 +163,7 @@ services:
       - MSCLIENTES_URL=${MSCLIENTES_URL}
       - MSPRODUCTOS_URL=${MSPRODUCTOS_URL}
       - MSPROVEEDOR_URL=${MSPROVEEDOR_URL}
+      - MSVENTAS_URL=${MSVENTAS_URL}
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     depends_on:
@@ -141,6 +171,7 @@ services:
       - msproductos
       - msproveedor
       - msusuarios
+      - msventas
     networks:
       - vitalcare-network
     restart: unless-stopped

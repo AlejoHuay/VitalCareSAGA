@@ -74,5 +74,6 @@ namespace FrontendVCare.Adaptadores
         {
             return _adapter.DeleteAsync(url);
         }
+
     }
 }
