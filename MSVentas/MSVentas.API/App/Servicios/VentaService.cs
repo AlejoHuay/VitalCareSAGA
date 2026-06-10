@@ -1,10 +1,13 @@
-using MSVentas.App.Interfaces;
-using MSVentas.Dominio.Puertos.PuertoSalida;
 using MSVentas.App.DTOs;
+using MSVentas.App.Interfaces;
 using MSVentas.Dominio.Modelos;
-using MSVentas.Infraestructura.Ayudadores;
+using MSVentas.Dominio.Puertos.PuertoSalida;
 using MSVentas.Dominio.Validadores;
+using MSVentas.Infraestructura.Ayudadores;
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace MSVentas.App.Servicios
 {
@@ -12,18 +15,12 @@ namespace MSVentas.App.Servicios
     {
         private readonly IVentaRepository _repository;
         private readonly IResult<Venta> _validador;
-        private readonly IMedicamentoRepository _medicamentoRepository;
 
-        public VentaService(
-            IVentaRepository repository,
-            IMedicamentoRepository medicamentoRepository,
-            IResult<Venta> validador)
+        public VentaService(IVentaRepository repository, IResult<Venta> validador)
         {
             _repository = repository;
-            _medicamentoRepository = medicamentoRepository;
             _validador = validador;
         }
-
 
         public DataTable ObtenerTodos()
         {
@@ -32,16 +29,26 @@ namespace MSVentas.App.Servicios
 
         public DataTable ObtenerTodos(string filtro)
         {
-            return _repository.GetAll(filtro);
+            filtro = StringHelper.LimpiarEspacios(filtro);
+
+            return string.IsNullOrWhiteSpace(filtro)
+                ? _repository.GetAll()
+                : _repository.GetAll(filtro);
         }
 
         public Venta? ObtenerPorId(int id)
         {
+            if (id <= 0)
+                return null;
+
             return _repository.GetById(id);
         }
 
         public List<DetalleVenta> ObtenerDetallesPorVenta(int idVenta)
         {
+            if (idVenta <= 0)
+                return new List<DetalleVenta>();
+
             return _repository.GetDetallesByVentaId(idVenta);
         }
 
@@ -54,13 +61,15 @@ namespace MSVentas.App.Servicios
             try
             {
                 Venta venta = ConstruirVenta(
-                    id: 0,
-                    idCliente: idCliente,
-                    idUsuario: idUsuario,
-                    metodoPago: metodoPago,
-                    detallesInput: detallesInput,
-                    idUsuarioEditor: null);
-
+                    0,
+                    idCliente,
+                    idUsuario,
+                    metodoPago,
+                    detallesInput,
+                    null,
+                    string.Empty,
+                    string.Empty
+                );
 
                 Result validacion = _validador.Validar(venta);
 
@@ -75,7 +84,6 @@ namespace MSVentas.App.Servicios
             }
         }
 
-
         public Result Actualizar(
             int idVenta,
             int idCliente,
@@ -85,21 +93,30 @@ namespace MSVentas.App.Servicios
         {
             try
             {
-                Venta ventaExistente = _repository.GetById(idVenta) ?? new Venta();
+                if (idVenta <= 0)
+                    return Result.Fail("El ID de la venta no es válido.");
 
-                if (ventaExistente.Id == 0)
+                if (idUsuarioEditor <= 0)
+                    return Result.Fail("El usuario editor no es válido.");
+
+                Venta? ventaExistente = _repository.GetById(idVenta);
+
+                if (ventaExistente == null)
                     return Result.Fail("La venta no existe.");
 
                 if (ventaExistente.Estado == 0)
                     return Result.Fail("No se puede modificar una venta anulada.");
 
                 Venta venta = ConstruirVenta(
-                    id: idVenta,
-                    idCliente: idCliente,
-                    idUsuario: ventaExistente.IdUsuario,
-                    metodoPago: metodoPago,
-                    detallesInput: detallesInput,
-                    idUsuarioEditor: idUsuarioEditor);
+                    idVenta,
+                    idCliente,
+                    ventaExistente.IdUsuario,
+                    metodoPago,
+                    detallesInput,
+                    idUsuarioEditor,
+                    ventaExistente.Nit,
+                    ventaExistente.RazonSocial
+                );
 
                 Result validacion = _validador.Validar(venta);
 
@@ -114,10 +131,30 @@ namespace MSVentas.App.Servicios
             }
         }
 
-
         public Result EliminarLogicamente(int idVenta, int idUsuarioEditor)
         {
-            return _repository.AnularVentaLogicamente(idVenta, idUsuarioEditor);
+            try
+            {
+                if (idVenta <= 0)
+                    return Result.Fail("El ID de la venta no es válido.");
+
+                if (idUsuarioEditor <= 0)
+                    return Result.Fail("El usuario editor no es válido.");
+
+                Venta? venta = _repository.GetById(idVenta);
+
+                if (venta == null)
+                    return Result.Fail("La venta no existe.");
+
+                if (venta.Estado == 0)
+                    return Result.Fail("La venta ya se encuentra anulada.");
+
+                return _repository.AnularVentaLogicamente(idVenta, idUsuarioEditor);
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail(ex.Message);
+            }
         }
 
         private Venta ConstruirVenta(
@@ -126,50 +163,91 @@ namespace MSVentas.App.Servicios
             int idUsuario,
             string metodoPago,
             List<DetalleVentaInputDto> detallesInput,
-            int? idUsuarioEditor)
+            int? idUsuarioEditor,
+            string? nit,
+            string? razonSocial)
         {
-            if (detallesInput == null || !detallesInput.Any())
-                throw new InvalidOperationException("Debe agregar al menos un medicamento.");
+            if (idCliente <= 0)
+                throw new InvalidOperationException("El cliente no es válido.");
 
-            Venta venta = new Venta
+            if (idUsuario <= 0)
+                throw new InvalidOperationException("El usuario no es válido.");
+
+            metodoPago = StringHelper.LimpiarEspacios(metodoPago);
+
+            if (string.IsNullOrWhiteSpace(metodoPago))
+                throw new InvalidOperationException("Debe indicar el método de pago.");
+
+            List<DetalleVenta> detalles = ConstruirDetalles(detallesInput);
+
+            decimal total = detalles.Sum(detalle =>
+                detalle.Cantidad * detalle.PrecioUnitario
+            );
+
+            return new Venta
             {
                 Id = id,
                 IdCliente = idCliente,
                 IdUsuario = idUsuario,
                 IdUsuarioEditor = idUsuarioEditor,
-                MetodoPago = StringHelper.LimpiarEspacios(metodoPago),
-                Detalles = new List<DetalleVenta>()
+                MetodoPago = metodoPago,
+                Nit = StringHelper.LimpiarEspacios(nit),
+                RazonSocial = StringHelper.LimpiarEspacios(razonSocial),
+                Total = total,
+                Detalles = detalles
             };
+        }
+
+        private List<DetalleVenta> ConstruirDetalles(List<DetalleVentaInputDto> detallesInput)
+        {
+            if (detallesInput == null || detallesInput.Count == 0)
+                throw new InvalidOperationException("Debe agregar al menos un medicamento.");
 
             foreach (DetalleVentaInputDto item in detallesInput)
             {
-                var medicamento = _medicamentoRepository.GetById(item.IdMedicamento);
+                if (item.IdMedicamento <= 0)
+                    throw new InvalidOperationException("Existe un medicamento con ID no válido.");
 
-                if (medicamento == null)
-                    throw new InvalidOperationException(
-                        $"Medicamento con ID {item.IdMedicamento} no encontrado.");
-
-                if (item.Cantidad > medicamento.Stock)
-                    throw new InvalidOperationException(
-                        $"Stock insuficiente para {medicamento.Nombre}. Disponible: {medicamento.Stock}.");
-
-                decimal precioReal = medicamento.Precio;
-
-                DetalleVenta detalle = new DetalleVenta
+                if (item.Cantidad <= 0)
                 {
-                    IdMedicamento = item.IdMedicamento,
-                    Cantidad = item.Cantidad,
-                    PrecioUnitario = precioReal,
-                };
+                    throw new InvalidOperationException(
+                        $"La cantidad del medicamento {item.IdMedicamento} debe ser mayor que cero."
+                    );
+                }
 
-                venta.Detalles.Add(detalle);
+                if (item.PrecioUnitario <= 0)
+                {
+                    throw new InvalidOperationException(
+                        $"El precio del medicamento {item.IdMedicamento} debe ser mayor que cero."
+                    );
+                }
             }
 
-            venta.Total = venta.Detalles.Sum(x => x.Subtotal);
+            List<DetalleVenta> detalles = new List<DetalleVenta>();
 
-            return venta;
+            foreach (var grupo in detallesInput.GroupBy(item => item.IdMedicamento))
+            {
+                decimal precioUnitario = grupo.First().PrecioUnitario;
+
+                if (grupo.Any(item => item.PrecioUnitario != precioUnitario))
+                {
+                    throw new InvalidOperationException(
+                        $"El medicamento {grupo.Key} tiene precios diferentes."
+                    );
+                }
+
+                int cantidadTotal = checked(grupo.Sum(item => item.Cantidad));
+
+                detalles.Add(new DetalleVenta
+                {
+                    IdMedicamento = grupo.Key,
+                    Cantidad = cantidadTotal,
+                    PrecioUnitario = precioUnitario
+                });
+            }
+
+            return detalles;
         }
     }
 }
-
 

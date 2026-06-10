@@ -1,0 +1,32 @@
+# Dockerfile para MSVentas.API
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+WORKDIR /src
+COPY ["MSVentas/MSVentas.API/MSVentas.API.csproj", "MSVentas/MSVentas.API/"]
+
+RUN dotnet restore "MSVentas/MSVentas.API/MSVentas.API.csproj"
+
+COPY . .
+WORKDIR "/src/MSVentas/MSVentas.API"
+
+RUN dotnet build "MSVentas.API.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "MSVentas.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=publish /app/publish .
+COPY [".env", ".env"]
+
+EXPOSE 5200
+
+ENV ASPNETCORE_URLS=http://+:5200
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+ENTRYPOINT ["dotnet", "MSVentas.API.dll"]

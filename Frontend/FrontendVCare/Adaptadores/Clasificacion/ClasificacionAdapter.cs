@@ -40,10 +40,6 @@ namespace FrontendVCare.Adaptadores
             return _adapter.PutWithMessageAsync(url, data);
         }
 
-        public Task<bool> DeleteAsync(string url)
-        {
-            _adapter = adapter;
-        }
 
         public Task<List<ClasificacionDto>> GetAllAsync()
         {

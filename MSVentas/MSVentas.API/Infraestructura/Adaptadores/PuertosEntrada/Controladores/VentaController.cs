@@ -1,0 +1,288 @@
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using MSVentas.App.DTOs;
+using MSVentas.App.Interfaces;
+using MSVentas.Dominio.Modelos;
+using MSVentas.Dominio.Validadores;
+using System.Collections.Generic;
+using System.Data;
+using System.Security.Claims;
+
+namespace MSVentas.Infraestructura.Adaptadores.PuertosEntrada.Controladores
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize(Roles = "Admin,Bioquimico")]
+    public class VentaController : ControllerBase
+    {
+        private readonly IVentaService _ventaService;
+
+        public VentaController(IVentaService ventaService)
+        {
+            _ventaService = ventaService;
+        }
+
+        [HttpGet]
+        public IActionResult ObtenerTodos([FromQuery] string? filtro)
+        {
+            DataTable tabla = string.IsNullOrWhiteSpace(filtro)
+                ? _ventaService.ObtenerTodos()
+                : _ventaService.ObtenerTodos(filtro);
+
+            return Ok(new
+            {
+                mensaje = "Ventas obtenidas correctamente.",
+                data = ConvertirDataTable(tabla)
+            });
+        }
+
+        [HttpGet("{idVenta:int}")]
+        public IActionResult ObtenerPorId(int idVenta)
+        {
+            if (idVenta <= 0)
+            {
+                return BadRequest(new
+                {
+                    mensaje = "El ID de la venta no es válido."
+                });
+            }
+
+            Venta? venta = _ventaService.ObtenerPorId(idVenta);
+
+            if (venta == null)
+            {
+                return NotFound(new
+                {
+                    mensaje = "La venta no existe."
+                });
+            }
+
+            return Ok(new
+            {
+                mensaje = "Venta obtenida correctamente.",
+                data = venta
+            });
+        }
+
+        [HttpGet("{idVenta:int}/detalles")]
+        public IActionResult ObtenerDetalles(int idVenta)
+        {
+            if (idVenta <= 0)
+            {
+                return BadRequest(new
+                {
+                    mensaje = "El ID de la venta no es válido."
+                });
+            }
+
+            Venta? venta = _ventaService.ObtenerPorId(idVenta);
+
+            if (venta == null)
+            {
+                return NotFound(new
+                {
+                    mensaje = "La venta no existe."
+                });
+            }
+
+            List<DetalleVenta> detalles = _ventaService.ObtenerDetallesPorVenta(idVenta);
+
+            return Ok(new
+            {
+                mensaje = "Detalles obtenidos correctamente.",
+                data = detalles
+            });
+        }
+
+        [HttpPost]
+        public IActionResult Crear([FromBody] VentaCrearRequestDto dto)
+        {
+            int? idUsuario = ObtenerIdUsuarioSesion();
+
+            if (idUsuario == null)
+            {
+                return Unauthorized(new
+                {
+                    mensaje = "No se pudo identificar al usuario autenticado."
+                });
+            }
+
+            if (dto == null)
+            {
+                return BadRequest(new
+                {
+                    mensaje = "Los datos de la venta son obligatorios."
+                });
+            }
+
+            Result resultado = _ventaService.Crear(
+                dto.IdCliente,
+                idUsuario.Value,
+                dto.MetodoPago,
+                dto.Detalles
+            );
+
+            if (!resultado.IsSuccess)
+            {
+                return BadRequest(new
+                {
+                    mensaje = resultado.Error
+                });
+            }
+
+            return StatusCode(StatusCodes.Status201Created, new
+            {
+                mensaje = "Venta registrada correctamente."
+            });
+        }
+
+        [HttpPut("{idVenta:int}")]
+        public IActionResult Actualizar(
+            int idVenta,
+            [FromBody] VentaActualizarRequestDto dto)
+        {
+            int? idUsuarioEditor = ObtenerIdUsuarioSesion();
+
+            if (idUsuarioEditor == null)
+            {
+                return Unauthorized(new
+                {
+                    mensaje = "No se pudo identificar al usuario autenticado."
+                });
+            }
+
+            if (idVenta <= 0)
+            {
+                return BadRequest(new
+                {
+                    mensaje = "El ID de la venta no es válido."
+                });
+            }
+
+            if (dto == null)
+            {
+                return BadRequest(new
+                {
+                    mensaje = "Los datos de la venta son obligatorios."
+                });
+            }
+
+            Result resultado = _ventaService.Actualizar(
+                idVenta,
+                dto.IdCliente,
+                dto.MetodoPago,
+                dto.Detalles,
+                idUsuarioEditor.Value
+            );
+
+            if (!resultado.IsSuccess)
+            {
+                return BadRequest(new
+                {
+                    mensaje = resultado.Error
+                });
+            }
+
+            return Ok(new
+            {
+                mensaje = "Venta actualizada correctamente."
+            });
+        }
+
+        [HttpDelete("{idVenta:int}")]
+        public IActionResult Eliminar(int idVenta)
+        {
+            int? idUsuarioEditor = ObtenerIdUsuarioSesion();
+
+            if (idUsuarioEditor == null)
+            {
+                return Unauthorized(new
+                {
+                    mensaje = "No se pudo identificar al usuario autenticado."
+                });
+            }
+
+            if (idVenta <= 0)
+            {
+                return BadRequest(new
+                {
+                    mensaje = "El ID de la venta no es válido."
+                });
+            }
+
+            Result resultado = _ventaService.EliminarLogicamente(
+                idVenta,
+                idUsuarioEditor.Value
+            );
+
+            if (!resultado.IsSuccess)
+            {
+                return BadRequest(new
+                {
+                    mensaje = resultado.Error
+                });
+            }
+
+            return Ok(new
+            {
+                mensaje = "Venta anulada correctamente."
+            });
+        }
+
+        private int? ObtenerIdUsuarioSesion()
+        {
+            string? idUsuarioClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(idUsuarioClaim, out int idUsuario))
+                return null;
+
+            return idUsuario;
+        }
+
+        private static List<Dictionary<string, object?>> ConvertirDataTable(DataTable tabla)
+        {
+            List<Dictionary<string, object?>> registros =
+                new List<Dictionary<string, object?>>();
+
+            foreach (DataRow fila in tabla.Rows)
+            {
+                Dictionary<string, object?> registro =
+                    new Dictionary<string, object?>();
+
+                foreach (DataColumn columna in tabla.Columns)
+                {
+                    object? valor = fila[columna];
+
+                    registro[columna.ColumnName] =
+                        valor == DBNull.Value ? null : valor;
+                }
+
+                registros.Add(registro);
+            }
+
+            return registros;
+        }
+    }
+
+    public class VentaCrearRequestDto
+    {
+        public int IdCliente { get; set; }
+
+        public string MetodoPago { get; set; } = string.Empty;
+
+        public List<DetalleVentaInputDto> Detalles { get; set; } =
+            new List<DetalleVentaInputDto>();
+    }
+
+    public class VentaActualizarRequestDto
+    {
+        public int IdCliente { get; set; }
+
+        public string MetodoPago { get; set; } = string.Empty;
+
+        public List<DetalleVentaInputDto> Detalles { get; set; } =
+            new List<DetalleVentaInputDto>();
+    }
+}
+
