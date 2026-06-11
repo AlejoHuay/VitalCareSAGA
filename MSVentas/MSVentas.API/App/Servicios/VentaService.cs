@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using MSVentas.App.DTOs.Eventos;
-using MSVentas.Dominio.Puertos.PuertoSalida;
 
 namespace MSVentas.App.Servicios
 {
