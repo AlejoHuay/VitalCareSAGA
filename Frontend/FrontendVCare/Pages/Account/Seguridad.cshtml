@@ -4,14 +4,6 @@
     ViewData["Title"] = "Seguridad";
 }
 
-@if (Model.PasswordError != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-triangle"></i> @Model.PasswordError
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -103,6 +95,12 @@
             </div>
             <form method="post" asp-page-handler="ChangePassword">
                 <div class="modal-body">
+                    @if (Model.PasswordError != null)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i> @Model.PasswordError
+                        </div>
+                    }
                     <div class="mb-3">
                         <label for="currentPassword" class="form-label">Contraseña Actual</label>
                         <div class="input-group">
@@ -244,6 +242,14 @@
 
                     newPasswordInput.addEventListener('input', updateValidation);
                     confirmPasswordInput.addEventListener('input', updateValidation);
+
+                    @if (Model.PasswordError != null)
+                    {
+                        <text>
+                        const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+                        modal.show();
+                        </text>
+                    }
                 });
             </script>
         </div>

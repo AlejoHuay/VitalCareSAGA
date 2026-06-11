@@ -5,22 +5,20 @@ using FrontendVCare.Dto;
 
 namespace FrontendVCare.Adaptadores
 {
-    public class ProveedorApiAdapter
+    public class ProveedorApiAdapter : AdapterJSON<ProveedorDto>
     {
-        private readonly HttpClient httpClient;
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
 
-        public ProveedorApiAdapter(HttpClient httpClient)
+        public ProveedorApiAdapter(HttpClient httpClient) : base(httpClient)
         {
-            this.httpClient = httpClient;
         }
 
         public async Task<List<ProveedorDto>> ObtenerTodosAsync(string filtro)
         {
-            List<ProveedorDto>? proveedores = await httpClient.GetFromJsonAsync<List<ProveedorDto>>("api/proveedor", JsonOptions);
+            List<ProveedorDto>? proveedores = await _httpClient.GetFromJsonAsync<List<ProveedorDto>>("api/proveedor", JsonOptions);
             proveedores ??= new List<ProveedorDto>();
 
             if (string.IsNullOrWhiteSpace(filtro))
@@ -38,7 +36,7 @@ namespace FrontendVCare.Adaptadores
 
         public async Task<ProveedorDto?> ObtenerPorIdAsync(int id)
         {
-            HttpResponseMessage response = await httpClient.GetAsync($"api/proveedor/{id}");
+            HttpResponseMessage response = await _httpClient.GetAsync($"api/proveedor/{id}");
             if (response.StatusCode == HttpStatusCode.NotFound)
                 return null;
 
@@ -48,19 +46,19 @@ namespace FrontendVCare.Adaptadores
 
         public async Task<OperacionApiDto> CrearAsync(ProveedorFormularioDto proveedor)
         {
-            HttpResponseMessage response = await httpClient.PostAsJsonAsync("api/proveedor", proveedor);
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/proveedor", proveedor);
             return await LeerResultadoAsync(response, "Proveedor registrado correctamente.");
         }
 
         public async Task<OperacionApiDto> ActualizarAsync(int id, ProveedorFormularioDto proveedor)
         {
-            HttpResponseMessage response = await httpClient.PutAsJsonAsync($"api/proveedor/{id}", proveedor);
+            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"api/proveedor/{id}", proveedor);
             return await LeerResultadoAsync(response, "Proveedor actualizado correctamente.");
         }
 
         public async Task<OperacionApiDto> EliminarAsync(int id, int idUsuario)
         {
-            HttpResponseMessage response = await httpClient.DeleteAsync($"api/proveedor/{id}?idUsuario={idUsuario}");
+            HttpResponseMessage response = await _httpClient.DeleteAsync($"api/proveedor/{id}?idUsuario={idUsuario}");
             return await LeerResultadoAsync(response, "Proveedor eliminado correctamente.");
         }
 

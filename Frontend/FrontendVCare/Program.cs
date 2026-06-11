@@ -2,8 +2,6 @@ using DotNetEnv;
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Adaptadores.Auth;
 using FrontendVCare.Dto;
-using FrontendVCare.Dto.ClasificacionDtos;
-using FrontendVCare.Dto.MedicamentoDtos;
 using FrontendVCare.Servicios;
 
 Env.Load("../../.env");
@@ -72,8 +70,7 @@ builder.Services.AddHttpClient<UsuarioAdapter>(client =>
 builder.Services.AddScoped<LoginResponseAdapter>();
 builder.Services.AddScoped<MensajeApiAdapter>();
 
-// Registrar AdapterJSON para Clasificaciones
-builder.Services.AddHttpClient<AdapterJSON<ClasificacionDto>>(client =>
+builder.Services.AddHttpClient<MedicamentoAdapter>(client =>
 {
     string baseUrl = Environment.GetEnvironmentVariable("MSPRODUCTOS_URL")
         ?? builder.Configuration["ApiUrls:MSProductos"]
@@ -81,28 +78,6 @@ builder.Services.AddHttpClient<AdapterJSON<ClasificacionDto>>(client =>
     client.BaseAddress = new Uri(baseUrl);
 })
 .AddHttpMessageHandler<JwtTokenHandler>();
-
-// Registrar ClasificacionAdapter
-builder.Services.AddScoped<ClasificacionAdapter>(sp =>
-{
-    var adapterJson = sp.GetRequiredService<AdapterJSON<ClasificacionDto>>();
-    return new ClasificacionAdapter(adapterJson);
-});
-
-builder.Services.AddHttpClient<AdapterJSON<MedicamentoDto>>(client =>
-{
-    string baseUrl = Environment.GetEnvironmentVariable("MSPRODUCTOS_URL")
-        ?? builder.Configuration["ApiUrls:MSProductos"]
-        ?? "http://localhost:5141/";
-    client.BaseAddress = new Uri(baseUrl);
-})
-.AddHttpMessageHandler<JwtTokenHandler>();
-
-builder.Services.AddScoped<MedicamentoAdapter>(sp =>
-{
-    var adapterJson = sp.GetRequiredService<AdapterJSON<MedicamentoDto>>();
-    return new MedicamentoAdapter(adapterJson);
-});
 
 var app = builder.Build();
 
