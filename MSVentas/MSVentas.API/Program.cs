@@ -2,6 +2,8 @@ using System.Text;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MSVentas.Dominio.Puertos.PuertoSalida;
+using MSVentas.Infraestructura.Mensajeria;
 
 Env.Load("../../.env");
 
@@ -11,6 +13,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IEventPublisher, RabbitPublisher>();
 
 // Configuración JWT
 string jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")

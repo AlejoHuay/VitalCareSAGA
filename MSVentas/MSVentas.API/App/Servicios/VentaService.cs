@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using MSVentas.App.DTOs.Eventos;
 
 namespace MSVentas.App.Servicios
 {
@@ -15,11 +16,13 @@ namespace MSVentas.App.Servicios
     {
         private readonly IVentaRepository _repository;
         private readonly IResult<Venta> _validador;
+        private readonly IEventPublisher _eventPublisher;
 
-        public VentaService(IVentaRepository repository, IResult<Venta> validador)
+        public VentaService(IVentaRepository repository, IResult<Venta> validador, IEventPublisher eventPublisher)
         {
             _repository = repository;
             _validador = validador;
+            _eventPublisher = eventPublisher;
         }
 
         public DataTable ObtenerTodos()
@@ -76,7 +79,29 @@ namespace MSVentas.App.Servicios
                 if (!validacion.IsSuccess)
                     return validacion;
 
-                return _repository.RegistrarVenta(venta);
+                //return _repository.RegistrarVenta(venta);
+                Result resultado = _repository.RegistrarVenta(venta);
+
+                if (resultado.IsSuccess)
+                {
+                    _eventPublisher.Publish("venta.creada", new VentaCreadaEvent
+                    {
+                        IdVenta = venta.Id,
+                        IdCliente = venta.IdCliente,
+                        IdUsuario = venta.IdUsuario,
+                        Total = venta.Total,
+                        MetodoPago = venta.MetodoPago,
+                        FechaHora = DateTime.Now,
+                        Detalles = venta.Detalles.Select(d => new DetalleVentaCreadaEvent
+                        {
+                            IdMedicamento = d.IdMedicamento,
+                            Cantidad = d.Cantidad,
+                            PrecioUnitario = d.PrecioUnitario
+                        }).ToList()
+                    });
+                }
+
+                return resultado;
             }
             catch (Exception ex)
             {

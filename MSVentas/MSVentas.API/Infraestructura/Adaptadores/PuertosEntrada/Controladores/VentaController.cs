@@ -12,7 +12,7 @@ using System.Security.Claims;
 namespace MSVentas.Infraestructura.Adaptadores.PuertosEntrada.Controladores
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/ventas")]//[Route("api/[controller]")]
     [Authorize(Roles = "Admin,Bioquimico")]
     public class VentaController : ControllerBase
     {
