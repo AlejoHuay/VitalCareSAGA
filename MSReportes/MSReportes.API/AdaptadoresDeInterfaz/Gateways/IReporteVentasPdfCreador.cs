@@ -4,6 +4,6 @@ namespace MSReportes.API.AdaptadoresDeInterfaz.Gateways
 {
     public interface IReporteVentasPdfCreador
     {
-        ArchivoReporteDto Crear(IEnumerable<ReporteVentasPorRolDto> datos);
+        ArchivoReporteDto Crear(ReporteVentasPorRol reporte);
     }
 }

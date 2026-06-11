@@ -8,14 +8,9 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
 {
     public class ReporteVentasPorRolPdfCreador : IReporteVentasPdfCreador
     {
-        public ArchivoReporteDto Crear(IEnumerable<ReporteVentasPorRolDto> datos)
+        public ArchivoReporteDto Crear(ReporteVentasPorRol reporte)
         {
             QuestPDF.Settings.License = LicenseType.Community;
-
-            var lista = datos.ToList();
-
-            int totalVentas = lista.Sum(x => x.CantidadVentas);
-            decimal totalRecaudado = lista.Sum(x => x.TotalRecaudado);
 
             byte[] contenido = Document.Create(container =>
             {
@@ -28,17 +23,21 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
 
                     page.Header().Column(header =>
                     {
-                        header.Item().Text("VITALCARE")
+                        header.Item().Text(reporte.NombreEmpresa)
                             .FontSize(18)
                             .SemiBold()
                             .FontColor(Colors.Green.Darken2);
 
-                        header.Item().Text("REPORTE DE VENTAS POR ROL")
+                        header.Item().Text(reporte.Titulo)
                             .FontSize(22)
                             .SemiBold()
                             .FontColor(Colors.Black);
 
-                        header.Item().Text($"Fecha de generación: {DateTime.Now:dd/MM/yyyy HH:mm:ss}")
+                        header.Item().Text($"Fecha de generación: {reporte.FechaGeneracion:dd/MM/yyyy HH:mm:ss}")
+                            .FontSize(10)
+                            .FontColor(Colors.Grey.Darken1);
+
+                        header.Item().Text($"Usuario generador: {reporte.UsuarioGenerador}")
                             .FontSize(10)
                             .FontColor(Colors.Grey.Darken1);
                     });
@@ -49,19 +48,25 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
 
                         content.Item().Row(row =>
                         {
-                            row.RelativeItem().Background(Colors.Green.Lighten4).Padding(10).Column(col =>
-                            {
-                                col.Item().Text("Total de ventas").SemiBold();
-                                col.Item().Text(totalVentas.ToString()).FontSize(16);
-                            });
+                            row.RelativeItem()
+                                .Background(Colors.Green.Lighten4)
+                                .Padding(10)
+                                .Column(col =>
+                                {
+                                    col.Item().Text("Total de ventas").SemiBold();
+                                    col.Item().Text(reporte.Resumen.TotalVentas.ToString()).FontSize(16);
+                                });
 
                             row.ConstantItem(20);
 
-                            row.RelativeItem().Background(Colors.Blue.Lighten4).Padding(10).Column(col =>
-                            {
-                                col.Item().Text("Total recaudado").SemiBold();
-                                col.Item().Text($"Bs. {totalRecaudado:N2}").FontSize(16);
-                            });
+                            row.RelativeItem()
+                                .Background(Colors.Blue.Lighten4)
+                                .Padding(10)
+                                .Column(col =>
+                                {
+                                    col.Item().Text("Total recaudado").SemiBold();
+                                    col.Item().Text($"Bs. {reporte.Resumen.TotalRecaudado:N2}").FontSize(16);
+                                });
                         });
 
                         content.Item().Table(table =>
@@ -75,12 +80,29 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
 
                             table.Header(header =>
                             {
-                                header.Cell().Background(Colors.Grey.Lighten2).Border(1).Padding(6).Text("Rol").SemiBold();
-                                header.Cell().Background(Colors.Grey.Lighten2).Border(1).Padding(6).Text("Cantidad").SemiBold();
-                                header.Cell().Background(Colors.Grey.Lighten2).Border(1).Padding(6).Text("Total Recaudado").SemiBold();
+                                header.Cell()
+                                    .Background(Colors.Grey.Lighten2)
+                                    .Border(1)
+                                    .Padding(6)
+                                    .Text("Rol")
+                                    .SemiBold();
+
+                                header.Cell()
+                                    .Background(Colors.Grey.Lighten2)
+                                    .Border(1)
+                                    .Padding(6)
+                                    .Text("Cantidad")
+                                    .SemiBold();
+
+                                header.Cell()
+                                    .Background(Colors.Grey.Lighten2)
+                                    .Border(1)
+                                    .Padding(6)
+                                    .Text("Total Recaudado")
+                                    .SemiBold();
                             });
 
-                            foreach (var item in lista)
+                            foreach (var item in reporte.Detalle)
                             {
                                 table.Cell().Border(1).Padding(6).Text(item.Rol);
                                 table.Cell().Border(1).Padding(6).Text(item.CantidadVentas.ToString());
@@ -91,8 +113,7 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
 
                     page.Footer().AlignCenter().Text(text =>
                     {
-                        text.Span("Reporte generado automáticamente por VitalCare - ");
-                        text.Span(DateTime.Now.Year.ToString());
+                        text.Span(reporte.PiePagina);
                     });
                 });
             }).GeneratePdf();

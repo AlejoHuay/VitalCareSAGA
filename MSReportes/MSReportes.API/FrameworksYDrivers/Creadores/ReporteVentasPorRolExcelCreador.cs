@@ -6,36 +6,35 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
 {
     public class ReporteVentasPorRolExcelCreador : IReporteVentasExcelCreador
     {
-        public ArchivoReporteDto Crear(IEnumerable<ReporteVentasPorRolDto> datos)
+        public ArchivoReporteDto Crear(ReporteVentasPorRol reporte)
         {
-            var lista = datos.ToList();
-
             using var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Ventas por Rol");
 
-            worksheet.Cell("A1").Value = "VITALCARE";
+            worksheet.Cell("A1").Value = reporte.NombreEmpresa;
             worksheet.Cell("A1").Style.Font.Bold = true;
             worksheet.Cell("A1").Style.Font.FontSize = 18;
 
-            worksheet.Cell("A2").Value = "REPORTE DE VENTAS POR ROL";
+            worksheet.Cell("A2").Value = reporte.Titulo;
             worksheet.Cell("A2").Style.Font.Bold = true;
             worksheet.Cell("A2").Style.Font.FontSize = 14;
 
-            worksheet.Cell("A3").Value = $"Fecha de generación: {DateTime.Now:dd/MM/yyyy HH:mm:ss}";
+            worksheet.Cell("A3").Value = $"Fecha de generación: {reporte.FechaGeneracion:dd/MM/yyyy HH:mm:ss}";
+            worksheet.Cell("A4").Value = $"Usuario generador: {reporte.UsuarioGenerador}";
 
-            worksheet.Cell("A5").Value = "Rol";
-            worksheet.Cell("B5").Value = "Cantidad de Ventas";
-            worksheet.Cell("C5").Value = "Total Recaudado Bs.";
+            worksheet.Cell("A6").Value = "Rol";
+            worksheet.Cell("B6").Value = "Cantidad de Ventas";
+            worksheet.Cell("C6").Value = "Total Recaudado Bs.";
 
-            var headerRange = worksheet.Range("A5:C5");
+            var headerRange = worksheet.Range("A6:C6");
             headerRange.Style.Font.Bold = true;
             headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
             headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
             headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
 
-            int fila = 6;
+            int fila = 7;
 
-            foreach (var item in lista)
+            foreach (var item in reporte.Detalle)
             {
                 worksheet.Cell(fila, 1).Value = item.Rol;
                 worksheet.Cell(fila, 2).Value = item.CantidadVentas;
@@ -50,11 +49,13 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
             worksheet.Cell(fila + 1, 1).Value = "TOTAL";
             worksheet.Cell(fila + 1, 1).Style.Font.Bold = true;
 
-            worksheet.Cell(fila + 1, 2).FormulaA1 = $"SUM(B6:B{fila - 1})";
+            worksheet.Cell(fila + 1, 2).Value = reporte.Resumen.TotalVentas;
             worksheet.Cell(fila + 1, 2).Style.Font.Bold = true;
 
-            worksheet.Cell(fila + 1, 3).FormulaA1 = $"SUM(C6:C{fila - 1})";
+            worksheet.Cell(fila + 1, 3).Value = reporte.Resumen.TotalRecaudado;
             worksheet.Cell(fila + 1, 3).Style.Font.Bold = true;
+
+            worksheet.Cell(fila + 3, 1).Value = reporte.PiePagina;
 
             worksheet.Columns().AdjustToContents();
 
