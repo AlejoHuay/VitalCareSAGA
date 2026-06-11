@@ -233,6 +233,8 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
 
                 int idVenta = Convert.ToInt32(commandVenta.LastInsertedId);
 
+                venta.Id = idVenta;
+
                 foreach (DetalleVenta detalle in venta.Detalles)
                 {
                     Result resultadoDetalle = InsertarDetalle(
