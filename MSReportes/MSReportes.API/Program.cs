@@ -1,12 +1,39 @@
+using MSReportes.API.AdaptadoresDeInterfaz.Gateways;
+using MSReportes.API.CasosDeUso.Interactores;
+using MSReportes.API.CasosDeUso.PuertosEntrada;
+using MSReportes.API.FrameworksYDrivers.Creadores;
+using MSReportes.API.FrameworksYDrivers.Repositorios;
+using MSReportes.API.CasosDeUso.Builders;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// Servicios principales
+builder.Services.AddControllers();
+
+// OpenAPI
 builder.Services.AddOpenApi();
+
+// Inyección de dependencias
+builder.Services.AddScoped<IReporteVentasInputPort, ReporteVentasInteractor>();
+builder.Services.AddScoped<IReporteVentasRepositorio, ReporteVentasRepositorio>();
+builder.Services.AddScoped<IReporteVentasPdfCreador, ReporteVentasPorRolPdfCreador>();
+builder.Services.AddScoped<IReporteVentasExcelCreador, ReporteVentasPorRolExcelCreador>();
+builder.Services.AddScoped<IReporteVentasPorRolBuilder, ReporteVentasPorRolBuilder>();
+
+// CORS para que el frontend pueda consumir el microservicio
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirTodo", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configuración del pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -14,28 +41,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.UseCors("PermitirTodo");
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
