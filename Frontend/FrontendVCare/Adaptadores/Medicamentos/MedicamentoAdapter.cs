@@ -2,78 +2,50 @@ using FrontendVCare.Dto.MedicamentoDtos;
 
 namespace FrontendVCare.Adaptadores
 {
-    public class MedicamentoAdapter
+    public class MedicamentoAdapter : AdapterJSON<MedicamentoDto>
     {
-        private readonly AdapterJSON<MedicamentoDto> _adapter;
-
-        public MedicamentoAdapter(AdapterJSON<MedicamentoDto> adapter)
+        public MedicamentoAdapter(HttpClient httpClient) : base(httpClient)
         {
-            _adapter = adapter;
         }
 
         public Task<List<MedicamentoDto>> GetAllAsync()
         {
-            return _adapter.GetListAsync("api/medicamentos");
+            return GetListAsync("api/medicamentos");
         }
 
         public Task<MedicamentoDto?> GetByIdAsync(int id)
         {
-            return _adapter.GetAsync($"api/medicamentos/{id}");
+            return GetAsync($"api/medicamentos/{id}");
         }
 
         public Task<bool> CreateAsync(MedicamentoDto medicamento)
         {
-            return _adapter.PostAsync("api/medicamentos", medicamento);
+            return PostAsync("api/medicamentos", medicamento);
         }
 
         public Task<(bool Success, string? Message)> CreateWithMessageAsync(MedicamentoDto medicamento)
         {
-            return _adapter.PostWithMessageAsync("api/medicamentos", medicamento);
+            return PostWithMessageAsync("api/medicamentos", medicamento);
         }
 
         public Task<bool> UpdateAsync(MedicamentoDto medicamento)
         {
-            return _adapter.PutAsync($"api/medicamentos/{medicamento.Id}", medicamento);
+            return PutAsync($"api/medicamentos/{medicamento.Id}", medicamento);
         }
 
         public Task<(bool Success, string? Message)> UpdateWithMessageAsync(MedicamentoDto medicamento)
         {
-            return _adapter.PutWithMessageAsync($"api/medicamentos/{medicamento.Id}", medicamento);
+            return PutWithMessageAsync($"api/medicamentos/{medicamento.Id}", medicamento);
         }
 
         public Task<bool> DeleteAsync(int id)
         {
-            return _adapter.DeleteAsync($"api/medicamentos/{id}");
+            return DeleteAsync($"api/medicamentos/{id}");
         }
 
         public Task<bool> DeleteAsync(int id, int idUsuario)
         {
-            return _adapter.DeleteAsync($"api/medicamentos/{id}?idUsuario={idUsuario}");
+            return DeleteAsync($"api/medicamentos/{id}?idUsuario={idUsuario}");
         }
-
-        public Task<MedicamentoDto?> GetAsync(string url)
-        {
-            return _adapter.GetAsync(url);
-        }
-
-        public Task<(bool Success, string? Message)> PostWithMessageAsync(
-            string url,
-            MedicamentoDto data)
-        {
-            return _adapter.PostWithMessageAsync(url, data);
-        }
-
-        public Task<(bool Success, string? Message)> PutWithMessageAsync(
-            string url,
-            MedicamentoDto data)
-        {
-            return _adapter.PutWithMessageAsync(url, data);
-        }
-
-        public Task<bool> DeleteAsync(string url)
-        {
-            return _adapter.DeleteAsync(url);
-        }
-
     }
 }

@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using FrontendVCare.Dto;
@@ -8,9 +7,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace FrontendVCare.Adaptadores
 {
-    public class UsuarioAdapter
+    public class UsuarioAdapter : AdapterJSON<UsuarioDto>
     {
-        private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
@@ -18,8 +16,8 @@ namespace FrontendVCare.Adaptadores
         };
 
         public UsuarioAdapter(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+            : base(httpClient)
         {
-            _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -29,7 +27,7 @@ namespace FrontendVCare.Adaptadores
                 ? "api/usuarios/GetUsers"
                 : $"api/usuarios/GetUsers?filtro={Uri.EscapeDataString(filtro)}";
 
-            HttpResponseMessage response = await GetConTokenAsync(url);
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
             {
                 string mensaje = await LeerMensajeAsync(response, "No se pudieron obtener los usuarios.");
@@ -53,7 +51,7 @@ namespace FrontendVCare.Adaptadores
 
         public async Task<(OperacionApiDto Resultado, UsuarioDto? Usuario)> ObtenerPorIdConResultadoAsync(int id)
         {
-            HttpResponseMessage response = await GetConTokenAsync($"api/usuarios/getUserById?id={id}");
+            HttpResponseMessage response = await _httpClient.GetAsync($"api/usuarios/getUserById?id={id}");
             if (!response.IsSuccessStatusCode)
             {
                 string mensaje = await LeerMensajeAsync(response, "No se pudo obtener el usuario.");
@@ -71,7 +69,7 @@ namespace FrontendVCare.Adaptadores
 
         public async Task<(OperacionApiDto Resultado, UsuarioDto? Usuario)> ObtenerPorEmailConResultadoAsync(string email)
         {
-            HttpResponseMessage response = await GetConTokenAsync($"api/usuarios/getUser?email={Uri.EscapeDataString(email)}");
+            HttpResponseMessage response = await _httpClient.GetAsync($"api/usuarios/getUser?email={Uri.EscapeDataString(email)}");
             if (!response.IsSuccessStatusCode)
             {
                 string mensaje = await LeerMensajeAsync(response, "No se pudo obtener el usuario.");
@@ -89,7 +87,7 @@ namespace FrontendVCare.Adaptadores
 
         public async Task<(OperacionApiDto Resultado, UsuarioDto? Usuario)> ObtenerPorUserNameConResultadoAsync(string userName)
         {
-            HttpResponseMessage response = await GetConTokenAsync($"api/usuarios/getUser?userName={Uri.EscapeDataString(userName)}");
+            HttpResponseMessage response = await _httpClient.GetAsync($"api/usuarios/getUser?userName={Uri.EscapeDataString(userName)}");
             if (!response.IsSuccessStatusCode)
             {
                 string mensaje = await LeerMensajeAsync(response, "No se pudo obtener el usuario.");
@@ -107,7 +105,7 @@ namespace FrontendVCare.Adaptadores
 
         public async Task<OperacionApiDto> CrearConResultadoAsync(UsuarioRegistroDto usuario)
         {
-            HttpResponseMessage response = await PostConTokenAsync("api/usuarios/CrearUsuario", usuario);
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/usuarios/CrearUsuario", usuario);
             return await LeerResultadoAsync(response, "Usuario registrado correctamente.");
         }
 
@@ -124,7 +122,7 @@ namespace FrontendVCare.Adaptadores
             if (idUsuarioSesion.HasValue)
                 url += $"?idUsuarioSesion={idUsuarioSesion.Value}";
 
-            HttpResponseMessage response = await PutConTokenAsync(url, usuario);
+            HttpResponseMessage response = await _httpClient.PutAsJsonAsync(url, usuario);
             return await LeerResultadoAsync(response, "Usuario actualizado correctamente.");
         }
 
@@ -141,7 +139,7 @@ namespace FrontendVCare.Adaptadores
                 return OperacionApiDto.Error("No se pudo identificar al usuario autenticado.");
 
             string url = $"api/usuarios/EliminarUsuario?idUsuario={idUsuario}&idUsuarioSesion={idUsuarioSesion.Value}";
-            HttpResponseMessage response = await DeleteConTokenAsync(url);
+            HttpResponseMessage response = await _httpClient.DeleteAsync(url);
             return await LeerResultadoAsync(response, "Usuario eliminado correctamente.");
         }
 
@@ -156,54 +154,6 @@ namespace FrontendVCare.Adaptadores
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext == null) return null;
             return JwtSessionHelper.ObtenerIdUsuario(httpContext);
-        }
-
-        private string? ObtenerToken()
-        {
-            var httpContext = _httpContextAccessor.HttpContext;
-            if (httpContext == null) return null;
-            return JwtSessionHelper.ObtenerToken(httpContext);
-        }
-
-        private async Task<HttpResponseMessage> GetConTokenAsync(string url)
-        {
-            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-            AgregarBearer(request);
-            return await _httpClient.SendAsync(request);
-        }
-
-        private async Task<HttpResponseMessage> PostConTokenAsync(string url, object data)
-        {
-            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url)
-            {
-                Content = JsonContent.Create(data)
-            };
-            AgregarBearer(request);
-            return await _httpClient.SendAsync(request);
-        }
-
-        private async Task<HttpResponseMessage> PutConTokenAsync(string url, object data)
-        {
-            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url)
-            {
-                Content = JsonContent.Create(data)
-            };
-            AgregarBearer(request);
-            return await _httpClient.SendAsync(request);
-        }
-
-        private async Task<HttpResponseMessage> DeleteConTokenAsync(string url)
-        {
-            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, url);
-            AgregarBearer(request);
-            return await _httpClient.SendAsync(request);
-        }
-
-        private void AgregarBearer(HttpRequestMessage request)
-        {
-            string? token = ObtenerToken();
-            if (!string.IsNullOrWhiteSpace(token))
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
         private static async Task<JsonElement?> LeerJsonAsync(HttpResponseMessage response)

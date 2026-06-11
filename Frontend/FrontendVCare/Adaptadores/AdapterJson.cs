@@ -5,7 +5,7 @@ namespace FrontendVCare.Adaptadores
 {
     public class AdapterJSON<T> : IAdapter<T>
     {
-        private readonly HttpClient _httpClient;
+        protected readonly HttpClient _httpClient;
 
         public AdapterJSON(HttpClient httpClient)
         {
