@@ -17,5 +17,8 @@ namespace MSVentas.Dominio.Puertos.PuertoSalida
         Result RegistrarVenta(Venta venta);
         Result ActualizarVenta(Venta venta);
         Result AnularVentaLogicamente(int idVenta, int idUsuarioEditor);
+        Result ConfirmarStockSaga(int idVenta);
+
+        Result CompensarVentaPorFalloStock(int idVenta, string motivo);
     }
 }

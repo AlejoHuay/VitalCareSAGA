@@ -18,6 +18,14 @@ namespace FrontendVCare.Dto.Ventas
 
         public string Estado { get; set; } = string.Empty;
 
+        public string EstadoSaga { get; set; } = string.Empty;
+
+        public string? MotivoFalloSaga { get; set; }
+
+        public DateTime? FechaConfirmacionSaga { get; set; }
+
+        public DateTime? FechaCompensacionSaga { get; set; }
+
         public List<VentaDetalleDto> Detalles { get; set; } = new();
     }
 

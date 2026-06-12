@@ -17,7 +17,10 @@ namespace MSVentas.Dominio.Modelos
         public int? IdUsuarioEditor { get; set; }
         public string Nit { get; set; } = string.Empty;
         public string RazonSocial { get; set; } = string.Empty;
-
+        public string EstadoSaga { get; set; } = "PENDIENTE_STOCK";
+        public string? MotivoFalloSaga { get; set; }
+        public DateTime? FechaConfirmacionSaga { get; set; }
+        public DateTime? FechaCompensacionSaga { get; set; }
         public List<DetalleVenta> Detalles { get; set; } = new();
     }
 }

@@ -80,7 +80,11 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                     ultima_actualizacion,
                     Id_usuario_editor,
                     nit,
-                    razon_social
+                    razon_social,
+                    estado_saga,
+                    motivo_fallo_saga,
+                    fecha_confirmacion_saga,
+                    fecha_compensacion_saga
                 FROM venta
                 WHERE id = @id";
 
@@ -113,7 +117,22 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                         : StringHelper.LimpiarEspacios(reader["nit"]?.ToString()),
                     RazonSocial = reader["razon_social"] == DBNull.Value
                         ? string.Empty
-                        : StringHelper.LimpiarEspacios(reader["razon_social"]?.ToString())
+                        : StringHelper.LimpiarEspacios(reader["razon_social"]?.ToString()),
+                    EstadoSaga = reader["estado_saga"] == DBNull.Value
+                        ? "PENDIENTE_STOCK"
+                        : StringHelper.LimpiarEspacios(reader["estado_saga"]?.ToString()),
+
+                    MotivoFalloSaga = reader["motivo_fallo_saga"] == DBNull.Value
+                        ? null
+                        : StringHelper.LimpiarEspacios(reader["motivo_fallo_saga"]?.ToString()),
+
+                    FechaConfirmacionSaga = reader["fecha_confirmacion_saga"] == DBNull.Value
+                        ? null
+                        : Convert.ToDateTime(reader["fecha_confirmacion_saga"]),
+
+                    FechaCompensacionSaga = reader["fecha_compensacion_saga"] == DBNull.Value
+                        ? null
+                        : Convert.ToDateTime(reader["fecha_compensacion_saga"])
                 }
             );
 
@@ -186,7 +205,8 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                         Cliente_idCliente,
                         usuario_idUsuario,
                         nit,
-                        razon_social
+                        razon_social,
+                        estado_saga
                     )
                     VALUES
                     (
@@ -195,7 +215,8 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                         @idCliente,
                         @idUsuario,
                         @nit,
-                        @razonSocial
+                        @razonSocial,
+                        @estadoSaga
                     )";
 
                 using MySqlCommand commandVenta = new MySqlCommand(
@@ -208,6 +229,7 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                 commandVenta.Parameters.AddWithValue("@metodoPago", venta.MetodoPago);
                 commandVenta.Parameters.AddWithValue("@idCliente", venta.IdCliente);
                 commandVenta.Parameters.AddWithValue("@idUsuario", venta.IdUsuario);
+                commandVenta.Parameters.AddWithValue("@estadoSaga", string.IsNullOrWhiteSpace(venta.EstadoSaga) ? "PENDIENTE_STOCK" : venta.EstadoSaga);
 
                 commandVenta.Parameters.AddWithValue(
                     "@nit",
@@ -551,6 +573,62 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
             return resultado == null || resultado == DBNull.Value
                 ? 0
                 : Convert.ToInt32(resultado);
+        }
+        public Result ConfirmarStockSaga(int idVenta)
+        {
+            const string query = @"
+                UPDATE venta
+                SET
+                    estado_saga = 'STOCK_CONFIRMADO',
+                    motivo_fallo_saga = NULL,
+                    fecha_confirmacion_saga = NOW(),
+                    ultima_actualizacion = NOW()
+                WHERE id = @idVenta
+                AND estado = 1
+                AND estado_saga = 'PENDIENTE_STOCK'";
+
+            using MySqlConnection connection = new MySqlConnection(connectionString);
+            using MySqlCommand command = new MySqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@idVenta", idVenta);
+
+            connection.Open();
+
+            int filas = command.ExecuteNonQuery();
+
+            if (filas <= 0)
+                return Result.Fail("No se pudo confirmar el stock de la venta.");
+
+            return Result.Ok();
+        }
+        public Result CompensarVentaPorFalloStock(int idVenta, string motivo)
+        {
+            const string query = @"
+                UPDATE venta
+                SET
+                    estado = 0,
+                    estado_saga = 'VENTA_COMPENSADA',
+                    motivo_fallo_saga = @motivo,
+                    fecha_compensacion_saga = NOW(),
+                    ultima_actualizacion = NOW()
+                WHERE id = @idVenta
+                AND estado = 1
+                AND estado_saga = 'PENDIENTE_STOCK'";
+
+            using MySqlConnection connection = new MySqlConnection(connectionString);
+            using MySqlCommand command = new MySqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@idVenta", idVenta);
+            command.Parameters.AddWithValue("@motivo", motivo);
+
+            connection.Open();
+
+            int filas = command.ExecuteNonQuery();
+
+            if (filas <= 0)
+                return Result.Fail("No se pudo compensar la venta.");
+
+            return Result.Ok();
         }
     }
 }
