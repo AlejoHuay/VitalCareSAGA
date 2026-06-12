@@ -8,6 +8,7 @@ using MSProductos.Dominio.Entidades;
 using MSProductos.Dominio.Interfaces;
 using MSProductos.Dominio.Validadores;
 using MSProductos.Infraestructura.Repositorios;
+using MSProductos.Infraestructura.Mensajeria;
 
 Env.Load("../../.env");
 
@@ -17,6 +18,8 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IEventPublisher, RabbitPublisher>();
+builder.Services.AddHostedService<RabbitConsumerForProductos>();
 
 
 // Dependencias

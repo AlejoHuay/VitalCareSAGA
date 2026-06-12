@@ -260,5 +260,47 @@ namespace MSProductos.Infraestructura.Repositorios
 
             return query;
         }
+        public int DescontarStock(int idMedicamento, int cantidad, int idUsuario)
+        {
+            const string query = @"
+                UPDATE medicamento
+                SET stock = stock - @cantidad,
+                    id_usuario = @idUsuario,
+                    ultima_actualizacion = NOW()
+                WHERE id = @idMedicamento
+                AND estado = 1
+                AND stock >= @cantidad";
+
+            using MySqlConnection connection = new MySqlConnection(connectionString);
+            using MySqlCommand command = new MySqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@idMedicamento", idMedicamento);
+            command.Parameters.AddWithValue("@cantidad", cantidad);
+            command.Parameters.AddWithValue("@idUsuario", idUsuario);
+
+            connection.Open();
+            return command.ExecuteNonQuery();
+        }
+
+        public int RevertirStock(int idMedicamento, int cantidad, int idUsuario)
+        {
+            const string query = @"
+                UPDATE medicamento
+                SET stock = stock + @cantidad,
+                    id_usuario = @idUsuario,
+                    ultima_actualizacion = NOW()
+                WHERE id = @idMedicamento
+                AND estado = 1";
+
+            using MySqlConnection connection = new MySqlConnection(connectionString);
+            using MySqlCommand command = new MySqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@idMedicamento", idMedicamento);
+            command.Parameters.AddWithValue("@cantidad", cantidad);
+            command.Parameters.AddWithValue("@idUsuario", idUsuario);
+
+            connection.Open();
+            return command.ExecuteNonQuery();
+        }
     }
 }
