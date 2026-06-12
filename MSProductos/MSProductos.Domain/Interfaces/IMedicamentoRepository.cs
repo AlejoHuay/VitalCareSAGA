@@ -11,5 +11,7 @@ namespace MSProductos.Dominio.Interfaces
     {
         bool ExisteNombreActivo(string nombre);
         bool ExisteNombreActivoExcluyendoId(int idMedicamento, string nombre);
+        int DescontarStock(int idMedicamento, int cantidad, int idUsuario);
+        int RevertirStock(int idMedicamento, int cantidad, int idUsuario);
     }
 }
