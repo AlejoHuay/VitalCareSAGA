@@ -14,6 +14,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IEventPublisher, RabbitPublisher>();
+builder.Services.AddHostedService<RabbitConsumerForVentas>();
 
 // Configuración JWT
 string jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
