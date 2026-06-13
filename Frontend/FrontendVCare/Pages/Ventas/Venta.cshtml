@@ -9,8 +9,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-success">Ventas</h2>
-            <p class="text-muted mb-0">Registra ventas y consulta el historial reciente</p>
+            <p class="text-muted mb-0">Consulta y administra el historial de ventas</p>
         </div>
+        <a asp-page="/Ventas/NuevaVenta" class="btn btn-success">+ Agregar venta</a>
     </div>
 
     @if (!string.IsNullOrEmpty(Model.Mensaje))
@@ -27,75 +28,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-success text-white fw-semibold">
-            Nueva venta
-        </div>
-        <div class="card-body">
-            <form method="post" asp-page-handler="Registrar">
-                <div class="row g-3">
-                    <div class="col-md-5">
-                        <label asp-for="Venta.IdCliente" class="form-label">Cliente</label>
-                        <select asp-for="Venta.IdCliente" class="form-select" required>
-                            <option value="">Seleccionar cliente</option>
-                            @foreach (var cliente in Model.Clientes)
-                            {
-                                <option value="@cliente.IdCliente">@cliente.RazonSocial (@cliente.Nit)</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-
-                <div class="table-responsive mt-4">
-                    <table class="table align-middle" id="detalleVenta">
-                        <thead class="table-success">
-                            <tr>
-                                <th>Medicamento</th>
-                                <th style="width:140px">Cantidad</th>
-                                <th style="width:160px">Precio (Bs)</th>
-                                <th style="width:130px">Subtotal</th>
-                                <th style="width:80px"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <select name="Venta.Detalles[0].IdMedicamento" class="form-select medicamento-select" required>
-                                        <option value="">Seleccionar medicamento</option>
-                                        @foreach (var medicamento in Model.Medicamentos)
-                                        {
-                                            <option value="@medicamento.Id" data-precio="@medicamento.Precio">
-                                                @medicamento.Nombre - @medicamento.Presentacion
-                                            </option>
-                                        }
-                                    </select>
-                                </td>
-                                <td>
-                                    <input name="Venta.Detalles[0].Cantidad" type="number" min="1" value="1" class="form-control cantidad-input" required />
-                                </td>
-                                <td>
-                                    <input name="Venta.Detalles[0].PrecioUnitario" type="number" min="0" step="0.01" class="form-control precio-input" required />
-                                </td>
-                                <td class="subtotal-cell fw-semibold">0.00</td>
-                                <td>
-                                    <button type="button" class="btn btn-outline-danger btn-sm quitar-detalle">Quitar</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center">
-                    <button type="button" class="btn btn-outline-success" id="agregarDetalle">+ Agregar medicamento</button>
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="fs-5 fw-bold">Total: Bs <span id="totalVenta">0.00</span></span>
-                        <button type="submit" class="btn btn-primary">Registrar venta</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <form method="get" class="mb-4">
         <div class="card-module p-3">
@@ -148,65 +80,3 @@
         </table>
     </div>
 </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const tabla = document.querySelector("#detalleVenta tbody");
-        const agregar = document.getElementById("agregarDetalle");
-        const total = document.getElementById("totalVenta");
-
-        function renumerar() {
-            tabla.querySelectorAll("tr").forEach((fila, index) => {
-                fila.querySelectorAll("select, input").forEach((control) => {
-                    control.name = control.name.replace(/Venta\.Detalles\[\d+\]/, `Venta.Detalles[${index}]`);
-                });
-            });
-        }
-
-        function recalcular() {
-            let suma = 0;
-            tabla.querySelectorAll("tr").forEach((fila) => {
-                const cantidad = Number(fila.querySelector(".cantidad-input").value || 0);
-                const precio = Number(fila.querySelector(".precio-input").value || 0);
-                const subtotal = cantidad * precio;
-                fila.querySelector(".subtotal-cell").textContent = subtotal.toFixed(2);
-                suma += subtotal;
-            });
-            total.textContent = suma.toFixed(2);
-        }
-
-        tabla.addEventListener("change", function (event) {
-            if (event.target.classList.contains("medicamento-select")) {
-                const precio = event.target.selectedOptions[0]?.dataset.precio || "0";
-                event.target.closest("tr").querySelector(".precio-input").value = Number(precio).toFixed(2);
-                recalcular();
-            }
-        });
-
-        tabla.addEventListener("input", recalcular);
-
-        tabla.addEventListener("click", function (event) {
-            if (!event.target.classList.contains("quitar-detalle")) {
-                return;
-            }
-
-            if (tabla.querySelectorAll("tr").length > 1) {
-                event.target.closest("tr").remove();
-                renumerar();
-                recalcular();
-            }
-        });
-
-        agregar.addEventListener("click", function () {
-            const nuevaFila = tabla.querySelector("tr").cloneNode(true);
-            nuevaFila.querySelectorAll("select, input").forEach((control) => {
-                control.value = control.classList.contains("cantidad-input") ? "1" : "";
-            });
-            nuevaFila.querySelector(".subtotal-cell").textContent = "0.00";
-            tabla.appendChild(nuevaFila);
-            renumerar();
-        });
-
-        recalcular();
-    });
-</script>
