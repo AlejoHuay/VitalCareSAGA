@@ -15,38 +15,71 @@ namespace MSVentas.Infraestructura.Mensajeria
 
         public RabbitPublisher(IConfiguration configuration)
         {
-            _host = Environment.GetEnvironmentVariable("RABBITMQ_HOST")
-                ?? configuration["RabbitMQ:Host"]
-                ?? "localhost";
+            _host = ObtenerConfiguracionObligatoria(
+                configuration,
+                "RABBITMQ_HOST",
+                "RabbitMQ:Host"
+            );
 
-            _port = int.TryParse(
-                Environment.GetEnvironmentVariable("RABBITMQ_PORT")
-                ?? configuration["RabbitMQ:Port"],
-                out int port)
-                    ? port
-                    : 5672;
+            string puertoRabbit = ObtenerConfiguracionObligatoria(
+                configuration,
+                "RABBITMQ_PORT",
+                "RabbitMQ:Port"
+            );
 
-            _user = Environment.GetEnvironmentVariable("RABBITMQ_USER")
-                ?? configuration["RabbitMQ:User"]
-                ?? "guest";
+            if (!int.TryParse(puertoRabbit, out int puerto)
+                || puerto <= 0
+                || puerto > 65535)
+            {
+                throw new InvalidOperationException(
+                    "La configuración RABBITMQ_PORT no contiene un puerto válido."
+                );
+            }
 
-            _password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD")
-                ?? configuration["RabbitMQ:Password"]
-                ?? "guest";
+            _port = puerto;
 
-            _exchange = Environment.GetEnvironmentVariable("RABBITMQ_EXCHANGE")
-                ?? configuration["RabbitMQ:Exchange"]
-                ?? "vitalcare.saga";
+            _user = ObtenerConfiguracionObligatoria(
+                configuration,
+                "RABBITMQ_USER",
+                "RabbitMQ:User"
+            );
+
+            _password = ObtenerConfiguracionObligatoria(
+                configuration,
+                "RABBITMQ_PASSWORD",
+                "RabbitMQ:Password"
+            );
+
+            _exchange = ObtenerConfiguracionObligatoria(
+                configuration,
+                "RABBITMQ_EXCHANGE",
+                "RabbitMQ:Exchange"
+            );
         }
 
         public void Publish<T>(string routingKey, T evento)
         {
+            if (string.IsNullOrWhiteSpace(routingKey))
+            {
+                throw new ArgumentException(
+                    "La routing key es obligatoria.",
+                    nameof(routingKey)
+                );
+            }
+
+            if (evento == null)
+            {
+                throw new ArgumentNullException(nameof(evento));
+            }
+
             ConnectionFactory factory = new ConnectionFactory
             {
                 HostName = _host,
                 Port = _port,
                 UserName = _user,
-                Password = _password
+                Password = _password,
+                AutomaticRecoveryEnabled = true,
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(10)
             };
 
             using IConnection connection = factory.CreateConnection();
@@ -65,13 +98,33 @@ namespace MSVentas.Infraestructura.Mensajeria
             IBasicProperties properties = channel.CreateBasicProperties();
             properties.Persistent = true;
             properties.ContentType = "application/json";
+            properties.ContentEncoding = "utf-8";
 
             channel.BasicPublish(
                 exchange: _exchange,
-                routingKey: routingKey,
+                routingKey: routingKey.Trim(),
                 basicProperties: properties,
                 body: body
             );
+        }
+
+        private static string ObtenerConfiguracionObligatoria(
+            IConfiguration configuration,
+            string variableEntorno,
+            string claveConfiguracion)
+        {
+            string? valor =
+                Environment.GetEnvironmentVariable(variableEntorno)
+                ?? configuration[claveConfiguracion];
+
+            if (string.IsNullOrWhiteSpace(valor))
+            {
+                throw new InvalidOperationException(
+                    $"No se encontró '{variableEntorno}' ni '{claveConfiguracion}'."
+                );
+            }
+
+            return valor.Trim();
         }
     }
 }

@@ -25,28 +25,48 @@ namespace MSProductos.Infraestructura.Mensajeria
         public RabbitConsumerForProductos(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
-            _port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int port) ? port : 5672;
-            _user = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? "guest";
-            _password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? "guest";
-            _exchange = Environment.GetEnvironmentVariable("RABBITMQ_EXCHANGE") ?? "vitalcare.saga";
+
+            _host = ObtenerVariableObligatoria("RABBITMQ_HOST");
+
+            string puertoRabbit = ObtenerVariableObligatoria("RABBITMQ_PORT");
+
+            if (!int.TryParse(puertoRabbit, out int puerto)
+                || puerto <= 0
+                || puerto > 65535)
+            {
+                throw new InvalidOperationException(
+                    "La variable RABBITMQ_PORT no contiene un puerto válido."
+                );
+            }
+
+            _port = puerto;
+            _user = ObtenerVariableObligatoria("RABBITMQ_USER");
+            _password = ObtenerVariableObligatoria("RABBITMQ_PASSWORD");
+            _exchange = ObtenerVariableObligatoria("RABBITMQ_EXCHANGE");
             _queue = "msproductos.venta.creada";
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             ConnectionFactory factory = new ConnectionFactory
             {
                 HostName = _host,
                 Port = _port,
                 UserName = _user,
-                Password = _password
+                Password = _password,
+                AutomaticRecoveryEnabled = true,
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(10)
             };
 
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
 
-            _channel.ExchangeDeclare(_exchange, ExchangeType.Topic, durable: true, autoDelete: false);
+            _channel.ExchangeDeclare(
+                exchange: _exchange,
+                type: ExchangeType.Topic,
+                durable: true,
+                autoDelete: false
+            );
 
             _channel.QueueDeclare(
                 queue: _queue,
@@ -61,28 +81,48 @@ namespace MSProductos.Infraestructura.Mensajeria
                 routingKey: "venta.creada"
             );
 
+            _channel.BasicQos(
+                prefetchSize: 0,
+                prefetchCount: 1,
+                global: false
+            );
+
             EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
 
-            consumer.Received += (sender, args) =>
+            consumer.Received += (_, args) =>
             {
                 try
                 {
                     string json = Encoding.UTF8.GetString(args.Body.ToArray());
-                    VentaCreadaEvent? evento = JsonSerializer.Deserialize<VentaCreadaEvent>(json);
+
+                    VentaCreadaEvent? evento =
+                        JsonSerializer.Deserialize<VentaCreadaEvent>(json);
 
                     if (evento == null)
                     {
-                        _channel.BasicAck(args.DeliveryTag, false);
+                        _channel.BasicNack(
+                            deliveryTag: args.DeliveryTag,
+                            multiple: false,
+                            requeue: false
+                        );
+
                         return;
                     }
 
                     ProcesarVentaCreada(evento);
 
-                    _channel.BasicAck(args.DeliveryTag, false);
+                    _channel.BasicAck(
+                        deliveryTag: args.DeliveryTag,
+                        multiple: false
+                    );
                 }
                 catch
                 {
-                    _channel.BasicNack(args.DeliveryTag, false, requeue: false);
+                    _channel.BasicNack(
+                        deliveryTag: args.DeliveryTag,
+                        multiple: false,
+                        requeue: false
+                    );
                 }
             };
 
@@ -92,7 +132,7 @@ namespace MSProductos.Infraestructura.Mensajeria
                 consumer: consumer
             );
 
-            return Task.CompletedTask;
+            await Task.Delay(Timeout.Infinite, stoppingToken);
         }
 
         private void ProcesarVentaCreada(VentaCreadaEvent evento)
@@ -105,7 +145,7 @@ namespace MSProductos.Infraestructura.Mensajeria
             IEventPublisher eventPublisher =
                 scope.ServiceProvider.GetRequiredService<IEventPublisher>();
 
-            List<DetalleVentaCreadaEvent> descontados = new();
+            List<DetalleVentaCreadaEvent> descontados = new List<DetalleVentaCreadaEvent>();
 
             foreach (DetalleVentaCreadaEvent detalle in evento.Detalles)
             {
@@ -117,21 +157,25 @@ namespace MSProductos.Infraestructura.Mensajeria
 
                 if (filas <= 0)
                 {
-                    foreach (DetalleVentaCreadaEvent revertir in descontados)
+                    foreach (DetalleVentaCreadaEvent detalleRevertir in descontados)
                     {
                         medicamentoRepository.RevertirStock(
-                            revertir.IdMedicamento,
-                            revertir.Cantidad,
+                            detalleRevertir.IdMedicamento,
+                            detalleRevertir.Cantidad,
                             evento.IdUsuario
                         );
                     }
 
-                    eventPublisher.Publish("stock.fallido", new
-                    {
-                        evento.IdVenta,
-                        Motivo = $"Stock insuficiente o medicamento inactivo. Medicamento: {detalle.IdMedicamento}",
-                        Fecha = DateTime.Now
-                    });
+                    eventPublisher.Publish(
+                        "stock.fallido",
+                        new
+                        {
+                            evento.IdVenta,
+                            Motivo =
+                                $"Stock insuficiente o medicamento inactivo. Medicamento: {detalle.IdMedicamento}",
+                            Fecha = DateTime.Now
+                        }
+                    );
 
                     return;
                 }
@@ -139,19 +183,43 @@ namespace MSProductos.Infraestructura.Mensajeria
                 descontados.Add(detalle);
             }
 
-            eventPublisher.Publish("stock.actualizado", new
+            eventPublisher.Publish(
+                "stock.actualizado",
+                new
+                {
+                    evento.IdVenta,
+                    evento.IdUsuario,
+                    Fecha = DateTime.Now,
+                    Detalles = evento.Detalles
+                }
+            );
+        }
+
+        private static string ObtenerVariableObligatoria(string nombre)
+        {
+            string? valor = Environment.GetEnvironmentVariable(nombre);
+
+            if (string.IsNullOrWhiteSpace(valor))
             {
-                evento.IdVenta,
-                evento.IdUsuario,
-                Fecha = DateTime.Now,
-                Detalles = evento.Detalles
-            });
+                throw new InvalidOperationException(
+                    $"No se encontró la variable de entorno '{nombre}'."
+                );
+            }
+
+            return valor.Trim();
         }
 
         public override void Dispose()
         {
-            _channel?.Close();
-            _connection?.Close();
+            if (_channel?.IsOpen == true)
+                _channel.Close();
+
+            if (_connection?.IsOpen == true)
+                _connection.Close();
+
+            _channel?.Dispose();
+            _connection?.Dispose();
+
             base.Dispose();
         }
     }

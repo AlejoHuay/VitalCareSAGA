@@ -13,7 +13,6 @@ namespace MSVentas.Infraestructura.Mensajeria
     public class RabbitConsumerForVentas : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-
         private readonly string _host;
         private readonly int _port;
         private readonly string _user;
@@ -28,83 +27,108 @@ namespace MSVentas.Infraestructura.Mensajeria
         {
             _serviceProvider = serviceProvider;
 
-            _host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
+            _host = ObtenerVariableObligatoria("RABBITMQ_HOST");
 
-            _port = int.TryParse(
-                Environment.GetEnvironmentVariable("RABBITMQ_PORT"),
-                out int port
-            )
-                ? port
-                : 5672;
+            string puertoRabbit = ObtenerVariableObligatoria("RABBITMQ_PORT");
 
-            _user = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? "guest";
-            _password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? "guest";
-            _exchange = Environment.GetEnvironmentVariable("RABBITMQ_EXCHANGE") ?? "vitalcare.saga";
+            if (!int.TryParse(puertoRabbit, out int puerto)
+                || puerto <= 0
+                || puerto > 65535)
+            {
+                throw new InvalidOperationException(
+                    "La variable RABBITMQ_PORT no contiene un puerto válido."
+                );
+            }
 
+            _port = puerto;
+            _user = ObtenerVariableObligatoria("RABBITMQ_USER");
+            _password = ObtenerVariableObligatoria("RABBITMQ_PASSWORD");
+            _exchange = ObtenerVariableObligatoria("RABBITMQ_EXCHANGE");
             _queue = "msventas.stock.resultado";
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             ConnectionFactory factory = new ConnectionFactory
             {
                 HostName = _host,
                 Port = _port,
                 UserName = _user,
-                Password = _password
+                Password = _password,
+                AutomaticRecoveryEnabled = true,
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(10)
             };
 
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
+            IConnection connection = factory.CreateConnection();
+            IModel channel = connection.CreateModel();
 
-            _channel.ExchangeDeclare(
+            _connection = connection;
+            _channel = channel;
+
+            channel.ExchangeDeclare(
                 exchange: _exchange,
                 type: ExchangeType.Topic,
                 durable: true,
                 autoDelete: false
             );
 
-            _channel.QueueDeclare(
+            channel.QueueDeclare(
                 queue: _queue,
                 durable: true,
                 exclusive: false,
                 autoDelete: false
             );
 
-            _channel.QueueBind(
+            channel.QueueBind(
                 queue: _queue,
                 exchange: _exchange,
                 routingKey: "stock.actualizado"
             );
 
-            _channel.QueueBind(
+            channel.QueueBind(
                 queue: _queue,
                 exchange: _exchange,
                 routingKey: "stock.fallido"
             );
 
-            EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
+            channel.BasicQos(
+                prefetchSize: 0,
+                prefetchCount: 1,
+                global: false
+            );
 
-            consumer.Received += (sender, args) =>
+            EventingBasicConsumer consumer = new EventingBasicConsumer(channel);
+
+            consumer.Received += (_, args) =>
             {
                 try
                 {
                     string json = Encoding.UTF8.GetString(args.Body.ToArray());
 
-                    if (args.RoutingKey == "stock.actualizado")
+                    switch (args.RoutingKey)
                     {
-                        ProcesarStockActualizado(json);
-                    }
-                    else if (args.RoutingKey == "stock.fallido")
-                    {
-                        ProcesarStockFallido(json);
+                        case "stock.actualizado":
+                            ProcesarStockActualizado(json);
+                            break;
+
+                        case "stock.fallido":
+                            ProcesarStockFallido(json);
+                            break;
+
+                        default:
+                            throw new InvalidOperationException(
+                                $"Routing key no soportada: {args.RoutingKey}"
+                            );
                     }
 
-                    _channel.BasicAck(args.DeliveryTag, false);
+                    channel.BasicAck(
+                        deliveryTag: args.DeliveryTag,
+                        multiple: false
+                    );
                 }
                 catch
                 {
-                    _channel.BasicNack(
+                    channel.BasicNack(
                         deliveryTag: args.DeliveryTag,
                         multiple: false,
                         requeue: false
@@ -112,13 +136,13 @@ namespace MSVentas.Infraestructura.Mensajeria
                 }
             };
 
-            _channel.BasicConsume(
+            channel.BasicConsume(
                 queue: _queue,
                 autoAck: false,
                 consumer: consumer
             );
 
-            return Task.CompletedTask;
+            await Task.Delay(Timeout.Infinite, stoppingToken);
         }
 
         private void ProcesarStockActualizado(string json)
@@ -126,8 +150,12 @@ namespace MSVentas.Infraestructura.Mensajeria
             StockActualizadoEvent? evento =
                 JsonSerializer.Deserialize<StockActualizadoEvent>(json);
 
-            if (evento == null)
-                throw new InvalidOperationException("Evento stock.actualizado inválido.");
+            if (evento == null || evento.IdVenta <= 0)
+            {
+                throw new InvalidOperationException(
+                    "Evento stock.actualizado inválido."
+                );
+            }
 
             using IServiceScope scope = _serviceProvider.CreateScope();
 
@@ -145,8 +173,16 @@ namespace MSVentas.Infraestructura.Mensajeria
             StockFallidoEvent? evento =
                 JsonSerializer.Deserialize<StockFallidoEvent>(json);
 
-            if (evento == null)
-                throw new InvalidOperationException("Evento stock.fallido inválido.");
+            if (evento == null || evento.IdVenta <= 0)
+            {
+                throw new InvalidOperationException(
+                    "Evento stock.fallido inválido."
+                );
+            }
+
+            string motivo = string.IsNullOrWhiteSpace(evento.Motivo)
+                ? "El procesamiento del stock falló."
+                : evento.Motivo.Trim();
 
             using IServiceScope scope = _serviceProvider.CreateScope();
 
@@ -155,17 +191,37 @@ namespace MSVentas.Infraestructura.Mensajeria
 
             Result resultado = repository.CompensarVentaPorFalloStock(
                 evento.IdVenta,
-                evento.Motivo
+                motivo
             );
 
             if (!resultado.IsSuccess)
                 throw new InvalidOperationException(resultado.Error);
         }
 
+        private static string ObtenerVariableObligatoria(string nombre)
+        {
+            string? valor = Environment.GetEnvironmentVariable(nombre);
+
+            if (string.IsNullOrWhiteSpace(valor))
+            {
+                throw new InvalidOperationException(
+                    $"No se encontró la variable de entorno '{nombre}'."
+                );
+            }
+
+            return valor.Trim();
+        }
+
         public override void Dispose()
         {
-            _channel?.Close();
-            _connection?.Close();
+            if (_channel?.IsOpen == true)
+                _channel.Close();
+
+            if (_connection?.IsOpen == true)
+                _connection.Close();
+
+            _channel?.Dispose();
+            _connection?.Dispose();
 
             base.Dispose();
         }
