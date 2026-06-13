@@ -1,6 +1,28 @@
 version: '3.8'
 
 services:
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: vitalcare-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    ports:
+      - "${RABBITMQ_HOST_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - vitalcare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
   # Microservicio - MSClientes (MongoDB Atlas)
   msclientes:
     build:
@@ -10,21 +32,29 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:${MSCLIENTES_PORT}
+
+      # MongoDB Atlas
       - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING}
       - MONGODB_DATABASE=${MONGODB_DATABASE}
       - MONGODB_COLLECTION=${MONGODB_COLLECTION}
+
       # JWT Configuration
       - JWT_KEY=${JWT_KEY}
       - JWT_ISSUER=${JWT_ISSUER}
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+
       # Frontend Base URL
       - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+
     ports:
       - "${MSCLIENTES_PORT}:${MSCLIENTES_PORT}"
+
     networks:
       - vitalcare-network
+
     restart: unless-stopped
+
     depends_on:
       - msusuarios
 
@@ -37,25 +67,43 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:${MSPRODUCTOS_PORT}
+
+      # MySQL
       - MYSQL_HOST=${MYSQL_HOST}
       - MYSQL_PORT=${MYSQL_PORT}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+      # RabbitMQ
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_EXCHANGE=${RABBITMQ_EXCHANGE}
+
       # JWT Configuration
       - JWT_KEY=${JWT_KEY}
       - JWT_ISSUER=${JWT_ISSUER}
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+
       # Frontend Base URL
       - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+
     ports:
       - "${MSPRODUCTOS_PORT}:${MSPRODUCTOS_PORT}"
+
     networks:
       - vitalcare-network
+
     restart: unless-stopped
+
     depends_on:
-      - msusuarios
+      msusuarios:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
   # Microservicio - MSProveedor (PostgreSQL)
   msproveedor:
@@ -64,25 +112,33 @@ services:
       dockerfile: Dockerfile.MSProveedor
     container_name: vitalcare-msproveedor
     environment:
-      # JWT Configuration
-      - JWT_KEY=${JWT_KEY}
-      - JWT_ISSUER=${JWT_ISSUER}
-      - JWT_AUDIENCE=${JWT_AUDIENCE}
-      - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
-      # Frontend Base URL
-      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:${MSPROVEEDOR_PORT}
+
+      # PostgreSQL
       - POSTGRES_PROVEEDOR_HOST=${POSTGRES_PROVEEDOR_HOST}
       - POSTGRES_PROVEEDOR_PORT=${POSTGRES_PROVEEDOR_PORT}
       - POSTGRES_PROVEEDOR_DATABASE=${POSTGRES_PROVEEDOR_DATABASE}
       - POSTGRES_PROVEEDOR_USER=${POSTGRES_PROVEEDOR_USER}
       - POSTGRES_PROVEEDOR_PASSWORD=${POSTGRES_PROVEEDOR_PASSWORD}
+
+      # JWT Configuration
+      - JWT_KEY=${JWT_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+
+      # Frontend Base URL
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+
     ports:
       - "${MSPROVEEDOR_PORT}:${MSPROVEEDOR_PORT}"
+
     networks:
       - vitalcare-network
+
     restart: unless-stopped
+
     depends_on:
       - msusuarios
 
@@ -95,17 +151,20 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:${MSUSUARIOS_PORT}
+
       # Base de datos PostgreSQL - Railway
       - POSTGRES_RAILWAY_HOST=${POSTGRES_RAILWAY_HOST}
       - POSTGRES_RAILWAY_PORT=${POSTGRES_RAILWAY_PORT}
       - POSTGRES_RAILWAY_DATABASE=${POSTGRES_RAILWAY_DATABASE}
       - POSTGRES_RAILWAY_USER=${POSTGRES_RAILWAY_USER}
       - POSTGRES_RAILWAY_PASSWORD=${POSTGRES_RAILWAY_PASSWORD}
+
       # JWT Configuration
       - JWT_KEY=${JWT_KEY}
       - JWT_ISSUER=${JWT_ISSUER}
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+
       # SMTP Configuration
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
@@ -113,12 +172,16 @@ services:
       - SMTP_REMITENTE_EMAIL=${SMTP_REMITENTE_EMAIL}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_USE_SSL=${SMTP_USE_SSL}
+
       # Frontend Base URL
       - FRONTEND_BASE_URL=http://frontend:${FRONTEND_PORT}
+
     ports:
       - "${MSUSUARIOS_PORT}:${MSUSUARIOS_PORT}"
+
     networks:
       - vitalcare-network
+
     restart: unless-stopped
 
   # Microservicio - MSVentas (MySQL Railway)
@@ -130,25 +193,43 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:${MSVENTAS_PORT}
+
+      # MySQL Railway
       - MYSQL_VENTAS_HOST=${MYSQL_VENTAS_HOST}
       - MYSQL_VENTAS_PORT=${MYSQL_VENTAS_PORT}
       - MYSQL_VENTAS_DATABASE=${MYSQL_VENTAS_DATABASE}
       - MYSQL_VENTAS_USER=${MYSQL_VENTAS_USER}
       - MYSQL_VENTAS_PASSWORD=${MYSQL_VENTAS_PASSWORD}
+
+      # RabbitMQ
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_EXCHANGE=${RABBITMQ_EXCHANGE}
+
       # JWT Configuration
       - JWT_KEY=${JWT_KEY}
       - JWT_ISSUER=${JWT_ISSUER}
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+
       # Frontend Base URL
       - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+
     ports:
       - "${MSVENTAS_PORT}:${MSVENTAS_PORT}"
+
     networks:
       - vitalcare-network
+
     restart: unless-stopped
+
     depends_on:
-      - msusuarios
+      msusuarios:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
   # Frontend - FrontendVCare (Razor Pages)
   frontend:
@@ -159,23 +240,32 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:${FRONTEND_PORT}
+
+      # URLs de los microservicios
       - MSUSUARIOS_URL=${MSUSUARIOS_URL}
       - MSCLIENTES_URL=${MSCLIENTES_URL}
       - MSPRODUCTOS_URL=${MSPRODUCTOS_URL}
       - MSPROVEEDOR_URL=${MSPROVEEDOR_URL}
       - MSVENTAS_URL=${MSVENTAS_URL}
+
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+
     depends_on:
       - msclientes
       - msproductos
       - msproveedor
       - msusuarios
       - msventas
+
     networks:
       - vitalcare-network
+
     restart: unless-stopped
 
 networks:
   vitalcare-network:
     driver: bridge
+
+volumes:
+  rabbitmq-data:
