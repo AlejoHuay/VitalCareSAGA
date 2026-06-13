@@ -3,12 +3,12 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MSProductos.Aplicacion.InputPorts;
-using MSProductos.Aplicacion.Interactors;
 using MSProductos.Dominio.Entidades;
 using MSProductos.Dominio.Interfaces;
 using MSProductos.Dominio.Validadores;
 using MSProductos.Infraestructura.Repositorios;
 using MSProductos.Infraestructura.Mensajeria;
+using MSProductos.Aplicacion.UseCases;
 
 Env.Load("../../.env");
 
