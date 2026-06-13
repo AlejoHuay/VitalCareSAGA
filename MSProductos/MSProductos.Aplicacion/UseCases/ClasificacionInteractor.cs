@@ -4,7 +4,7 @@ using MSProductos.Dominio.Validadores;
 using MSProductos.Aplicacion.InputPorts;
 using MSProductos.Aplicacion.Helpers;
 
-namespace MSProductos.Aplicacion.Interactors
+namespace MSProductos.Aplicacion.UseCases
 {
     public class ClasificacionInteractor : IClasificacionInputPort
     {
