@@ -25,8 +25,14 @@ namespace FrontendVCare.Adaptadores.Ventas
                 ? "api/ventas"
                 : $"api/ventas?filtro={WebUtility.UrlEncode(filtro)}";
 
-            List<VentaDto>? ventas = await httpClient.GetFromJsonAsync<List<VentaDto>>(url, JsonOptions);
-            return ventas ?? new List<VentaDto>();
+            HttpResponseMessage response = await httpClient.GetAsync(url);
+
+            response.EnsureSuccessStatusCode();
+
+            RespuestaVentasDto? respuesta =
+                await response.Content.ReadFromJsonAsync<RespuestaVentasDto>(JsonOptions);
+
+            return respuesta?.Data ?? new List<VentaDto>();
         }
 
         public async Task<OperacionApiDto> RegistrarAsync(VentaFormularioDto venta)
@@ -79,6 +85,12 @@ namespace FrontendVCare.Adaptadores.Ventas
             {
                 return null;
             }
+        }
+
+        private class RespuestaVentasDto
+        {
+            public string Mensaje { get; set; } = string.Empty;
+            public List<VentaDto> Data { get; set; } = new();
         }
     }
 }

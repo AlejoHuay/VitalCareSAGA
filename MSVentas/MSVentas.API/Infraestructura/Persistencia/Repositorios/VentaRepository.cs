@@ -30,18 +30,21 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
 
             string query = @"
                 SELECT
-                    v.id,
-                    v.fecha_hora,
-                    v.total,
-                    v.metodo_pago,
+                    v.id AS Id,
+                    v.fecha_hora AS Fecha,
+                    v.Cliente_idCliente AS IdCliente,
                     CONCAT(
                         COALESCE(v.nit, ''),
                         ' - ',
                         COALESCE(v.razon_social, '')
-                    ) AS cliente,
-                    v.razon_social,
-                    v.nit,
-                    v.usuario_idUsuario AS usuario
+                    ) AS Cliente,
+                    v.usuario_idUsuario AS IdUsuario,
+                    CAST(v.usuario_idUsuario AS CHAR) AS Usuario,
+                    v.total AS Total,
+                    CASE
+                        WHEN v.estado = 1 THEN 'ACTIVA'
+                        ELSE 'ANULADA'
+                    END AS Estado
                 FROM venta v
                 WHERE v.estado = 1";
 
