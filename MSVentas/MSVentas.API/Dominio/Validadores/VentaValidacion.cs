@@ -1,6 +1,5 @@
-using System.Text.RegularExpressions;
-using MSVentas.Dominio.Modelos;
 using MSVentas.App.Interfaces;
+using MSVentas.Dominio.Modelos;
 
 namespace MSVentas.Dominio.Validadores
 {
@@ -19,7 +18,7 @@ namespace MSVentas.Dominio.Validadores
         private Result? ValidarCliente(int idCliente)
         {
             if (idCliente <= 0)
-                return Result.Fail("La venta debe tener un cliente válido.");
+                return Result.Fail("La venta debe tener un cliente valido.");
 
             return null;
         }
@@ -27,7 +26,7 @@ namespace MSVentas.Dominio.Validadores
         private Result? ValidarUsuario(int idUsuario)
         {
             if (idUsuario <= 0)
-                return Result.Fail("La venta debe tener un usuario registrador válido.");
+                return Result.Fail("La venta debe tener un usuario registrador valido.");
 
             return null;
         }
@@ -35,12 +34,16 @@ namespace MSVentas.Dominio.Validadores
         private Result? ValidarMetodoPago(string metodoPago)
         {
             if (string.IsNullOrWhiteSpace(metodoPago))
-                return Result.Fail("El método de pago es obligatorio.");
+                return Result.Fail("El metodo de pago es obligatorio.");
 
             metodoPago = metodoPago.Trim();
 
             if (metodoPago.Length > 45)
-                return Result.Fail("El método de pago no puede exceder 45 caracteres.");
+                return Result.Fail("El metodo de pago no puede exceder 45 caracteres.");
+
+            string[] metodosPermitidos = ["Efectivo", "QR"];
+            if (!metodosPermitidos.Contains(metodoPago, StringComparer.OrdinalIgnoreCase))
+                return Result.Fail("El metodo de pago seleccionado no es valido.");
 
             return null;
         }
@@ -55,7 +58,7 @@ namespace MSVentas.Dominio.Validadores
             foreach (DetalleVenta detalle in detalles)
             {
                 if (detalle.IdMedicamento <= 0)
-                    return Result.Fail("Todos los detalles deben tener un medicamento válido.");
+                    return Result.Fail("Todos los detalles deben tener un medicamento valido.");
 
                 if (detalle.Cantidad <= 0)
                     return Result.Fail("La cantidad vendida debe ser mayor a 0.");
