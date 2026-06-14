@@ -7,5 +7,6 @@ namespace MSReportes.API.CasosDeUso.PuertosEntrada
         Task<IEnumerable<ReporteVentasPorRolDto>> ObtenerVentasPorRolAsync();
         Task<ArchivoReporteDto> GenerarPdfVentasPorRolAsync();
         Task<ArchivoReporteDto> GenerarExcelVentasPorRolAsync();
+        Task<ArchivoReporteDto> GenerarComprobanteVentaPdfAsync(int idVenta);
     }
 }

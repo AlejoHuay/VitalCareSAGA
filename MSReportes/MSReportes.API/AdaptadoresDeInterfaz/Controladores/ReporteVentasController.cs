@@ -50,5 +50,28 @@ namespace MSReportes.API.AdaptadoresDeInterfaz.Controladores
                 archivo.NombreArchivo
             );
         }
+
+        [HttpGet("{idVenta:int}/comprobante/pdf")]
+        public async Task<IActionResult> DescargarComprobantePdf(int idVenta)
+        {
+            try
+            {
+                var archivo = await _reporteVentasInputPort.GenerarComprobanteVentaPdfAsync(idVenta);
+
+                return File(
+                    archivo.Contenido,
+                    archivo.ContentType,
+                    archivo.NombreArchivo
+                );
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
     }
 }
