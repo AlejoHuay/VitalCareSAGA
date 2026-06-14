@@ -32,6 +32,15 @@ builder.Services.AddHttpClient("MSProductos", client =>
     client.BaseAddress = new Uri(baseUrl);
 });
 
+builder.Services.AddHttpClient("MSUsuarios", client =>
+{
+    string baseUrl = Environment.GetEnvironmentVariable("MSUSUARIOS_URL")
+        ?? builder.Configuration["ApiUrls:MSUsuarios"]
+        ?? "http://localhost:5281/";
+
+    client.BaseAddress = new Uri(baseUrl);
+});
+
 // Inyección de dependencias
 builder.Services.AddScoped<IReporteVentasInputPort, ReporteVentasInteractor>();
 builder.Services.AddScoped<IReporteVentasRepositorio, ReporteVentasRepositorio>();

@@ -67,9 +67,7 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
                 RazonSocial = string.IsNullOrWhiteSpace(venta.RazonSocial)
                     ? venta.Cliente
                     : venta.RazonSocial,
-                Cajero = string.IsNullOrWhiteSpace(venta.Usuario)
-                    ? $"Usuario #{venta.IdUsuario}"
-                    : venta.Usuario,
+                Cajero = await ObtenerNombreUsuarioAsync(venta.IdUsuario),
                 MetodoPago = venta.MetodoPago,
                 Estado = venta.Estado,
                 EstadoSaga = venta.EstadoSaga,
@@ -122,6 +120,45 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
             }
         }
 
+        private async Task<string> ObtenerNombreUsuarioAsync(int idUsuario)
+        {
+            if (idUsuario <= 0)
+                return "Usuario no identificado";
+
+            try
+            {
+                HttpClient usuariosClient = CrearClienteAutenticado("MSUsuarios");
+                HttpResponseMessage response =
+                    await usuariosClient.GetAsync($"api/usuarios/getUserById?id={idUsuario}");
+
+                if (!response.IsSuccessStatusCode)
+                    return $"Usuario #{idUsuario}";
+
+                RespuestaUsuarioDto? respuestaUsuario =
+                    await response.Content.ReadFromJsonAsync<RespuestaUsuarioDto>(JsonOptions);
+
+                UsuarioReporteDto? usuario = respuestaUsuario?.Data;
+                if (usuario == null)
+                    return $"Usuario #{idUsuario}";
+
+                string nombre = string.Join(
+                    " ",
+                    new[] { usuario.Nombres, usuario.ApellidoPaterno, usuario.ApellidoMaterno }
+                        .Where(valor => !string.IsNullOrWhiteSpace(valor)));
+
+                if (string.IsNullOrWhiteSpace(nombre))
+                    nombre = string.IsNullOrWhiteSpace(usuario.UserName)
+                        ? $"Usuario #{idUsuario}"
+                        : usuario.UserName;
+
+                return $"{nombre} (ID: {idUsuario})";
+            }
+            catch
+            {
+                return $"Usuario #{idUsuario}";
+            }
+        }
+
         private HttpClient CrearClienteAutenticado(string nombreCliente)
         {
             HttpClient client = httpClientFactory.CreateClient(nombreCliente);
@@ -171,6 +208,20 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
         {
             public string Nombre { get; set; } = string.Empty;
             public string Presentacion { get; set; } = string.Empty;
+        }
+
+        private class RespuestaUsuarioDto
+        {
+            public string Mensaje { get; set; } = string.Empty;
+            public UsuarioReporteDto? Data { get; set; }
+        }
+
+        private class UsuarioReporteDto
+        {
+            public string Nombres { get; set; } = string.Empty;
+            public string ApellidoPaterno { get; set; } = string.Empty;
+            public string? ApellidoMaterno { get; set; }
+            public string UserName { get; set; } = string.Empty;
         }
     }
 }
