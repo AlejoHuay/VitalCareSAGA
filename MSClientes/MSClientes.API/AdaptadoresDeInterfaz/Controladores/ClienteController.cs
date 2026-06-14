@@ -37,7 +37,7 @@ namespace MSClientes.API.AdaptadoresDeInterfaz.Controladores
             if (!resultado.Exito)
                 return BadRequest(new { mensaje = resultado.Mensaje });
 
-            return Ok(new { mensaje = resultado.Mensaje });
+            return Ok(new { mensaje = resultado.Mensaje, data = cliente });
         }
 
         [HttpPut("{id:int}")]
