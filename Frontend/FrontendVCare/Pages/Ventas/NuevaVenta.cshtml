@@ -87,19 +87,6 @@
         font-size: .92rem;
     }
 
-    .selected-client {
-        border: 1px solid #cfe8dc;
-        border-radius: 8px;
-        background: #f3fbf7;
-        padding: 14px;
-        min-height: 86px;
-    }
-
-    .selected-client.empty {
-        background: #fafafa;
-        border-color: #e3e8e5;
-    }
-
     .search-results {
         left: 0;
         right: 0;
@@ -108,26 +95,10 @@
         overflow-y: auto;
     }
 
-    .payment-group {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-    }
-
-    .payment-button {
-        border: 1px solid #d7e6df;
-        border-radius: 8px;
-        background: #fff;
-        padding: 14px 16px;
-        font-weight: 800;
-        color: #263b35;
-        min-height: 58px;
-    }
-
-    .payment-button.active {
-        border-color: #11844f;
-        background: #11844f;
-        color: #fff;
+    .cliente-status {
+        color: #11844f;
+        font-weight: 700;
+        min-height: 24px;
     }
 
     .empty-detail {
@@ -185,7 +156,6 @@
 
     <form method="post" id="ventaForm">
         <input type="hidden" asp-for="Venta.IdCliente" id="Venta_IdCliente" />
-        <input type="hidden" asp-for="Venta.MetodoPago" id="Venta_MetodoPago" />
 
         <div class="sale-shell">
             <div class="sale-card">
@@ -224,22 +194,16 @@
                                    autocomplete="off"
                                    placeholder="NIT o razon social" />
                             <div id="clienteResultados" class="list-group position-absolute shadow-sm z-3 search-results"></div>
+                            <div class="cliente-status mt-2" id="clienteSeleccionado"></div>
                         </div>
-                        <div class="col-lg-5">
-                            <label class="form-label fw-semibold">Seleccion actual</label>
-                            <div class="selected-client empty" id="clienteSeleccionado">
-                                Ningun cliente seleccionado.
-                            </div>
+                        <div class="col-lg-5" id="metodoPagoWrap">
+                            <label asp-for="Venta.MetodoPago" class="form-label fw-semibold">Metodo de pago</label>
+                            <select asp-for="Venta.MetodoPago" class="form-select form-select-lg" id="Venta_MetodoPago" required>
+                                <option value="">Seleccionar</option>
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="QR">QR</option>
+                            </select>
                         </div>
-                    </div>
-                </section>
-
-                <section class="sale-section">
-                    <span class="section-kicker">Pago</span>
-                    <h5 class="fw-bold mb-3">Metodo de pago</h5>
-                    <div class="payment-group">
-                        <button type="button" class="payment-button" data-payment="Efectivo">Efectivo</button>
-                        <button type="button" class="payment-button" data-payment="QR">QR</button>
                     </div>
                 </section>
 
@@ -373,6 +337,7 @@
 
         const clienteBusqueda = document.getElementById("clienteBusqueda");
         const clienteBusquedaWrap = document.getElementById("clienteBusquedaWrap");
+        const metodoPagoWrap = document.getElementById("metodoPagoWrap");
         const clienteResultados = document.getElementById("clienteResultados");
         const clienteSeleccionado = document.getElementById("clienteSeleccionado");
         const clienteId = document.getElementById("Venta_IdCliente");
@@ -384,7 +349,6 @@
         const modalClienteRapido = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalClienteRapido"));
 
         const metodoPagoInput = document.getElementById("Venta_MetodoPago");
-        const paymentButtons = document.querySelectorAll(".payment-button");
         const clienteConfirmacion = document.getElementById("clienteConfirmacion");
         const pagoConfirmacion = document.getElementById("pagoConfirmacion");
 
@@ -415,12 +379,7 @@
         }
 
         function pintarCliente(cliente, esConsumidorFinal) {
-            clienteSeleccionado.classList.remove("empty");
-            clienteSeleccionado.innerHTML = `
-                <div class="fw-bold">${cliente.razonSocial || "Sin razon social"}</div>
-                <div class="text-muted small">NIT / CI: ${cliente.nit || "-"}</div>
-                <div class="small text-success fw-semibold">${esConsumidorFinal ? "Consumidor final" : "Cliente registrado"}</div>
-            `;
+            clienteSeleccionado.textContent = `${esConsumidorFinal ? "Consumidor final" : "Cliente"}: ${cliente.razonSocial || "Sin razon social"} | NIT / CI: ${cliente.nit || "-"}`;
             clienteConfirmacion.textContent = cliente.razonSocial || "Sin razon social";
         }
 
@@ -445,12 +404,13 @@
             btnConsumidorFinal.classList.add("active");
             btnClienteRegistrado.classList.remove("active");
             clienteBusquedaWrap.classList.add("d-none");
+            metodoPagoWrap.classList.remove("col-lg-5");
+            metodoPagoWrap.classList.add("col-lg-12");
 
             const consumidorFinal = buscarConsumidorFinal();
             if (!consumidorFinal) {
                 clienteId.value = "";
                 clienteActual = null;
-                clienteSeleccionado.classList.add("empty");
                 clienteSeleccionado.textContent = "No existe un cliente configurado como consumidor final.";
                 mostrarError("No existe un cliente configurado como consumidor final.");
                 return;
@@ -463,11 +423,12 @@
             btnClienteRegistrado.classList.add("active");
             btnConsumidorFinal.classList.remove("active");
             clienteBusquedaWrap.classList.remove("d-none");
+            metodoPagoWrap.classList.remove("col-lg-12");
+            metodoPagoWrap.classList.add("col-lg-5");
             clienteBusqueda.focus();
             clienteId.value = "";
             clienteActual = null;
             clienteBusqueda.value = "";
-            clienteSeleccionado.classList.add("empty");
             clienteSeleccionado.textContent = "Busca y selecciona un cliente registrado.";
             clienteConfirmacion.textContent = "Sin cliente";
         }
@@ -479,7 +440,6 @@
             const texto = this.value.trim().toLowerCase();
             clienteId.value = "";
             clienteActual = null;
-            clienteSeleccionado.classList.add("empty");
             clienteSeleccionado.textContent = "Busca y selecciona un cliente registrado.";
             clienteResultados.innerHTML = "";
 
@@ -501,14 +461,9 @@
                 });
         });
 
-        paymentButtons.forEach(button => {
-            button.addEventListener("click", function () {
-                paymentButtons.forEach(item => item.classList.remove("active"));
-                this.classList.add("active");
-                metodoPagoInput.value = this.dataset.payment || "";
-                pagoConfirmacion.textContent = metodoPagoInput.value || "Sin seleccionar";
-                limpiarError();
-            });
+        metodoPagoInput.addEventListener("change", function () {
+            pagoConfirmacion.textContent = this.value || "Sin seleccionar";
+            limpiarError();
         });
 
         clienteRapidoForm.addEventListener("submit", async function (event) {
