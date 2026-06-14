@@ -1,15 +1,46 @@
 .medicamento-form-page {
     background-color: #f4f6f5;
-    min-height: 100vh;
+    min-height: auto;
+    overflow-x: hidden;
+    overflow-y: visible;
 }
 
+/* Tarjeta principal */
 .med-card {
     background: #ffffff;
     border: none;
     border-radius: 18px;
     overflow: hidden;
+    position: relative;
+    transform: none !important;
+    animation: none !important;
+    transition: box-shadow 0.2s ease-in-out !important;
 }
 
+/* Evita que la tarjeta reaccione al mouse */
+.med-card:hover,
+.med-card:focus,
+.med-card:active {
+    transform: none !important;
+    animation: none !important;
+}
+
+/* Desactiva el efecto de brillo/parpadeo del pseudo-elemento */
+.med-card::before,
+.med-card:hover::before,
+.med-card:focus::before,
+.med-card:active::before {
+    content: none !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    top: auto !important;
+    left: auto !important;
+    background: none !important;
+    transition: none !important;
+}
+
+/* Encabezado */
 .med-card-header {
     padding: 2rem 2rem 1rem 2rem;
     border-bottom: 1px solid #eef1ef;
@@ -20,10 +51,12 @@
     font-weight: 700;
 }
 
+/* Cuerpo */
 .med-card-body {
     padding: 2rem;
 }
 
+/* Inputs */
 .med-input {
     border-radius: 12px !important;
     border: 1px solid #d8e2dc;
@@ -35,10 +68,12 @@
     box-shadow: 0 0 0 0.15rem rgba(25, 135, 84, 0.15) !important;
 }
 
+/* Labels */
 .form-floating > label {
     color: #6c757d;
 }
 
+/* Botón principal */
 .med-btn-primary {
     background-color: #10a53a;
     border-color: #10a53a;
@@ -54,6 +89,7 @@
     color: #fff;
 }
 
+/* Botón secundario */
 .med-btn-secondary {
     background-color: #6c757d;
     border-color: #6c757d;
@@ -69,11 +105,13 @@
     color: #fff;
 }
 
+/* Alertas */
 .med-alert {
     border-radius: 12px;
     margin-top: 0.5rem;
 }
 
+/* Altura uniforme */
 .input-group .form-control,
 .input-group .input-group-text,
 .med-input {
@@ -82,4 +120,31 @@
 
 .form-text {
     min-height: 20px;
+}
+
+/* Seguridad visual para que el formulario no se mueva por hover */
+.medicamento-form-page .med-card,
+.medicamento-form-page .med-card:hover,
+.medicamento-form-page .med-card:focus,
+.medicamento-form-page .med-card:active {
+    transform: none !important;
+    animation: none !important;
+}
+
+/* Evita animaciones internas en la página de medicamento */
+.medicamento-form-page,
+.medicamento-form-page *,
+.medicamento-form-page *::before,
+.medicamento-form-page *::after {
+    animation: none !important;
+}
+
+/* Control de scroll general */
+html {
+    scroll-behavior: auto;
+}
+
+body {
+    overflow-x: hidden;
+    overflow-y: auto;
 }
