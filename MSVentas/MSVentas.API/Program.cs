@@ -49,6 +49,34 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero,
             RoleClaimType = System.Security.Claims.ClaimTypes.Role
         };
+        
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine(
+                    $"ERROR JWT MSVENTAS: {context.Exception.Message}"
+                );
+
+                return Task.CompletedTask;
+            },
+
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("JWT VALIDADO CORRECTAMENTE EN MSVENTAS.");
+                return Task.CompletedTask;
+            },
+
+            OnChallenge = context =>
+            {
+                Console.WriteLine(
+                    $"JWT RECHAZADO. Error: {context.Error}. " +
+                    $"Descripcion: {context.ErrorDescription}"
+                );
+
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();

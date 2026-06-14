@@ -14,23 +14,32 @@ namespace FrontendVCare.Helpers
         /// <summary>
         /// Guarda el token en una cookie HTTP y extrae los datos del usuario
         /// </summary>
-        public static void GuardarSesion(HttpContext context, UsuarioLoginResponseDto respuesta)
+        public static void GuardarSesion(
+            HttpContext context,
+            UsuarioLoginResponseDto respuesta)
         {
-            // Guardar token en cookie HttpOnly
+            string token = NormalizarToken(respuesta.Token);
+
+            if (token.Split('.').Length != 3)
+            {
+                throw new InvalidOperationException(
+                    "El token recibido durante el login no tiene un formato JWT válido."
+                );
+            }
+
             context.Response.Cookies.Append(
                 TokenCookieName,
-                respuesta.Token,
+                token,
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false, // Cambiar a true en producción
+                    Secure = false,
                     SameSite = SameSiteMode.Strict,
                     Expires = DateTimeOffset.UtcNow.AddHours(1)
                 }
             );
 
-            // Extraer y guardar datos del usuario desde el token
-            CompletarSesionDesdeTokenSiFalta(context, respuesta.Token);
+            CompletarSesionDesdeTokenSiFalta(context, token);
         }
 
         /// <summary>
@@ -38,8 +47,16 @@ namespace FrontendVCare.Helpers
         /// </summary>
         public static string? ObtenerToken(HttpContext context)
         {
-            context.Request.Cookies.TryGetValue(TokenCookieName, out string? token);
-            return string.IsNullOrWhiteSpace(token) ? null : token;
+            context.Request.Cookies.TryGetValue(
+                TokenCookieName,
+                out string? token
+            );
+
+            string tokenLimpio = NormalizarToken(token);
+
+            return string.IsNullOrWhiteSpace(tokenLimpio)
+                ? null
+                : tokenLimpio;
         }
 
         /// <summary>
@@ -132,6 +149,20 @@ namespace FrontendVCare.Helpers
             }
 
             return claims;
+        }
+
+        private static string NormalizarToken(string? token)
+        {
+            string tokenLimpio = (token ?? string.Empty).Trim();
+
+            tokenLimpio = tokenLimpio.Trim('"');
+
+            if (tokenLimpio.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                tokenLimpio = tokenLimpio["Bearer ".Length..].Trim();
+            }
+
+            return tokenLimpio;
         }
     }
 }
