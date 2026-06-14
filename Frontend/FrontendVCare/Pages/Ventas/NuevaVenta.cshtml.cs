@@ -69,6 +69,31 @@ public class NuevaVentaModel : BasePageModel
             return Page();
         }
 
+        if (string.IsNullOrWhiteSpace(Venta.MetodoPago))
+        {
+            MensajeError = "Debe seleccionar un metodo de pago.";
+            await CargarOpcionesAsync();
+            return Page();
+        }
+
+        if (!EsMetodoPagoValido(Venta.MetodoPago))
+        {
+            MensajeError = "El metodo de pago seleccionado no es valido.";
+            await CargarOpcionesAsync();
+            return Page();
+        }
+
+        ClienteDto? cliente = await ObtenerClienteSeleccionadoAsync(Venta.IdCliente);
+        if (cliente == null)
+        {
+            MensajeError = "No se pudo obtener los datos del cliente seleccionado.";
+            await CargarOpcionesAsync();
+            return Page();
+        }
+
+        Venta.Nit = cliente.Nit;
+        Venta.RazonSocial = cliente.RazonSocial;
+
         OperacionApiDto resultado = await ventaAdapter.RegistrarAsync(Venta);
         if (resultado.Exito)
             return RedirectToPage("/Ventas/Venta", new { mensaje = resultado.Mensaje });
@@ -76,6 +101,92 @@ public class NuevaVentaModel : BasePageModel
         MensajeError = resultado.Mensaje;
         await CargarOpcionesAsync();
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostCrearClienteRapidoAsync(
+        string clienteModalNit,
+        string clienteModalRazonSocial,
+        string? clienteModalCorreoElectronico)
+    {
+        int? idUsuario = ObtenerIdUsuarioSesion();
+        if (idUsuario == null || idUsuario.Value == 0)
+        {
+            return new JsonResult(new
+            {
+                success = false,
+                error = "No se encontro el usuario. Inicia sesion nuevamente."
+            })
+            { StatusCode = StatusCodes.Status401Unauthorized };
+        }
+
+        clienteModalNit = clienteModalNit?.Trim() ?? string.Empty;
+        clienteModalRazonSocial = clienteModalRazonSocial?.Trim() ?? string.Empty;
+        clienteModalCorreoElectronico = clienteModalCorreoElectronico?.Trim();
+
+        if (string.IsNullOrWhiteSpace(clienteModalNit) ||
+            string.IsNullOrWhiteSpace(clienteModalRazonSocial))
+        {
+            return new JsonResult(new
+            {
+                success = false,
+                error = "Debe ingresar NIT / CI y razon social."
+            })
+            { StatusCode = StatusCodes.Status400BadRequest };
+        }
+
+        try
+        {
+            List<ClienteDto> existentes = await clienteAdapter.ObtenerTodosAsync(clienteModalNit);
+            ClienteDto? existente = existentes.FirstOrDefault(cliente =>
+                cliente.Nit.Equals(clienteModalNit, StringComparison.OrdinalIgnoreCase));
+
+            if (existente != null)
+                return CrearRespuestaCliente(existente);
+
+            ClienteFormularioDto clienteFormulario = new()
+            {
+                Nit = clienteModalNit,
+                RazonSocial = clienteModalRazonSocial,
+                CorreoElectronico = clienteModalCorreoElectronico ?? string.Empty,
+                IdUsuario = idUsuario.Value
+            };
+
+            OperacionApiDto resultado = await clienteAdapter.CrearAsync(clienteFormulario);
+            if (!resultado.Exito)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    error = resultado.Mensaje ?? "No se pudo registrar el cliente."
+                })
+                { StatusCode = StatusCodes.Status400BadRequest };
+            }
+
+            List<ClienteDto> actualizados = await clienteAdapter.ObtenerTodosAsync(clienteModalNit);
+            ClienteDto? creado = actualizados.FirstOrDefault(cliente =>
+                cliente.Nit.Equals(clienteModalNit, StringComparison.OrdinalIgnoreCase));
+
+            if (creado == null)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    error = "Cliente creado, pero no se pudo recuperar para seleccionarlo."
+                })
+                { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+
+            return CrearRespuestaCliente(creado);
+        }
+        catch (Exception ex)
+        {
+            return new JsonResult(new
+            {
+                success = false,
+                error = ex.Message
+            })
+            { StatusCode = StatusCodes.Status500InternalServerError };
+        }
     }
 
     private async Task CargarOpcionesAsync()
@@ -103,6 +214,43 @@ public class NuevaVentaModel : BasePageModel
             MensajeError ??= "No se pudo cargar medicamentos.";
             Medicamentos = ObtenerMedicamentosDePrueba();
         }
+    }
+
+    private async Task<ClienteDto?> ObtenerClienteSeleccionadoAsync(int idCliente)
+    {
+        ClienteDto? cliente = Clientes.FirstOrDefault(c => c.IdCliente == idCliente);
+        if (cliente != null)
+            return cliente;
+
+        try
+        {
+            return await clienteAdapter.ObtenerPorIdAsync(idCliente);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static bool EsMetodoPagoValido(string metodoPago)
+    {
+        return metodoPago.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)
+            || metodoPago.Equals("QR", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static JsonResult CrearRespuestaCliente(ClienteDto cliente)
+    {
+        return new JsonResult(new
+        {
+            success = true,
+            cliente = new
+            {
+                id = cliente.IdCliente,
+                nit = cliente.Nit,
+                razonSocial = cliente.RazonSocial,
+                esConsumidorFinal = cliente.EsConsumidorFinal
+            }
+        });
     }
 
     private static List<ClienteDto> ObtenerClientesDePrueba()

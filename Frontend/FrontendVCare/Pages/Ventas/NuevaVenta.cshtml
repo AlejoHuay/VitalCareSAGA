@@ -1,15 +1,33 @@
 @page
+@using System.Text.Json
 @model FrontendVCare.Pages.Ventas.NuevaVentaModel
 
 @{
     ViewData["Title"] = "Nueva venta";
+
+    var clientesJson = JsonSerializer.Serialize(Model.Clientes.Select(cliente => new
+    {
+        id = cliente.IdCliente,
+        nit = cliente.Nit,
+        razonSocial = cliente.RazonSocial,
+        esConsumidorFinal = cliente.EsConsumidorFinal
+    }));
+
+    var medicamentosJson = JsonSerializer.Serialize(Model.Medicamentos.Select(medicamento => new
+    {
+        id = medicamento.Id,
+        nombre = medicamento.Nombre,
+        presentacion = medicamento.Presentacion,
+        precio = medicamento.Precio,
+        stock = medicamento.Stock
+    }));
 }
 
 <div class="container mt-5 no-card-hover">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-success">Nueva venta</h2>
-            <p class="text-muted mb-0">Selecciona un cliente y los medicamentos de la venta</p>
+            <p class="text-muted mb-0">Busca el cliente, agrega medicamentos y confirma la venta</p>
         </div>
         <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary">Volver a ventas</a>
     </div>
@@ -22,22 +40,72 @@
         </div>
     }
 
+    <div class="alert alert-danger d-none shadow-sm" id="ventaMensajeError"></div>
+
     <div class="card shadow-sm">
         <div class="card-header bg-success text-white fw-semibold">
             Datos de la venta
         </div>
         <div class="card-body">
-            <form method="post">
+            <form method="post" id="ventaForm">
+                <input type="hidden" asp-for="Venta.IdCliente" id="Venta_IdCliente" />
+
                 <div class="row g-3">
-                    <div class="col-md-5">
-                        <label asp-for="Venta.IdCliente" class="form-label">Cliente</label>
-                        <select asp-for="Venta.IdCliente" class="form-select" required>
-                            <option value="">Seleccionar cliente</option>
-                            @foreach (var cliente in Model.Clientes)
-                            {
-                                <option value="@cliente.IdCliente">@cliente.RazonSocial (@cliente.Nit)</option>
-                            }
+                    <div class="col-md-5 position-relative">
+                        <label for="clienteBusqueda" class="form-label">Cliente por NIT / razon social</label>
+                        <input type="text"
+                               id="clienteBusqueda"
+                               class="form-control"
+                               autocomplete="off"
+                               placeholder="Escribe al menos 2 caracteres" />
+                        <div id="clienteResultados" class="list-group position-absolute w-100 shadow-sm z-3"></div>
+                        <div class="form-text" id="clienteSeleccionado">Ningun cliente seleccionado.</div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="Venta.MetodoPago" class="form-label">Metodo de pago</label>
+                        <select asp-for="Venta.MetodoPago" class="form-select" required>
+                            <option value="">Seleccionar</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="QR">QR</option>
                         </select>
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-success" id="btnConsumidorFinal">
+                                Consumidor final
+                            </button>
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalClienteRapido">
+                                Agregar cliente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-7 position-relative">
+                        <label for="medicamentoBusqueda" class="form-label">Buscar medicamento</label>
+                        <input type="text"
+                               id="medicamentoBusqueda"
+                               class="form-control"
+                               autocomplete="off"
+                               placeholder="Nombre o presentacion" />
+                        <div id="medicamentoResultados" class="list-group position-absolute w-100 shadow-sm z-3"></div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="cantidadAgregar" class="form-label">Cantidad</label>
+                        <input type="number" id="cantidadAgregar" class="form-control" min="1" value="1" />
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-outline-success w-100" id="agregarDetalle">
+                            + Agregar medicamento
+                        </button>
                     </div>
                 </div>
 
@@ -46,48 +114,76 @@
                         <thead class="table-success">
                             <tr>
                                 <th>Medicamento</th>
+                                <th style="width:140px">Stock</th>
                                 <th style="width:140px">Cantidad</th>
                                 <th style="width:160px">Precio (Bs)</th>
                                 <th style="width:130px">Subtotal</th>
-                                <th style="width:80px"></th>
+                                <th style="width:90px"></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <select name="Venta.Detalles[0].IdMedicamento" class="form-select medicamento-select" required>
-                                        <option value="">Seleccionar medicamento</option>
-                                        @foreach (var medicamento in Model.Medicamentos)
-                                        {
-                                            <option value="@medicamento.Id" data-precio="@medicamento.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">
-                                                @medicamento.Nombre - @medicamento.Presentacion
-                                            </option>
-                                        }
-                                    </select>
-                                </td>
-                                <td>
-                                    <input name="Venta.Detalles[0].Cantidad" type="number" min="1" value="1" class="form-control cantidad-input" required />
-                                </td>
-                                <td>
-                                    <input name="Venta.Detalles[0].PrecioUnitario" type="hidden" class="precio-hidden" />
-                                    <span class="precio-text">0.00</span>
-                                </td>
-                                <td class="subtotal-cell fw-semibold">0.00</td>
-                                <td>
-                                    <button type="button" class="btn btn-outline-danger btn-sm quitar-detalle">Quitar</button>
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
-                    <button type="button" class="btn btn-outline-success" id="agregarDetalle">+ Agregar medicamento</button>
+                    <span class="text-muted">La venta se registrara y luego la saga confirmara el stock.</span>
                     <div class="d-flex align-items-center gap-3">
                         <span class="fs-5 fw-bold">Total: Bs <span id="totalVenta">0.00</span></span>
                         <a asp-page="/Ventas/Venta" class="btn btn-secondary">Cancelar</a>
-                        <button type="submit" class="btn btn-primary">Registrar venta</button>
+                        <button type="button" class="btn btn-primary" id="btnPrepararVenta">Registrar venta</button>
                     </div>
+                </div>
+
+                <div class="modal fade" id="modalConfirmarVenta" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content shadow">
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title">Confirmar venta</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-1">Revise los datos antes de registrar la venta.</p>
+                                <p class="fw-bold mb-0">Total: Bs <span id="totalConfirmacion">0.00</span></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-success">Confirmar venta</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalClienteRapido" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <form id="clienteRapidoForm">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Agregar cliente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger d-none" id="clienteRapidoError"></div>
+                    <div class="mb-3">
+                        <label for="clienteModalNit" class="form-label">NIT / CI</label>
+                        <input id="clienteModalNit" name="clienteModalNit" class="form-control" maxlength="20" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="clienteModalRazonSocial" class="form-label">Razon social</label>
+                        <input id="clienteModalRazonSocial" name="clienteModalRazonSocial" class="form-control" maxlength="80" required />
+                    </div>
+                    <div>
+                        <label for="clienteModalCorreoElectronico" class="form-label">Correo electronico</label>
+                        <input id="clienteModalCorreoElectronico" name="clienteModalCorreoElectronico" type="email" class="form-control" maxlength="80" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success" id="btnGuardarClienteRapido">Guardar cliente</button>
                 </div>
             </form>
         </div>
@@ -96,85 +192,312 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const tabla = document.querySelector("#detalleVenta tbody");
-        const agregar = document.getElementById("agregarDetalle");
-        const total = document.getElementById("totalVenta");
+        const clientes = @Html.Raw(clientesJson);
+        const medicamentos = @Html.Raw(medicamentosJson);
 
-        function renumerar() {
-            tabla.querySelectorAll("tr").forEach((fila, index) => {
-                fila.querySelectorAll("select, input").forEach((control) => {
-                    control.name = control.name.replace(/Venta\.Detalles\[\d+\]/, `Venta.Detalles[${index}]`);
+        const clienteBusqueda = document.getElementById("clienteBusqueda");
+        const clienteResultados = document.getElementById("clienteResultados");
+        const clienteSeleccionado = document.getElementById("clienteSeleccionado");
+        const clienteId = document.getElementById("Venta_IdCliente");
+        const btnConsumidorFinal = document.getElementById("btnConsumidorFinal");
+        const clienteRapidoForm = document.getElementById("clienteRapidoForm");
+        const clienteRapidoError = document.getElementById("clienteRapidoError");
+        const btnGuardarClienteRapido = document.getElementById("btnGuardarClienteRapido");
+        const modalClienteRapido = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalClienteRapido"));
+
+        const medicamentoBusqueda = document.getElementById("medicamentoBusqueda");
+        const medicamentoResultados = document.getElementById("medicamentoResultados");
+        const cantidadAgregar = document.getElementById("cantidadAgregar");
+        const agregarDetalle = document.getElementById("agregarDetalle");
+        const tabla = document.querySelector("#detalleVenta tbody");
+        const totalVenta = document.getElementById("totalVenta");
+        const totalConfirmacion = document.getElementById("totalConfirmacion");
+        const ventaMensajeError = document.getElementById("ventaMensajeError");
+        const btnPrepararVenta = document.getElementById("btnPrepararVenta");
+        const modalConfirmarVenta = new bootstrap.Modal(document.getElementById("modalConfirmarVenta"));
+
+        let medicamentoSeleccionado = null;
+
+        function mostrarError(mensaje) {
+            ventaMensajeError.textContent = mensaje;
+            ventaMensajeError.classList.remove("d-none");
+        }
+
+        function limpiarError() {
+            ventaMensajeError.textContent = "";
+            ventaMensajeError.classList.add("d-none");
+        }
+
+        function seleccionarCliente(cliente) {
+            clienteId.value = cliente.id;
+            clienteBusqueda.value = `${cliente.nit} - ${cliente.razonSocial}`;
+            clienteSeleccionado.textContent = `Cliente seleccionado: ${cliente.razonSocial}`;
+            clienteResultados.innerHTML = "";
+            limpiarError();
+        }
+
+        clienteBusqueda.addEventListener("input", function () {
+            const texto = this.value.trim().toLowerCase();
+            clienteId.value = "";
+            clienteSeleccionado.textContent = "Ningun cliente seleccionado.";
+            clienteResultados.innerHTML = "";
+
+            if (texto.length < 2) return;
+
+            clientes
+                .filter(cliente =>
+                    (cliente.nit || "").toLowerCase().includes(texto) ||
+                    (cliente.razonSocial || "").toLowerCase().includes(texto))
+                .slice(0, 8)
+                .forEach(cliente => {
+                    const item = document.createElement("button");
+                    item.type = "button";
+                    item.className = "list-group-item list-group-item-action";
+                    item.textContent = `${cliente.nit} - ${cliente.razonSocial}`;
+                    item.addEventListener("click", () => seleccionarCliente(cliente));
+                    clienteResultados.appendChild(item);
                 });
+        });
+
+        btnConsumidorFinal.addEventListener("click", function () {
+            const consumidorFinal = clientes.find(cliente =>
+                cliente.esConsumidorFinal ||
+                (cliente.nit || "").toLowerCase() === "cf" ||
+                (cliente.nit || "") === "0");
+
+            if (!consumidorFinal) {
+                mostrarError("No existe un cliente configurado como consumidor final.");
+                return;
+            }
+
+            seleccionarCliente(consumidorFinal);
+        });
+
+        clienteRapidoForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            clienteRapidoError.classList.add("d-none");
+            btnGuardarClienteRapido.disabled = true;
+            btnGuardarClienteRapido.textContent = "Guardando...";
+
+            try {
+                const formData = new FormData(clienteRapidoForm);
+                const response = await fetch(`${window.location.pathname}?handler=CrearClienteRapido`, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || "No se pudo registrar el cliente.");
+                }
+
+                const cliente = data.cliente;
+                if (!clientes.some(item => Number(item.id) === Number(cliente.id))) {
+                    clientes.push(cliente);
+                }
+
+                seleccionarCliente(cliente);
+                clienteRapidoForm.reset();
+                modalClienteRapido.hide();
+            } catch (error) {
+                clienteRapidoError.textContent = error.message;
+                clienteRapidoError.classList.remove("d-none");
+            } finally {
+                btnGuardarClienteRapido.disabled = false;
+                btnGuardarClienteRapido.textContent = "Guardar cliente";
+            }
+        });
+
+        function seleccionarMedicamento(medicamento) {
+            medicamentoSeleccionado = medicamento;
+            medicamentoBusqueda.value = `${medicamento.nombre} - ${medicamento.presentacion}`;
+            medicamentoResultados.innerHTML = "";
+            limpiarError();
+        }
+
+        medicamentoBusqueda.addEventListener("input", function () {
+            const texto = this.value.trim().toLowerCase();
+            medicamentoSeleccionado = null;
+            medicamentoResultados.innerHTML = "";
+
+            if (texto.length < 2) return;
+
+            medicamentos
+                .filter(medicamento =>
+                    (medicamento.nombre || "").toLowerCase().includes(texto) ||
+                    (medicamento.presentacion || "").toLowerCase().includes(texto))
+                .slice(0, 8)
+                .forEach(medicamento => {
+                    const item = document.createElement("button");
+                    item.type = "button";
+                    item.className = "list-group-item list-group-item-action";
+                    item.textContent = `${medicamento.nombre} - ${medicamento.presentacion} | Stock: ${medicamento.stock}`;
+                    item.addEventListener("click", () => seleccionarMedicamento(medicamento));
+                    medicamentoResultados.appendChild(item);
+                });
+        });
+
+        function reindexar() {
+            tabla.querySelectorAll("tr").forEach((fila, index) => {
+                fila.querySelector(".id-input").name = `Venta.Detalles[${index}].IdMedicamento`;
+                fila.querySelector(".cantidad-input").name = `Venta.Detalles[${index}].Cantidad`;
+                fila.querySelector(".precio-input").name = `Venta.Detalles[${index}].PrecioUnitario`;
             });
         }
 
         function recalcular() {
-            let suma = 0;
-            tabla.querySelectorAll("tr").forEach((fila) => {
+            let total = 0;
+
+            tabla.querySelectorAll("tr").forEach(fila => {
                 const cantidad = Number(fila.querySelector(".cantidad-input").value || 0);
-                const precio = Number(fila.querySelector(".precio-hidden").value || 0);
+                const precio = Number(fila.dataset.precio || 0);
                 const subtotal = cantidad * precio;
                 fila.querySelector(".subtotal-cell").textContent = subtotal.toFixed(2);
-                suma += subtotal;
+                total += subtotal;
             });
-            total.textContent = suma.toFixed(2);
+
+            totalVenta.textContent = total.toFixed(2);
+            totalConfirmacion.textContent = total.toFixed(2);
         }
 
-        function inicializarFila(fila) {
-            const select = fila.querySelector('.medicamento-select');
-            const ph = fila.querySelector('.precio-hidden');
-            const pt = fila.querySelector('.precio-text');
-            const precioRaw = select?.selectedOptions[0]?.dataset.precio;
-            const precioNum = precioRaw ? parseFloat(precioRaw.toString().replace(',', '.')) : 0;
-            if (ph) ph.value = precioNum ? precioNum.toFixed(2) : '';
-            if (pt) pt.textContent = precioNum ? precioNum.toFixed(2) : '0.00';
-        }
-
-        tabla.addEventListener("change", function (event) {
-            if (event.target.classList.contains("medicamento-select")) {
-                const precioRaw = event.target.selectedOptions[0]?.dataset.precio || "0";
-                const precioNum = parseFloat(precioRaw.toString().replace(',', '.')) || 0;
-                const fila = event.target.closest("tr");
-                const ph = fila.querySelector(".precio-hidden");
-                const pt = fila.querySelector(".precio-text");
-                if (ph) ph.value = precioNum ? precioNum.toFixed(2) : "";
-                if (pt) pt.textContent = precioNum ? precioNum.toFixed(2) : '0.00';
-                recalcular();
-            }
-        });
-
-        tabla.addEventListener("input", recalcular);
-
-        tabla.addEventListener("click", function (event) {
-            if (!event.target.classList.contains("quitar-detalle")) {
+        function agregarMedicamento() {
+            if (!medicamentoSeleccionado) {
+                mostrarError("Debe seleccionar un medicamento.");
+                medicamentoBusqueda.focus();
                 return;
             }
 
-            if (tabla.querySelectorAll("tr").length > 1) {
-                event.target.closest("tr").remove();
-                renumerar();
+            const cantidad = Number(cantidadAgregar.value || 0);
+            if (cantidad <= 0) {
+                mostrarError("La cantidad debe ser mayor que cero.");
+                return;
+            }
+
+            const filaExistente = Array.from(tabla.querySelectorAll("tr"))
+                .find(fila => Number(fila.dataset.idMedicamento) === Number(medicamentoSeleccionado.id));
+
+            if (filaExistente) {
+                const cantidadInput = filaExistente.querySelector(".cantidad-input");
+                cantidadInput.value = Number(cantidadInput.value || 0) + cantidad;
+                validarCantidadFila(filaExistente);
+                recalcular();
+                limpiarSeleccionMedicamento();
+                return;
+            }
+
+            const fila = document.createElement("tr");
+            fila.dataset.idMedicamento = medicamentoSeleccionado.id;
+            fila.dataset.precio = Number(medicamentoSeleccionado.precio || 0);
+            fila.dataset.stock = Number(medicamentoSeleccionado.stock || 0);
+
+            fila.innerHTML = `
+                <td class="fw-semibold">
+                    ${medicamentoSeleccionado.nombre} - ${medicamentoSeleccionado.presentacion}
+                    <input type="hidden" class="id-input" value="${medicamentoSeleccionado.id}">
+                </td>
+                <td>${medicamentoSeleccionado.stock}</td>
+                <td>
+                    <input type="number" min="1" class="form-control cantidad-input" value="${cantidad}">
+                </td>
+                <td>
+                    ${Number(medicamentoSeleccionado.precio || 0).toFixed(2)}
+                    <input type="hidden" class="precio-input" value="${Number(medicamentoSeleccionado.precio || 0).toFixed(2)}">
+                </td>
+                <td class="subtotal-cell fw-semibold">0.00</td>
+                <td>
+                    <button type="button" class="btn btn-outline-danger btn-sm quitar-detalle">Quitar</button>
+                </td>
+            `;
+
+            tabla.appendChild(fila);
+            reindexar();
+            validarCantidadFila(fila);
+            recalcular();
+            limpiarSeleccionMedicamento();
+        }
+
+        function limpiarSeleccionMedicamento() {
+            medicamentoSeleccionado = null;
+            medicamentoBusqueda.value = "";
+            cantidadAgregar.value = "1";
+            medicamentoResultados.innerHTML = "";
+            limpiarError();
+        }
+
+        function validarCantidadFila(fila) {
+            const cantidadInput = fila.querySelector(".cantidad-input");
+            const cantidad = Number(cantidadInput.value || 0);
+            const stock = Number(fila.dataset.stock || 0);
+
+            if (cantidad > stock) {
+                cantidadInput.classList.add("is-invalid");
+                return false;
+            }
+
+            cantidadInput.classList.remove("is-invalid");
+            return true;
+        }
+
+        function validarVenta() {
+            if (!clienteId.value || Number(clienteId.value) <= 0) {
+                mostrarError("Debe seleccionar un cliente valido.");
+                return false;
+            }
+
+            const metodoPago = document.getElementById("Venta_MetodoPago").value;
+            if (!metodoPago) {
+                mostrarError("Debe seleccionar un metodo de pago.");
+                return false;
+            }
+
+            if (tabla.querySelectorAll("tr").length === 0) {
+                mostrarError("Debe agregar al menos un medicamento.");
+                return false;
+            }
+
+            for (const fila of tabla.querySelectorAll("tr")) {
+                if (!validarCantidadFila(fila)) {
+                    mostrarError("Una o mas cantidades superan el stock disponible.");
+                    return false;
+                }
+            }
+
+            limpiarError();
+            return true;
+        }
+
+        agregarDetalle.addEventListener("click", agregarMedicamento);
+
+        tabla.addEventListener("input", function (event) {
+            if (event.target.classList.contains("cantidad-input")) {
+                validarCantidadFila(event.target.closest("tr"));
                 recalcular();
             }
         });
 
-        agregar.addEventListener("click", function () {
-            const nuevaFila = tabla.querySelector("tr").cloneNode(true);
-            nuevaFila.querySelectorAll("select, input").forEach((control) => {
-                control.value = control.classList.contains("cantidad-input") ? "1" : "";
-            });
-            // Asegurar que el texto de precio y subtotal queden en 0.00
-            const pt = nuevaFila.querySelector(".precio-text");
-            const ph = nuevaFila.querySelector(".precio-hidden");
-            if (ph) ph.value = "";
-            if (pt) pt.textContent = "0.00";
-            nuevaFila.querySelector(".subtotal-cell").textContent = "0.00";
-            tabla.appendChild(nuevaFila);
-            renumerar();
-            inicializarFila(nuevaFila);
+        tabla.addEventListener("click", function (event) {
+            if (!event.target.classList.contains("quitar-detalle")) return;
+
+            event.target.closest("tr").remove();
+            reindexar();
+            recalcular();
         });
 
-        // Inicializar filas existentes para evitar NaN
-        tabla.querySelectorAll('tr').forEach(f => inicializarFila(f));
-        recalcular();
+        btnPrepararVenta.addEventListener("click", function () {
+            if (!validarVenta()) return;
+
+            modalConfirmarVenta.show();
+        });
+
+        document.addEventListener("click", function (event) {
+            if (!event.target.closest(".position-relative")) {
+                clienteResultados.innerHTML = "";
+                medicamentoResultados.innerHTML = "";
+            }
+        });
     });
 </script>
