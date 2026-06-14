@@ -173,7 +173,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">Confirmar venta</button>
+                        <button type="submit" class="btn btn-success" id="btnConfirmarVenta">Confirmar venta</button>
                     </div>
                 </div>
             </div>
@@ -248,11 +248,14 @@
             const totalVenta = document.getElementById("totalVenta");
             const totalConfirmacion = document.getElementById("totalConfirmacion");
             const ventaMensajeError = document.getElementById("ventaMensajeError");
+            const ventaForm = document.getElementById("ventaForm");
             const btnPrepararVenta = document.getElementById("btnPrepararVenta");
+            const btnConfirmarVenta = document.getElementById("btnConfirmarVenta");
             const modalConfirmarVenta = new bootstrap.Modal(document.getElementById("modalConfirmarVenta"));
 
             let medicamentoSeleccionado = null;
             let clienteActual = null;
+            let ventaEnviada = false;
 
             function mostrarErrorGeneral(mensaje) {
                 ventaMensajeError.textContent = mensaje;
@@ -647,6 +650,23 @@
                 if (!validarVenta()) return;
 
                 modalConfirmarVenta.show();
+            });
+
+            ventaForm.addEventListener("submit", function (event) {
+                if (ventaEnviada) {
+                    event.preventDefault();
+                    return;
+                }
+
+                if (!validarVenta()) {
+                    event.preventDefault();
+                    return;
+                }
+
+                ventaEnviada = true;
+                btnConfirmarVenta.disabled = true;
+                btnConfirmarVenta.textContent = "Registrando...";
+                btnPrepararVenta.disabled = true;
             });
 
             document.addEventListener("click", function (event) {
