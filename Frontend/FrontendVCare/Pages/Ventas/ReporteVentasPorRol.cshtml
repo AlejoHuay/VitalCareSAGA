@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] = "Reporte por Rol";
-    decimal total = Model.Reporte.Sum(item => item.TotalVentas);
+    decimal total = Model.Reporte.Sum(item => item.TotalRecaudado);
     int cantidad = Model.Reporte.Sum(item => item.CantidadVentas);
 }
 
@@ -13,7 +13,21 @@
             <h2 class="fw-bold text-success">Reporte de ventas por rol</h2>
             <p class="text-muted mb-0">Resumen de ventas agrupadas por rol de usuario</p>
         </div>
-        <a asp-page="/Ventas/Venta" class="btn btn-outline-success">Volver a ventas</a>
+        <div class="d-flex gap-2">
+            <a asp-page-handler="DescargarPdf"
+               asp-route-desde="@Model.Desde?.ToString("yyyy-MM-dd")"
+               asp-route-hasta="@Model.Hasta?.ToString("yyyy-MM-dd")"
+               class="btn btn-success">
+                Descargar PDF
+            </a>
+            <a asp-page-handler="DescargarExcel"
+               asp-route-desde="@Model.Desde?.ToString("yyyy-MM-dd")"
+               asp-route-hasta="@Model.Hasta?.ToString("yyyy-MM-dd")"
+               class="btn btn-outline-success">
+                Descargar Excel
+            </a>
+            <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary">Volver a ventas</a>
+        </div>
     </div>
 
     @if (!string.IsNullOrEmpty(Model.MensajeError))
@@ -83,7 +97,7 @@
                     <tr>
                         <td class="fw-semibold">@item.Rol</td>
                         <td>@item.CantidadVentas</td>
-                        <td>@item.TotalVentas.ToString("N2")</td>
+                        <td>@item.TotalRecaudado.ToString("N2")</td>
                     </tr>
                 }
             </tbody>

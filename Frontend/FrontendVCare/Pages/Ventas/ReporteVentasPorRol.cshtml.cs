@@ -1,5 +1,5 @@
-using FrontendVCare.Adaptadores.Ventas;
-using FrontendVCare.Dto.Ventas;
+using FrontendVCare.Adaptadores.Reportes;
+using FrontendVCare.Dto.Reportes;
 using FrontendVCare.Pages.Base;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,11 +7,11 @@ namespace FrontendVCare.Pages.Ventas
 {
     public class ReporteVentasPorRolModel : BasePageModel
     {
-        private readonly VentaAdapter ventaAdapter;
+        private readonly ReporteVentasAdapter reporteVentasAdapter;
 
-        public ReporteVentasPorRolModel(VentaAdapter ventaAdapter)
+        public ReporteVentasPorRolModel(ReporteVentasAdapter reporteVentasAdapter)
         {
-            this.ventaAdapter = ventaAdapter;
+            this.reporteVentasAdapter = reporteVentasAdapter;
         }
 
         public List<ReporteVentasPorRolDto> Reporte { get; set; } = new();
@@ -32,14 +32,44 @@ namespace FrontendVCare.Pages.Ventas
 
             try
             {
-                Reporte = await ventaAdapter.ObtenerReportePorRolAsync(Desde, Hasta);
+                Reporte = await reporteVentasAdapter.ObtenerReporteVentasPorRolAsync(Desde, Hasta);
             }
             catch
             {
-                MensajeError = "No se pudo cargar el reporte. Verifica que MSVentas este disponible.";
+                MensajeError = "No se pudo cargar el reporte. Verifica que MSReportes este disponible.";
             }
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnGetDescargarPdfAsync()
+        {
+            IActionResult? acceso = ValidarAccesoAdmin();
+            if (acceso != null)
+                return acceso;
+
+            ArchivoDescargaDto? archivo =
+                await reporteVentasAdapter.DescargarReporteVentasPorRolPdfAsync(Desde, Hasta);
+
+            if (archivo == null)
+                return RedirectToPage(new { desde = Desde, hasta = Hasta });
+
+            return File(archivo.Contenido, archivo.ContentType, archivo.NombreArchivo);
+        }
+
+        public async Task<IActionResult> OnGetDescargarExcelAsync()
+        {
+            IActionResult? acceso = ValidarAccesoAdmin();
+            if (acceso != null)
+                return acceso;
+
+            ArchivoDescargaDto? archivo =
+                await reporteVentasAdapter.DescargarReporteVentasPorRolExcelAsync(Desde, Hasta);
+
+            if (archivo == null)
+                return RedirectToPage(new { desde = Desde, hasta = Hasta });
+
+            return File(archivo.Contenido, archivo.ContentType, archivo.NombreArchivo);
         }
     }
 }
