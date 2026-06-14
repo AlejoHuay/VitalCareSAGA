@@ -35,6 +35,36 @@ namespace FrontendVCare.Adaptadores.Ventas
             return respuesta?.Data ?? new List<VentaDto>();
         }
 
+        public async Task<VentaDto?> ObtenerPorIdAsync(int id)
+        {
+            HttpResponseMessage response = await httpClient.GetAsync($"api/ventas/{id}");
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return null;
+
+            response.EnsureSuccessStatusCode();
+
+            RespuestaVentaDto? respuesta =
+                await response.Content.ReadFromJsonAsync<RespuestaVentaDto>(JsonOptions);
+
+            return respuesta?.Data;
+        }
+
+        public async Task<List<VentaDetalleDto>> ObtenerDetallesAsync(int id)
+        {
+            HttpResponseMessage response = await httpClient.GetAsync($"api/ventas/{id}/detalles");
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return new List<VentaDetalleDto>();
+
+            response.EnsureSuccessStatusCode();
+
+            RespuestaDetallesVentaDto? respuesta =
+                await response.Content.ReadFromJsonAsync<RespuestaDetallesVentaDto>(JsonOptions);
+
+            return respuesta?.Data ?? new List<VentaDetalleDto>();
+        }
+
         public async Task<OperacionApiDto> RegistrarAsync(VentaFormularioDto venta)
         {
             HttpResponseMessage response = await httpClient.PostAsJsonAsync("api/ventas", venta);
@@ -91,6 +121,18 @@ namespace FrontendVCare.Adaptadores.Ventas
         {
             public string Mensaje { get; set; } = string.Empty;
             public List<VentaDto> Data { get; set; } = new();
+        }
+
+        private class RespuestaVentaDto
+        {
+            public string Mensaje { get; set; } = string.Empty;
+            public VentaDto? Data { get; set; }
+        }
+
+        private class RespuestaDetallesVentaDto
+        {
+            public string Mensaje { get; set; } = string.Empty;
+            public List<VentaDetalleDto> Data { get; set; } = new();
         }
     }
 }

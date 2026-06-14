@@ -59,6 +59,8 @@ namespace MSVentas.App.Servicios
             int idCliente,
             int idUsuario,
             string metodoPago,
+            string? nit,
+            string? razonSocial,
             List<DetalleVentaInputDto> detallesInput)
         {
             try
@@ -70,8 +72,8 @@ namespace MSVentas.App.Servicios
                     metodoPago,
                     detallesInput,
                     null,
-                    string.Empty,
-                    string.Empty
+                    nit,
+                    razonSocial
                 );
 
                 Result validacion = _validador.Validar(venta);

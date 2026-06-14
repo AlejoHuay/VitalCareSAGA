@@ -61,7 +61,7 @@ namespace MSVentas.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             return Ok(new
             {
                 mensaje = "Venta obtenida correctamente.",
-                data = venta
+                data = MapearVentaRespuesta(venta)
             });
         }
 
@@ -91,7 +91,7 @@ namespace MSVentas.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             return Ok(new
             {
                 mensaje = "Detalles obtenidos correctamente.",
-                data = detalles
+                data = detalles.Select(MapearDetalleRespuesta)
             });
         }
 
@@ -120,6 +120,8 @@ namespace MSVentas.Infraestructura.Adaptadores.PuertosEntrada.Controladores
                 dto.IdCliente,
                 idUsuario.Value,
                 dto.MetodoPago,
+                dto.Nit,
+                dto.RazonSocial,
                 dto.Detalles
             );
 
@@ -263,6 +265,44 @@ namespace MSVentas.Infraestructura.Adaptadores.PuertosEntrada.Controladores
 
             return registros;
         }
+
+        private static object MapearVentaRespuesta(Venta venta)
+        {
+            return new
+            {
+                Id = venta.Id,
+                Fecha = venta.FechaHora,
+                FechaHora = venta.FechaHora,
+                venta.Total,
+                venta.MetodoPago,
+                venta.IdCliente,
+                Nit = venta.Nit,
+                RazonSocial = venta.RazonSocial,
+                Cliente = string.IsNullOrWhiteSpace(venta.Nit)
+                    ? venta.RazonSocial
+                    : $"{venta.Nit} - {venta.RazonSocial}",
+                venta.IdUsuario,
+                Usuario = venta.IdUsuario.ToString(),
+                Estado = venta.Estado == 1 ? "ACTIVA" : "ANULADA",
+                venta.EstadoSaga,
+                venta.MotivoFalloSaga,
+                venta.FechaConfirmacionSaga,
+                venta.FechaCompensacionSaga,
+                Detalles = venta.Detalles.Select(MapearDetalleRespuesta)
+            };
+        }
+
+        private static object MapearDetalleRespuesta(DetalleVenta detalle)
+        {
+            return new
+            {
+                detalle.IdVenta,
+                detalle.IdMedicamento,
+                detalle.Cantidad,
+                detalle.PrecioUnitario,
+                detalle.Subtotal
+            };
+        }
     }
 
     public class VentaCrearRequestDto
@@ -270,6 +310,10 @@ namespace MSVentas.Infraestructura.Adaptadores.PuertosEntrada.Controladores
         public int IdCliente { get; set; }
 
         public string MetodoPago { get; set; } = string.Empty;
+
+        public string? Nit { get; set; }
+
+        public string? RazonSocial { get; set; }
 
         public List<DetalleVentaInputDto> Detalles { get; set; } =
             new List<DetalleVentaInputDto>();

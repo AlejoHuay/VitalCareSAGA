@@ -17,6 +17,8 @@ namespace MSVentas.App.Interfaces
             int idCliente,
             int idUsuario,
             string metodoPago,
+            string? nit,
+            string? razonSocial,
             List<DetalleVentaInputDto> detallesInput);
 
         Result Actualizar(

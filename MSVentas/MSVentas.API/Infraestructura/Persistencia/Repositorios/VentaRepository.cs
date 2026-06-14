@@ -32,7 +32,10 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                 SELECT
                     v.id AS Id,
                     v.fecha_hora AS Fecha,
+                    v.fecha_hora AS FechaHora,
                     v.Cliente_idCliente AS IdCliente,
+                    COALESCE(v.nit, '') AS Nit,
+                    COALESCE(v.razon_social, '') AS RazonSocial,
                     CONCAT(
                         COALESCE(v.nit, ''),
                         ' - ',
@@ -40,11 +43,16 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                     ) AS Cliente,
                     v.usuario_idUsuario AS IdUsuario,
                     CAST(v.usuario_idUsuario AS CHAR) AS Usuario,
+                    v.metodo_pago AS MetodoPago,
                     v.total AS Total,
                     CASE
                         WHEN v.estado = 1 THEN 'ACTIVA'
                         ELSE 'ANULADA'
-                    END AS Estado
+                    END AS Estado,
+                    COALESCE(v.estado_saga, 'PENDIENTE_STOCK') AS EstadoSaga,
+                    v.motivo_fallo_saga AS MotivoFalloSaga,
+                    v.fecha_confirmacion_saga AS FechaConfirmacionSaga,
+                    v.fecha_compensacion_saga AS FechaCompensacionSaga
                 FROM venta v
                 WHERE v.estado = 1";
 
