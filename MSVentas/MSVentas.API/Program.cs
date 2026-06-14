@@ -4,6 +4,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MSVentas.Dominio.Puertos.PuertoSalida;
 using MSVentas.Infraestructura.Mensajeria;
+using MSVentas.App.Interfaces;
+using MSVentas.App.Servicios;
+using MSVentas.Dominio.Modelos;
+using MSVentas.Dominio.Validadores;
+using MSVentas.Infraestructura.Persistencia.Repositorios;
 
 Env.Load("../../.env");
 
@@ -13,6 +18,11 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IVentaRepository, VentaRepository>();
+builder.Services.AddScoped<IVentaService, VentaService>();
+builder.Services.AddScoped<IResult<Venta>, VentaValidacion>();
+
 builder.Services.AddScoped<IEventPublisher, RabbitPublisher>();
 builder.Services.AddHostedService<RabbitConsumerForVentas>();
 

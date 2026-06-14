@@ -22,6 +22,12 @@ namespace FrontendVCare.Servicios
             if (httpContext != null)
             {
                 string? token = JwtSessionHelper.ObtenerToken(httpContext);
+                
+                Console.WriteLine(
+                    string.IsNullOrWhiteSpace(token)
+                        ? "JWT NO ENCONTRADO EN LA SESION"
+                        : "JWT ENCONTRADO Y AGREGADO A LA PETICION"
+                );
                 if (!string.IsNullOrWhiteSpace(token))
                 {
                     request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);

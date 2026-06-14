@@ -15,6 +15,8 @@ builder.Logging.AddDebug();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
 
 // Registrar el manejador de tokens JWT
@@ -102,6 +104,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRouting();
+app.UseSession();
 app.UseAuthorization();
 
 app.MapStaticAssets();
