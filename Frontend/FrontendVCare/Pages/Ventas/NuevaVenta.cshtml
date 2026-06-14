@@ -28,14 +28,31 @@
         </div>
         <div class="card-body">
             <form method="post">
+                @Html.AntiForgeryToken()
                 <div class="row g-3">
                     <div class="col-md-5">
                         <label asp-for="Venta.IdCliente" class="form-label">Cliente</label>
-                        <select asp-for="Venta.IdCliente" class="form-select" required>
-                            <option value="">Seleccionar cliente</option>
-                            @foreach (var cliente in Model.Clientes)
+                        <div class="input-group">
+                            <select asp-for="Venta.IdCliente" class="form-select" required>
+                                <option value="">Seleccionar cliente</option>
+                                @foreach (var cliente in Model.Clientes)
+                                {
+                                    <option value="@cliente.IdCliente">@cliente.RazonSocial (@cliente.Nit)</option>
+                                }
+                            </select>
+                            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalNuevoCliente">
+                                + Nuevo cliente
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Venta.MetodoPago" class="form-label">Método de pago</label>
+                        <select asp-for="Venta.MetodoPago" class="form-select" required>
+                            <option value="">Seleccionar método</option>
+                            @foreach (var metodo in Model.MetodosPago)
                             {
-                                <option value="@cliente.IdCliente">@cliente.RazonSocial (@cliente.Nit)</option>
+                                <option value="@metodo">@metodo</option>
                             }
                         </select>
                     </div>
@@ -90,6 +107,59 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNuevoCliente" tabindex="-1" aria-labelledby="modalNuevoClienteLabel" aria-hidden="true" data-id-usuario="@Model.IdUsuarioActual">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalNuevoClienteLabel">Nuevo cliente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formNuevoCliente">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tipo de cliente</label>
+                        <div class="d-flex gap-3">
+                            <label class="form-check-label">
+                                <input type="radio" name="tipoCliente" value="false" class="form-check-input me-2" checked> Cliente con datos fiscales
+                            </label>
+                            <label class="form-check-label">
+                                <input type="radio" name="tipoCliente" value="true" class="form-check-input me-2"> Consumidor Final
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="modalContenedorClienteFiscal">
+                        <div class="form-floating mb-3">
+                            <input id="nuevoClienteNit" class="form-control" placeholder="NIT" inputmode="numeric" pattern="[0-9]*" title="El NIT solo acepta números." required />
+                            <label for="nuevoClienteNit">NIT / CI</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input id="nuevoClienteRazonSocial" class="form-control" placeholder="Razón Social" minlength="3" maxlength="45" pattern="[\p{L} ]+" title="Solo se permiten letras y espacios." required />
+                            <label for="nuevoClienteRazonSocial">Razón Social / Nombre Completo</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input id="nuevoClienteCorreo" type="email" class="form-control" placeholder="Correo electrónico opcional" maxlength="45" />
+                            <label for="nuevoClienteCorreo">Correo electrónico (opcional)</label>
+                        </div>
+                    </div>
+
+                    <div id="modalBloqueConsumidorFinal" class="alert alert-success border-0 mb-3" style="display:none;">
+                        Se registrará el cliente como <strong>Consumidor Final</strong>.
+                    </div>
+
+                    <div id="clienteError" class="alert alert-danger d-none" role="alert"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="guardarNuevoClienteBtn">Guardar cliente</button>
+            </div>
         </div>
     </div>
 </div>
@@ -171,6 +241,132 @@
             tabla.appendChild(nuevaFila);
             renumerar();
             inicializarFila(nuevaFila);
+        });
+
+        const modal = document.getElementById('modalNuevoCliente');
+        const clienteFiscalContainer = document.getElementById('modalContenedorClienteFiscal');
+        const consumidorFinalInfo = document.getElementById('modalBloqueConsumidorFinal');
+        const clienteError = document.getElementById('clienteError');
+        const guardarClienteBtn = document.getElementById('guardarNuevoClienteBtn');
+        const clienteNit = document.getElementById('nuevoClienteNit');
+        const clienteRazonSocial = document.getElementById('nuevoClienteRazonSocial');
+        const clienteCorreo = document.getElementById('nuevoClienteCorreo');
+        const clienteTipoRadios = document.querySelectorAll('input[name="tipoCliente"]');
+        const clienteSelect = document.getElementById('Venta_IdCliente');
+        const idUsuarioActual = Number(modal?.dataset.idUsuario || 0);
+        const antiforgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+
+        const actualizarModalTipoCliente = () => {
+            const esConsumidorFinal = document.querySelector('input[name="tipoCliente"]:checked')?.value === 'true';
+            consumidorFinalInfo.style.display = esConsumidorFinal ? '' : 'none';
+            clienteFiscalContainer.style.display = esConsumidorFinal ? 'none' : '';
+            clienteNit.required = !esConsumidorFinal;
+            clienteRazonSocial.required = !esConsumidorFinal;
+
+            if (esConsumidorFinal) {
+                clienteNit.value = 'CF';
+                clienteRazonSocial.value = 'Consumidor Final';
+                clienteCorreo.value = '';
+            } else {
+                if (clienteNit.value === 'CF') clienteNit.value = '';
+                if (clienteRazonSocial.value === 'Consumidor Final') clienteRazonSocial.value = '';
+            }
+        };
+
+        clienteTipoRadios.forEach(radio => radio.addEventListener('change', actualizarModalTipoCliente));
+        actualizarModalTipoCliente();
+
+        guardarClienteBtn.addEventListener('click', async () => {
+            clienteError.classList.add('d-none');
+            clienteError.textContent = '';
+
+            const esConsumidorFinal = document.querySelector('input[name="tipoCliente"]:checked')?.value === 'true';
+            const nit = clienteNit.value.trim();
+            const razonSocial = clienteRazonSocial.value.trim();
+            const correo = clienteCorreo.value.trim();
+
+            if (!esConsumidorFinal) {
+                if (!nit) {
+                    clienteError.textContent = 'El NIT no puede estar vacío.';
+                    clienteError.classList.remove('d-none');
+                    return;
+                }
+
+                if (!/^\d+$/.test(nit)) {
+                    clienteError.textContent = 'El NIT solo acepta números.';
+                    clienteError.classList.remove('d-none');
+                    return;
+                }
+
+                if (!razonSocial) {
+                    clienteError.textContent = 'La razón social no puede estar vacía.';
+                    clienteError.classList.remove('d-none');
+                    return;
+                }
+            }
+
+            if (!idUsuarioActual) {
+                clienteError.textContent = 'No se pudo obtener la sesión del usuario. Recarga la página.';
+                clienteError.classList.remove('d-none');
+                return;
+            }
+
+            guardarClienteBtn.disabled = true;
+            guardarClienteBtn.textContent = 'Guardando...';
+
+            try {
+                const response = await fetch('?handler=CrearCliente', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': antiforgeryToken
+                    },
+                    body: JSON.stringify({
+                        idUsuario: idUsuarioActual,
+                        esConsumidorFinal: esConsumidorFinal,
+                        nit: nit,
+                        razonSocial: razonSocial,
+                        correoElectronico: correo
+                    })
+                });
+
+                const contenido = await response.json();
+                if (!response.ok) {
+                    clienteError.textContent = contenido.mensaje || 'No se pudo crear el cliente.';
+                    clienteError.classList.remove('d-none');
+                    return;
+                }
+
+                const nuevoClienteId = contenido.data?.idCliente || contenido.idCliente || 0;
+                const nuevaRazonSocial = contenido.data?.razonSocial || razonSocial;
+                const nuevoNit = contenido.data?.nit || nit;
+
+                if (!nuevoClienteId) {
+                    clienteError.textContent = contenido.mensaje || 'Cliente creado, pero no se devolvió el ID.';
+                    clienteError.classList.remove('d-none');
+                    return;
+                }
+
+                const nuevaOpcion = document.createElement('option');
+                nuevaOpcion.value = nuevoClienteId;
+                nuevaOpcion.textContent = `${nuevaRazonSocial} (${nuevoNit})`;
+                nuevaOpcion.selected = true;
+                clienteSelect.appendChild(nuevaOpcion);
+
+                const bsModal = bootstrap.Modal.getInstance(modal) || new bootstrap.Modal(modal);
+                bsModal.hide();
+                clienteNit.value = '';
+                clienteRazonSocial.value = '';
+                clienteCorreo.value = '';
+                clienteTipoRadios[0].checked = true;
+                actualizarModalTipoCliente();
+            } catch (error) {
+                clienteError.textContent = 'No se pudo crear el cliente. Verifica tu conexión.';
+                clienteError.classList.remove('d-none');
+            } finally {
+                guardarClienteBtn.disabled = false;
+                guardarClienteBtn.textContent = 'Guardar cliente';
+            }
         });
 
         // Inicializar filas existentes para evitar NaN
