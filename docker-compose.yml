@@ -231,6 +231,30 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  # Microservicio - MSReportes (Sin BD - generación de reportes PDF/Excel)
+  msreportes:
+    build:
+      context: .
+      dockerfile: Dockerfile.MSReportes
+    container_name: vitalcare-msreportes
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:${MSREPORTES_PORT}
+
+      # JWT Configuration
+      - JWT_KEY=${JWT_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+
+    ports:
+      - "${MSREPORTES_PORT}:${MSREPORTES_PORT}"
+
+    networks:
+      - vitalcare-network
+
+    restart: unless-stopped
+
   # Frontend - FrontendVCare (Razor Pages)
   frontend:
     build:
@@ -247,6 +271,7 @@ services:
       - MSPRODUCTOS_URL=${MSPRODUCTOS_URL}
       - MSPROVEEDOR_URL=${MSPROVEEDOR_URL}
       - MSVENTAS_URL=${MSVENTAS_URL}
+      - MSREPORTES_URL=${MSREPORTES_URL}
 
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
@@ -257,6 +282,7 @@ services:
       - msproveedor
       - msusuarios
       - msventas
+      - msreportes
 
     networks:
       - vitalcare-network
