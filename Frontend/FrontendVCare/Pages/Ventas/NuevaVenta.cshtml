@@ -54,17 +54,17 @@
     .option-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        gap: 10px;
     }
 
     .choice-card {
         width: 100%;
-        min-height: 86px;
+        min-height: 66px;
         border: 1px solid #d7e6df;
         border-radius: 8px;
         background: #f8fbfa;
         color: #1f2d2a;
-        padding: 14px 16px;
+        padding: 10px 14px;
         text-align: left;
         transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
     }
@@ -78,13 +78,13 @@
     .choice-card .title {
         display: block;
         font-weight: 800;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
 
     .choice-card .hint {
         display: block;
         color: #63756f;
-        font-size: .92rem;
+        font-size: .86rem;
     }
 
     .search-results {
@@ -99,6 +99,11 @@
         color: #11844f;
         font-weight: 700;
         min-height: 24px;
+        font-size: .9rem;
+    }
+
+    .payment-field {
+        max-width: 420px;
     }
 
     .empty-detail {
@@ -190,7 +195,7 @@
                             <label for="clienteBusqueda" class="form-label fw-semibold">Buscar cliente</label>
                             <input type="text"
                                    id="clienteBusqueda"
-                                   class="form-control form-control-lg"
+                                   class="form-control"
                                    autocomplete="off"
                                    placeholder="NIT o razon social" />
                             <div id="clienteResultados" class="list-group position-absolute shadow-sm z-3 search-results"></div>
@@ -198,7 +203,7 @@
                         </div>
                         <div class="col-lg-5" id="metodoPagoWrap">
                             <label asp-for="Venta.MetodoPago" class="form-label fw-semibold">Metodo de pago</label>
-                            <select asp-for="Venta.MetodoPago" class="form-select form-select-lg" id="Venta_MetodoPago" required>
+                            <select asp-for="Venta.MetodoPago" class="form-select payment-field" id="Venta_MetodoPago" required>
                                 <option value="">Seleccionar</option>
                                 <option value="Efectivo">Efectivo</option>
                                 <option value="QR">QR</option>
@@ -221,17 +226,17 @@
                             <label for="medicamentoBusqueda" class="form-label fw-semibold">Buscar medicamento</label>
                             <input type="text"
                                    id="medicamentoBusqueda"
-                                   class="form-control form-control-lg"
+                                   class="form-control"
                                    autocomplete="off"
                                    placeholder="Nombre o presentacion" />
                             <div id="medicamentoResultados" class="list-group position-absolute shadow-sm z-3 search-results"></div>
                         </div>
                         <div class="col-sm-4 col-lg-2">
                             <label for="cantidadAgregar" class="form-label fw-semibold">Cantidad</label>
-                            <input type="number" id="cantidadAgregar" class="form-control form-control-lg" min="1" value="1" />
+                            <input type="number" id="cantidadAgregar" class="form-control" min="1" value="1" />
                         </div>
                         <div class="col-sm-8 col-lg-3">
-                            <button type="button" class="btn btn-success btn-lg w-100" id="agregarDetalle">
+                            <button type="button" class="btn btn-success w-100" id="agregarDetalle">
                                 Agregar
                             </button>
                         </div>
@@ -337,7 +342,6 @@
 
         const clienteBusqueda = document.getElementById("clienteBusqueda");
         const clienteBusquedaWrap = document.getElementById("clienteBusquedaWrap");
-        const metodoPagoWrap = document.getElementById("metodoPagoWrap");
         const clienteResultados = document.getElementById("clienteResultados");
         const clienteSeleccionado = document.getElementById("clienteSeleccionado");
         const clienteId = document.getElementById("Venta_IdCliente");
@@ -404,8 +408,6 @@
             btnConsumidorFinal.classList.add("active");
             btnClienteRegistrado.classList.remove("active");
             clienteBusquedaWrap.classList.add("d-none");
-            metodoPagoWrap.classList.remove("col-lg-5");
-            metodoPagoWrap.classList.add("col-lg-12");
 
             const consumidorFinal = buscarConsumidorFinal();
             if (!consumidorFinal) {
@@ -423,8 +425,6 @@
             btnClienteRegistrado.classList.add("active");
             btnConsumidorFinal.classList.remove("active");
             clienteBusquedaWrap.classList.remove("d-none");
-            metodoPagoWrap.classList.remove("col-lg-12");
-            metodoPagoWrap.classList.add("col-lg-5");
             clienteBusqueda.focus();
             clienteId.value = "";
             clienteActual = null;
