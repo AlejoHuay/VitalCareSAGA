@@ -23,11 +23,158 @@
     }));
 }
 
-<div class="container mt-5 no-card-hover">
+<style>
+    .sale-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .sale-card {
+        border: 1px solid #dfe7e3;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 12px 30px rgba(24, 45, 36, .08);
+    }
+
+    .sale-section {
+        padding: 22px;
+    }
+
+    .sale-section + .sale-section {
+        border-top: 1px solid #e7efeb;
+    }
+
+    .section-kicker {
+        color: #11844f;
+        font-size: .78rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .option-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .choice-card {
+        width: 100%;
+        min-height: 86px;
+        border: 1px solid #d7e6df;
+        border-radius: 8px;
+        background: #f8fbfa;
+        color: #1f2d2a;
+        padding: 14px 16px;
+        text-align: left;
+        transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    .choice-card.active {
+        border-color: #11844f;
+        background: #edf8f3;
+        box-shadow: 0 0 0 3px rgba(17, 132, 79, .12);
+    }
+
+    .choice-card .title {
+        display: block;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .choice-card .hint {
+        display: block;
+        color: #63756f;
+        font-size: .92rem;
+    }
+
+    .selected-client {
+        border: 1px solid #cfe8dc;
+        border-radius: 8px;
+        background: #f3fbf7;
+        padding: 14px;
+        min-height: 86px;
+    }
+
+    .selected-client.empty {
+        background: #fafafa;
+        border-color: #e3e8e5;
+    }
+
+    .search-results {
+        left: 0;
+        right: 0;
+        top: calc(100% + 6px);
+        max-height: 260px;
+        overflow-y: auto;
+    }
+
+    .payment-group {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .payment-button {
+        border: 1px solid #d7e6df;
+        border-radius: 8px;
+        background: #fff;
+        padding: 14px 16px;
+        font-weight: 800;
+        color: #263b35;
+        min-height: 58px;
+    }
+
+    .payment-button.active {
+        border-color: #11844f;
+        background: #11844f;
+        color: #fff;
+    }
+
+    .summary-card {
+        position: sticky;
+        top: 24px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 11px 0;
+        border-bottom: 1px solid #edf2ef;
+    }
+
+    .summary-row:last-child {
+        border-bottom: 0;
+    }
+
+    .empty-detail {
+        border: 1px dashed #c9d9d2;
+        border-radius: 8px;
+        background: #f9fcfb;
+        color: #64746f;
+        padding: 22px;
+        text-align: center;
+    }
+
+    @@media (max-width: 992px) {
+        .sale-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-card {
+            position: static;
+        }
+    }
+</style>
+
+<div class="container mt-5 mb-5 no-card-hover">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-success">Nueva venta</h2>
-            <p class="text-muted mb-0">Busca el cliente, agrega medicamentos y confirma la venta</p>
+            <p class="text-muted mb-0">Registra el cliente, los medicamentos y el pago de la venta</p>
         </div>
         <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary">Volver a ventas</a>
     </div>
@@ -42,119 +189,180 @@
 
     <div class="alert alert-danger d-none shadow-sm" id="ventaMensajeError"></div>
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-success text-white fw-semibold">
-            Datos de la venta
-        </div>
-        <div class="card-body">
-            <form method="post" id="ventaForm">
-                <input type="hidden" asp-for="Venta.IdCliente" id="Venta_IdCliente" />
+    <form method="post" id="ventaForm">
+        <input type="hidden" asp-for="Venta.IdCliente" id="Venta_IdCliente" />
+        <input type="hidden" asp-for="Venta.MetodoPago" id="Venta_MetodoPago" />
 
-                <div class="row g-3">
-                    <div class="col-md-5 position-relative">
-                        <label for="clienteBusqueda" class="form-label">Cliente por NIT / razon social</label>
-                        <input type="text"
-                               id="clienteBusqueda"
-                               class="form-control"
-                               autocomplete="off"
-                               placeholder="Escribe al menos 2 caracteres" />
-                        <div id="clienteResultados" class="list-group position-absolute w-100 shadow-sm z-3"></div>
-                        <div class="form-text" id="clienteSeleccionado">Ningun cliente seleccionado.</div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label asp-for="Venta.MetodoPago" class="form-label">Metodo de pago</label>
-                        <select asp-for="Venta.MetodoPago" class="form-select" required>
-                            <option value="">Seleccionar</option>
-                            <option value="Efectivo">Efectivo</option>
-                            <option value="QR">QR</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-4 d-flex align-items-end">
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-success" id="btnConsumidorFinal">
-                                Consumidor final
-                            </button>
-                            <button type="button"
-                                    class="btn btn-outline-secondary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalClienteRapido">
-                                Agregar cliente
-                            </button>
+        <div class="sale-shell">
+            <div class="sale-card">
+                <section class="sale-section">
+                    <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
+                        <div>
+                            <span class="section-kicker">Cliente</span>
+                            <h5 class="fw-bold mb-1">Datos de facturacion</h5>
+                            <p class="text-muted mb-0">Elige consumidor final o busca un cliente registrado.</p>
                         </div>
-                    </div>
-                </div>
-
-                <hr class="my-4" />
-
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-7 position-relative">
-                        <label for="medicamentoBusqueda" class="form-label">Buscar medicamento</label>
-                        <input type="text"
-                               id="medicamentoBusqueda"
-                               class="form-control"
-                               autocomplete="off"
-                               placeholder="Nombre o presentacion" />
-                        <div id="medicamentoResultados" class="list-group position-absolute w-100 shadow-sm z-3"></div>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="cantidadAgregar" class="form-label">Cantidad</label>
-                        <input type="number" id="cantidadAgregar" class="form-control" min="1" value="1" />
-                    </div>
-                    <div class="col-md-3">
-                        <button type="button" class="btn btn-outline-success w-100" id="agregarDetalle">
-                            + Agregar medicamento
+                        <button type="button"
+                                class="btn btn-outline-success"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalClienteRapido">
+                            Agregar cliente
                         </button>
                     </div>
-                </div>
 
-                <div class="table-responsive mt-4">
-                    <table class="table align-middle" id="detalleVenta">
-                        <thead class="table-success">
-                            <tr>
-                                <th>Medicamento</th>
-                                <th style="width:140px">Stock</th>
-                                <th style="width:140px">Cantidad</th>
-                                <th style="width:160px">Precio (Bs)</th>
-                                <th style="width:130px">Subtotal</th>
-                                <th style="width:90px"></th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-muted">La venta se registrara y luego la saga confirmara el stock.</span>
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="fs-5 fw-bold">Total: Bs <span id="totalVenta">0.00</span></span>
-                        <a asp-page="/Ventas/Venta" class="btn btn-secondary">Cancelar</a>
-                        <button type="button" class="btn btn-primary" id="btnPrepararVenta">Registrar venta</button>
+                    <div class="option-grid mb-3">
+                        <button type="button" class="choice-card active" id="btnConsumidorFinal">
+                            <span class="title">Consumidor final</span>
+                            <span class="hint">Completa NIT y razon social automaticamente.</span>
+                        </button>
+                        <button type="button" class="choice-card" id="btnClienteRegistrado">
+                            <span class="title">Cliente registrado</span>
+                            <span class="hint">Busca por NIT o razon social.</span>
+                        </button>
                     </div>
-                </div>
 
-                <div class="modal fade" id="modalConfirmarVenta" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content shadow">
-                            <div class="modal-header bg-success text-white">
-                                <h5 class="modal-title">Confirmar venta</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p class="mb-1">Revise los datos antes de registrar la venta.</p>
-                                <p class="fw-bold mb-0">Total: Bs <span id="totalConfirmacion">0.00</span></p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-success">Confirmar venta</button>
+                    <div class="row g-3 align-items-start">
+                        <div class="col-lg-7 position-relative" id="clienteBusquedaWrap">
+                            <label for="clienteBusqueda" class="form-label fw-semibold">Buscar cliente</label>
+                            <input type="text"
+                                   id="clienteBusqueda"
+                                   class="form-control form-control-lg"
+                                   autocomplete="off"
+                                   placeholder="NIT o razon social" />
+                            <div id="clienteResultados" class="list-group position-absolute shadow-sm z-3 search-results"></div>
+                        </div>
+                        <div class="col-lg-5">
+                            <label class="form-label fw-semibold">Seleccion actual</label>
+                            <div class="selected-client empty" id="clienteSeleccionado">
+                                Ningun cliente seleccionado.
                             </div>
                         </div>
                     </div>
-                </div>
-            </form>
+                </section>
+
+                <section class="sale-section">
+                    <span class="section-kicker">Pago</span>
+                    <h5 class="fw-bold mb-3">Metodo de pago</h5>
+                    <div class="payment-group">
+                        <button type="button" class="payment-button" data-payment="Efectivo">Efectivo</button>
+                        <button type="button" class="payment-button" data-payment="QR">QR</button>
+                    </div>
+                </section>
+
+                <section class="sale-section">
+                    <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
+                        <div>
+                            <span class="section-kicker">Medicamentos</span>
+                            <h5 class="fw-bold mb-1">Detalle de la venta</h5>
+                            <p class="text-muted mb-0">Busca un medicamento, define la cantidad y agregalo a la venta.</p>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 align-items-end">
+                        <div class="col-lg-7 position-relative">
+                            <label for="medicamentoBusqueda" class="form-label fw-semibold">Buscar medicamento</label>
+                            <input type="text"
+                                   id="medicamentoBusqueda"
+                                   class="form-control form-control-lg"
+                                   autocomplete="off"
+                                   placeholder="Nombre o presentacion" />
+                            <div id="medicamentoResultados" class="list-group position-absolute shadow-sm z-3 search-results"></div>
+                        </div>
+                        <div class="col-sm-4 col-lg-2">
+                            <label for="cantidadAgregar" class="form-label fw-semibold">Cantidad</label>
+                            <input type="number" id="cantidadAgregar" class="form-control form-control-lg" min="1" value="1" />
+                        </div>
+                        <div class="col-sm-8 col-lg-3">
+                            <button type="button" class="btn btn-success btn-lg w-100" id="agregarDetalle">
+                                Agregar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mt-4">
+                        <table class="table align-middle mb-0" id="detalleVenta">
+                            <thead class="table-success">
+                                <tr>
+                                    <th>Medicamento</th>
+                                    <th style="width:120px">Stock</th>
+                                    <th style="width:140px">Cantidad</th>
+                                    <th style="width:140px">Precio</th>
+                                    <th style="width:140px">Subtotal</th>
+                                    <th style="width:90px"></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="empty-detail mt-3" id="detalleVacio">
+                        Aun no agregaste medicamentos a la venta.
+                    </div>
+                </section>
+            </div>
+
+            <aside class="sale-card summary-card">
+                <section class="sale-section">
+                    <span class="section-kicker">Resumen</span>
+                    <h5 class="fw-bold mb-3">Venta actual</h5>
+
+                    <div class="summary-row">
+                        <span class="text-muted">Cliente</span>
+                        <strong class="text-end" id="resumenCliente">Consumidor Final</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span class="text-muted">NIT</span>
+                        <strong class="text-end" id="resumenNit">0</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span class="text-muted">Pago</span>
+                        <strong class="text-end" id="resumenPago">Sin seleccionar</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span class="text-muted">Items</span>
+                        <strong class="text-end" id="resumenItems">0</strong>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-light rounded-2">
+                        <div class="text-muted fw-semibold">Total</div>
+                        <div class="display-6 fw-bold text-success">Bs <span id="totalVenta">0.00</span></div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="button" class="btn btn-success btn-lg" id="btnPrepararVenta">
+                            Registrar venta
+                        </button>
+                        <a asp-page="/Ventas/Venta" class="btn btn-secondary btn-lg">Cancelar</a>
+                    </div>
+
+                    <p class="text-muted small mt-3 mb-0">
+                        La venta se registrara y la saga confirmara el stock.
+                    </p>
+                </section>
+            </aside>
         </div>
-    </div>
+
+        <div class="modal fade" id="modalConfirmarVenta" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Confirmar venta</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-1">Revise los datos antes de registrar la venta.</p>
+                        <p class="mb-1">Cliente: <strong id="clienteConfirmacion">Consumidor Final</strong></p>
+                        <p class="mb-1">Pago: <strong id="pagoConfirmacion">Sin seleccionar</strong></p>
+                        <p class="fw-bold mb-0">Total: Bs <span id="totalConfirmacion">0.00</span></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Confirmar venta</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
 
 <div class="modal fade" id="modalClienteRapido" tabindex="-1" aria-hidden="true">
@@ -196,20 +404,32 @@
         const medicamentos = @Html.Raw(medicamentosJson);
 
         const clienteBusqueda = document.getElementById("clienteBusqueda");
+        const clienteBusquedaWrap = document.getElementById("clienteBusquedaWrap");
         const clienteResultados = document.getElementById("clienteResultados");
         const clienteSeleccionado = document.getElementById("clienteSeleccionado");
         const clienteId = document.getElementById("Venta_IdCliente");
         const btnConsumidorFinal = document.getElementById("btnConsumidorFinal");
+        const btnClienteRegistrado = document.getElementById("btnClienteRegistrado");
         const clienteRapidoForm = document.getElementById("clienteRapidoForm");
         const clienteRapidoError = document.getElementById("clienteRapidoError");
         const btnGuardarClienteRapido = document.getElementById("btnGuardarClienteRapido");
         const modalClienteRapido = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalClienteRapido"));
+
+        const metodoPagoInput = document.getElementById("Venta_MetodoPago");
+        const paymentButtons = document.querySelectorAll(".payment-button");
+        const resumenCliente = document.getElementById("resumenCliente");
+        const resumenNit = document.getElementById("resumenNit");
+        const resumenPago = document.getElementById("resumenPago");
+        const resumenItems = document.getElementById("resumenItems");
+        const clienteConfirmacion = document.getElementById("clienteConfirmacion");
+        const pagoConfirmacion = document.getElementById("pagoConfirmacion");
 
         const medicamentoBusqueda = document.getElementById("medicamentoBusqueda");
         const medicamentoResultados = document.getElementById("medicamentoResultados");
         const cantidadAgregar = document.getElementById("cantidadAgregar");
         const agregarDetalle = document.getElementById("agregarDetalle");
         const tabla = document.querySelector("#detalleVenta tbody");
+        const detalleVacio = document.getElementById("detalleVacio");
         const totalVenta = document.getElementById("totalVenta");
         const totalConfirmacion = document.getElementById("totalConfirmacion");
         const ventaMensajeError = document.getElementById("ventaMensajeError");
@@ -217,10 +437,12 @@
         const modalConfirmarVenta = new bootstrap.Modal(document.getElementById("modalConfirmarVenta"));
 
         let medicamentoSeleccionado = null;
+        let clienteActual = null;
 
         function mostrarError(mensaje) {
             ventaMensajeError.textContent = mensaje;
             ventaMensajeError.classList.remove("d-none");
+            ventaMensajeError.scrollIntoView({ behavior: "smooth", block: "center" });
         }
 
         function limpiarError() {
@@ -228,49 +450,108 @@
             ventaMensajeError.classList.add("d-none");
         }
 
-        function seleccionarCliente(cliente) {
+        function pintarCliente(cliente, esConsumidorFinal) {
+            clienteSeleccionado.classList.remove("empty");
+            clienteSeleccionado.innerHTML = `
+                <div class="fw-bold">${cliente.razonSocial || "Sin razon social"}</div>
+                <div class="text-muted small">NIT / CI: ${cliente.nit || "-"}</div>
+                <div class="small text-success fw-semibold">${esConsumidorFinal ? "Consumidor final" : "Cliente registrado"}</div>
+            `;
+            resumenCliente.textContent = cliente.razonSocial || "Sin razon social";
+            resumenNit.textContent = cliente.nit || "-";
+            clienteConfirmacion.textContent = cliente.razonSocial || "Sin razon social";
+        }
+
+        function seleccionarCliente(cliente, esConsumidorFinal = false) {
+            clienteActual = cliente;
             clienteId.value = cliente.id;
-            clienteBusqueda.value = `${cliente.nit} - ${cliente.razonSocial}`;
-            clienteSeleccionado.textContent = `Cliente seleccionado: ${cliente.razonSocial}`;
+            clienteBusqueda.value = esConsumidorFinal ? "" : `${cliente.nit} - ${cliente.razonSocial}`;
             clienteResultados.innerHTML = "";
+            pintarCliente(cliente, esConsumidorFinal);
             limpiarError();
         }
+
+        function buscarConsumidorFinal() {
+            return clientes.find(cliente =>
+                cliente.esConsumidorFinal ||
+                (cliente.nit || "").toLowerCase() === "cf" ||
+                (cliente.nit || "") === "0" ||
+                (cliente.razonSocial || "").toLowerCase() === "consumidor final");
+        }
+
+        function activarModoConsumidorFinal() {
+            btnConsumidorFinal.classList.add("active");
+            btnClienteRegistrado.classList.remove("active");
+            clienteBusquedaWrap.classList.add("d-none");
+
+            const consumidorFinal = buscarConsumidorFinal();
+            if (!consumidorFinal) {
+                clienteId.value = "";
+                clienteActual = null;
+                clienteSeleccionado.classList.add("empty");
+                clienteSeleccionado.textContent = "No existe un cliente configurado como consumidor final.";
+                resumenCliente.textContent = "Consumidor Final";
+                resumenNit.textContent = "0";
+                mostrarError("No existe un cliente configurado como consumidor final.");
+                return;
+            }
+
+            seleccionarCliente(consumidorFinal, true);
+        }
+
+        function activarModoClienteRegistrado() {
+            btnClienteRegistrado.classList.add("active");
+            btnConsumidorFinal.classList.remove("active");
+            clienteBusquedaWrap.classList.remove("d-none");
+            clienteBusqueda.focus();
+            clienteId.value = "";
+            clienteActual = null;
+            clienteBusqueda.value = "";
+            clienteSeleccionado.classList.add("empty");
+            clienteSeleccionado.textContent = "Busca y selecciona un cliente registrado.";
+            resumenCliente.textContent = "Sin cliente";
+            resumenNit.textContent = "-";
+            clienteConfirmacion.textContent = "Sin cliente";
+        }
+
+        btnConsumidorFinal.addEventListener("click", activarModoConsumidorFinal);
+        btnClienteRegistrado.addEventListener("click", activarModoClienteRegistrado);
 
         clienteBusqueda.addEventListener("input", function () {
             const texto = this.value.trim().toLowerCase();
             clienteId.value = "";
-            clienteSeleccionado.textContent = "Ningun cliente seleccionado.";
+            clienteActual = null;
+            clienteSeleccionado.classList.add("empty");
+            clienteSeleccionado.textContent = "Busca y selecciona un cliente registrado.";
             clienteResultados.innerHTML = "";
 
             if (texto.length < 2) return;
 
             clientes
                 .filter(cliente =>
-                    (cliente.nit || "").toLowerCase().includes(texto) ||
-                    (cliente.razonSocial || "").toLowerCase().includes(texto))
+                    !cliente.esConsumidorFinal &&
+                    ((cliente.nit || "").toLowerCase().includes(texto) ||
+                    (cliente.razonSocial || "").toLowerCase().includes(texto)))
                 .slice(0, 8)
                 .forEach(cliente => {
                     const item = document.createElement("button");
                     item.type = "button";
                     item.className = "list-group-item list-group-item-action";
-                    item.textContent = `${cliente.nit} - ${cliente.razonSocial}`;
-                    item.addEventListener("click", () => seleccionarCliente(cliente));
+                    item.innerHTML = `<strong>${cliente.razonSocial}</strong><br><span class="text-muted small">NIT / CI: ${cliente.nit || "-"}</span>`;
+                    item.addEventListener("click", () => seleccionarCliente(cliente, false));
                     clienteResultados.appendChild(item);
                 });
         });
 
-        btnConsumidorFinal.addEventListener("click", function () {
-            const consumidorFinal = clientes.find(cliente =>
-                cliente.esConsumidorFinal ||
-                (cliente.nit || "").toLowerCase() === "cf" ||
-                (cliente.nit || "") === "0");
-
-            if (!consumidorFinal) {
-                mostrarError("No existe un cliente configurado como consumidor final.");
-                return;
-            }
-
-            seleccionarCliente(consumidorFinal);
+        paymentButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                paymentButtons.forEach(item => item.classList.remove("active"));
+                this.classList.add("active");
+                metodoPagoInput.value = this.dataset.payment || "";
+                resumenPago.textContent = metodoPagoInput.value || "Sin seleccionar";
+                pagoConfirmacion.textContent = metodoPagoInput.value || "Sin seleccionar";
+                limpiarError();
+            });
         });
 
         clienteRapidoForm.addEventListener("submit", async function (event) {
@@ -300,7 +581,8 @@
                     clientes.push(cliente);
                 }
 
-                seleccionarCliente(cliente);
+                activarModoClienteRegistrado();
+                seleccionarCliente(cliente, false);
                 clienteRapidoForm.reset();
                 modalClienteRapido.hide();
             } catch (error) {
@@ -335,7 +617,7 @@
                     const item = document.createElement("button");
                     item.type = "button";
                     item.className = "list-group-item list-group-item-action";
-                    item.textContent = `${medicamento.nombre} - ${medicamento.presentacion} | Stock: ${medicamento.stock}`;
+                    item.innerHTML = `<strong>${medicamento.nombre}</strong> - ${medicamento.presentacion}<br><span class="text-muted small">Stock: ${medicamento.stock} | Bs ${Number(medicamento.precio || 0).toFixed(2)}</span>`;
                     item.addEventListener("click", () => seleccionarMedicamento(medicamento));
                     medicamentoResultados.appendChild(item);
                 });
@@ -347,6 +629,12 @@
                 fila.querySelector(".cantidad-input").name = `Venta.Detalles[${index}].Cantidad`;
                 fila.querySelector(".precio-input").name = `Venta.Detalles[${index}].PrecioUnitario`;
             });
+        }
+
+        function actualizarDetalleVacio() {
+            const cantidadFilas = tabla.querySelectorAll("tr").length;
+            detalleVacio.classList.toggle("d-none", cantidadFilas > 0);
+            resumenItems.textContent = cantidadFilas.toString();
         }
 
         function recalcular() {
@@ -362,6 +650,7 @@
 
             totalVenta.textContent = total.toFixed(2);
             totalConfirmacion.textContent = total.toFixed(2);
+            actualizarDetalleVacio();
         }
 
         function agregarMedicamento() {
@@ -396,7 +685,8 @@
 
             fila.innerHTML = `
                 <td class="fw-semibold">
-                    ${medicamentoSeleccionado.nombre} - ${medicamentoSeleccionado.presentacion}
+                    ${medicamentoSeleccionado.nombre}<br>
+                    <span class="text-muted small">${medicamentoSeleccionado.presentacion}</span>
                     <input type="hidden" class="id-input" value="${medicamentoSeleccionado.id}">
                 </td>
                 <td>${medicamentoSeleccionado.stock}</td>
@@ -443,13 +733,12 @@
         }
 
         function validarVenta() {
-            if (!clienteId.value || Number(clienteId.value) <= 0) {
+            if (!clienteId.value || Number(clienteId.value) <= 0 || !clienteActual) {
                 mostrarError("Debe seleccionar un cliente valido.");
                 return false;
             }
 
-            const metodoPago = document.getElementById("Venta_MetodoPago").value;
-            if (!metodoPago) {
+            if (!metodoPagoInput.value) {
                 mostrarError("Debe seleccionar un metodo de pago.");
                 return false;
             }
@@ -499,5 +788,8 @@
                 medicamentoResultados.innerHTML = "";
             }
         });
+
+        activarModoConsumidorFinal();
+        actualizarDetalleVacio();
     });
 </script>
