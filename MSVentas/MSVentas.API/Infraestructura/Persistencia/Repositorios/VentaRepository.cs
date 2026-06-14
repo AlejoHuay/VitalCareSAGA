@@ -451,10 +451,12 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                     UPDATE venta
                     SET
                         estado = 0,
+                        estado_saga = 'PENDIENTE_REVERSION_STOCK',
                         ultima_actualizacion = NOW(),
                         Id_usuario_editor = @idUsuarioEditor
                     WHERE id = @idVenta
-                    AND estado = 1";
+                    AND estado = 1
+                    AND estado_saga = 'STOCK_CONFIRMADO'";
 
                 using MySqlCommand command = new MySqlCommand(
                     query,

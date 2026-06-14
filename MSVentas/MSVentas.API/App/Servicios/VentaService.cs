@@ -176,7 +176,27 @@ namespace MSVentas.App.Servicios
                 if (venta.Estado == 0)
                     return Result.Fail("La venta ya se encuentra anulada.");
 
-                return _repository.AnularVentaLogicamente(idVenta, idUsuarioEditor);
+                if (!string.Equals(venta.EstadoSaga, "STOCK_CONFIRMADO", StringComparison.OrdinalIgnoreCase))
+                    return Result.Fail("Solo se puede anular una venta con stock confirmado.");
+
+                Result resultado = _repository.AnularVentaLogicamente(idVenta, idUsuarioEditor);
+
+                if (resultado.IsSuccess)
+                {
+                    _eventPublisher.Publish("venta.anulada", new VentaAnuladaEvent
+                    {
+                        IdVenta = venta.Id,
+                        IdUsuario = idUsuarioEditor,
+                        Fecha = DateTime.Now,
+                        Detalles = venta.Detalles.Select(d => new DetalleVentaAnuladaEvent
+                        {
+                            IdMedicamento = d.IdMedicamento,
+                            Cantidad = d.Cantidad
+                        }).ToList()
+                    });
+                }
+
+                return resultado;
             }
             catch (Exception ex)
             {
