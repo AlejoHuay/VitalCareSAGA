@@ -106,6 +106,12 @@
         max-width: 420px;
     }
 
+    .validation-message {
+        color: #b42318;
+        font-size: .88rem;
+        font-weight: 600;
+    }
+
     .add-medicine-row {
         display: grid;
         grid-template-columns: minmax(0, 1fr) 130px;
@@ -215,6 +221,7 @@
                                    placeholder="NIT o razon social" />
                             <div id="clienteResultados" class="list-group position-absolute shadow-sm z-3 search-results"></div>
                             <div class="cliente-status mt-2" id="clienteSeleccionado"></div>
+                            <div class="validation-message mt-1 d-none" id="clienteError"></div>
                         </div>
                         <div class="col-lg-5" id="metodoPagoWrap">
                             <label asp-for="Venta.MetodoPago" class="form-label fw-semibold">Metodo de pago</label>
@@ -223,6 +230,7 @@
                                 <option value="Efectivo">Efectivo</option>
                                 <option value="QR">QR</option>
                             </select>
+                            <div class="validation-message mt-1 d-none" id="pagoError"></div>
                         </div>
                     </div>
                 </section>
@@ -244,6 +252,7 @@
                                    autocomplete="off"
                                    placeholder="Nombre o presentacion" />
                             <div id="medicamentoResultados" class="list-group position-absolute shadow-sm z-3 search-results"></div>
+                            <div class="validation-message mt-1 d-none" id="medicamentoError"></div>
                         </div>
                         <button type="button" class="btn btn-success" id="agregarDetalle">
                             Agregar
@@ -269,13 +278,13 @@
                     <div class="empty-detail mt-3" id="detalleVacio">
                         Aun no agregaste medicamentos a la venta.
                     </div>
+                    <div class="validation-message mt-2 d-none" id="detalleError"></div>
                 </section>
 
                 <div class="sale-actions">
                     <div>
                         <div class="text-muted fw-semibold">Total de la venta</div>
                         <div class="sale-total">Bs <span id="totalVenta">0.00</span></div>
-                        <div class="text-muted small mt-2">La venta se registrara y la saga confirmara el stock.</div>
                     </div>
                     <div class="d-flex gap-2 flex-wrap justify-content-end">
                         <a asp-page="/Ventas/Venta" class="btn btn-secondary btn-lg">Cancelar</a>
@@ -352,6 +361,7 @@
         const clienteBusquedaWrap = document.getElementById("clienteBusquedaWrap");
         const clienteResultados = document.getElementById("clienteResultados");
         const clienteSeleccionado = document.getElementById("clienteSeleccionado");
+        const clienteError = document.getElementById("clienteError");
         const clienteId = document.getElementById("Venta_IdCliente");
         const btnConsumidorFinal = document.getElementById("btnConsumidorFinal");
         const btnClienteRegistrado = document.getElementById("btnClienteRegistrado");
@@ -361,14 +371,17 @@
         const modalClienteRapido = bootstrap.Modal.getOrCreateInstance(document.getElementById("modalClienteRapido"));
 
         const metodoPagoInput = document.getElementById("Venta_MetodoPago");
+        const pagoError = document.getElementById("pagoError");
         const clienteConfirmacion = document.getElementById("clienteConfirmacion");
         const pagoConfirmacion = document.getElementById("pagoConfirmacion");
 
         const medicamentoBusqueda = document.getElementById("medicamentoBusqueda");
         const medicamentoResultados = document.getElementById("medicamentoResultados");
+        const medicamentoError = document.getElementById("medicamentoError");
         const agregarDetalle = document.getElementById("agregarDetalle");
         const tabla = document.querySelector("#detalleVenta tbody");
         const detalleVacio = document.getElementById("detalleVacio");
+        const detalleError = document.getElementById("detalleError");
         const totalVenta = document.getElementById("totalVenta");
         const totalConfirmacion = document.getElementById("totalConfirmacion");
         const ventaMensajeError = document.getElementById("ventaMensajeError");
@@ -378,15 +391,37 @@
         let medicamentoSeleccionado = null;
         let clienteActual = null;
 
-        function mostrarError(mensaje) {
+        function mostrarErrorGeneral(mensaje) {
             ventaMensajeError.textContent = mensaje;
             ventaMensajeError.classList.remove("d-none");
             ventaMensajeError.scrollIntoView({ behavior: "smooth", block: "center" });
         }
 
-        function limpiarError() {
+        function limpiarErrorGeneral() {
             ventaMensajeError.textContent = "";
             ventaMensajeError.classList.add("d-none");
+        }
+
+        function mostrarValidacion(elemento, mensaje, foco) {
+            elemento.textContent = mensaje;
+            elemento.classList.remove("d-none");
+            if (foco) {
+                foco.focus();
+                foco.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+
+        function limpiarValidacion(elemento) {
+            elemento.textContent = "";
+            elemento.classList.add("d-none");
+        }
+
+        function limpiarValidaciones() {
+            limpiarErrorGeneral();
+            limpiarValidacion(clienteError);
+            limpiarValidacion(pagoError);
+            limpiarValidacion(medicamentoError);
+            limpiarValidacion(detalleError);
         }
 
         function pintarCliente(cliente, esConsumidorFinal) {
@@ -400,7 +435,8 @@
             clienteBusqueda.value = esConsumidorFinal ? "" : `${cliente.nit} - ${cliente.razonSocial}`;
             clienteResultados.innerHTML = "";
             pintarCliente(cliente, esConsumidorFinal);
-            limpiarError();
+            limpiarValidacion(clienteError);
+            limpiarErrorGeneral();
         }
 
         function buscarConsumidorFinal() {
@@ -421,7 +457,7 @@
                 clienteId.value = "";
                 clienteActual = null;
                 clienteSeleccionado.textContent = "No existe un cliente configurado como consumidor final.";
-                mostrarError("No existe un cliente configurado como consumidor final.");
+                mostrarValidacion(clienteError, "No existe un cliente configurado como consumidor final.", btnConsumidorFinal);
                 return;
             }
 
@@ -438,6 +474,8 @@
             clienteBusqueda.value = "";
             clienteSeleccionado.textContent = "Busca y selecciona un cliente registrado.";
             clienteConfirmacion.textContent = "Sin cliente";
+            limpiarValidacion(clienteError);
+            limpiarErrorGeneral();
         }
 
         btnConsumidorFinal.addEventListener("click", activarModoConsumidorFinal);
@@ -449,6 +487,7 @@
             clienteActual = null;
             clienteSeleccionado.textContent = "Busca y selecciona un cliente registrado.";
             clienteResultados.innerHTML = "";
+            limpiarValidacion(clienteError);
 
             if (texto.length < 2) return;
 
@@ -470,7 +509,8 @@
 
         metodoPagoInput.addEventListener("change", function () {
             pagoConfirmacion.textContent = this.value || "Sin seleccionar";
-            limpiarError();
+            limpiarValidacion(pagoError);
+            limpiarErrorGeneral();
         });
 
         clienteRapidoForm.addEventListener("submit", async function (event) {
@@ -517,13 +557,15 @@
             medicamentoSeleccionado = medicamento;
             medicamentoBusqueda.value = `${medicamento.nombre} - ${medicamento.presentacion}`;
             medicamentoResultados.innerHTML = "";
-            limpiarError();
+            limpiarValidacion(medicamentoError);
+            limpiarErrorGeneral();
         }
 
         medicamentoBusqueda.addEventListener("input", function () {
             const texto = this.value.trim().toLowerCase();
             medicamentoSeleccionado = null;
             medicamentoResultados.innerHTML = "";
+            limpiarValidacion(medicamentoError);
 
             if (texto.length < 2) return;
 
@@ -573,12 +615,13 @@
 
         function agregarMedicamento() {
             if (!medicamentoSeleccionado) {
-                mostrarError("Debe seleccionar un medicamento.");
-                medicamentoBusqueda.focus();
+                mostrarValidacion(medicamentoError, "Debe seleccionar un medicamento.", medicamentoBusqueda);
                 return;
             }
 
             const cantidad = 1;
+            limpiarValidacion(medicamentoError);
+            limpiarValidacion(detalleError);
 
             const filaExistente = Array.from(tabla.querySelectorAll("tr"))
                 .find(fila => Number(fila.dataset.idMedicamento) === Number(medicamentoSeleccionado.id));
@@ -586,7 +629,9 @@
             if (filaExistente) {
                 const cantidadInput = filaExistente.querySelector(".cantidad-input");
                 cantidadInput.value = Number(cantidadInput.value || 0) + cantidad;
-                validarCantidadFila(filaExistente);
+                if (!validarCantidadFila(filaExistente)) {
+                    validarCantidadesDetalle(true, true);
+                }
                 recalcular();
                 limpiarSeleccionMedicamento();
                 return;
@@ -619,7 +664,9 @@
 
             tabla.appendChild(fila);
             reindexar();
-            validarCantidadFila(fila);
+            if (!validarCantidadFila(fila)) {
+                validarCantidadesDetalle(true, true);
+            }
             recalcular();
             limpiarSeleccionMedicamento();
         }
@@ -628,15 +675,30 @@
             medicamentoSeleccionado = null;
             medicamentoBusqueda.value = "";
             medicamentoResultados.innerHTML = "";
-            limpiarError();
+            limpiarErrorGeneral();
         }
 
-        function validarCantidadFila(fila) {
+        function obtenerMensajeCantidadFila(fila) {
             const cantidadInput = fila.querySelector(".cantidad-input");
             const cantidad = Number(cantidadInput.value || 0);
             const stock = Number(fila.dataset.stock || 0);
 
+            if (cantidad <= 0) {
+                return "La cantidad debe ser mayor que cero.";
+            }
+
             if (cantidad > stock) {
+                return "Una o mas cantidades superan el stock disponible.";
+            }
+
+            return "";
+        }
+
+        function validarCantidadFila(fila) {
+            const cantidadInput = fila.querySelector(".cantidad-input");
+            const mensaje = obtenerMensajeCantidadFila(fila);
+
+            if (mensaje) {
                 cantidadInput.classList.add("is-invalid");
                 return false;
             }
@@ -645,30 +707,51 @@
             return true;
         }
 
+        function validarCantidadesDetalle(mostrarMensaje, enfocar) {
+            for (const fila of tabla.querySelectorAll("tr")) {
+                const mensaje = obtenerMensajeCantidadFila(fila);
+                const cantidadInput = fila.querySelector(".cantidad-input");
+                if (mensaje) {
+                    validarCantidadFila(fila);
+                    if (mostrarMensaje) {
+                        mostrarValidacion(detalleError, mensaje, enfocar ? cantidadInput : null);
+                    }
+                    return false;
+                }
+
+                validarCantidadFila(fila);
+            }
+
+            limpiarValidacion(detalleError);
+            return true;
+        }
+
         function validarVenta() {
+            limpiarErrorGeneral();
+
             if (!clienteId.value || Number(clienteId.value) <= 0 || !clienteActual) {
-                mostrarError("Debe seleccionar un cliente valido.");
+                const focoCliente = clienteBusquedaWrap.classList.contains("d-none")
+                    ? btnConsumidorFinal
+                    : clienteBusqueda;
+                mostrarValidacion(clienteError, "Debe seleccionar un cliente valido.", focoCliente);
                 return false;
             }
 
             if (!metodoPagoInput.value) {
-                mostrarError("Debe seleccionar un metodo de pago.");
+                mostrarValidacion(pagoError, "Debe seleccionar un metodo de pago.", metodoPagoInput);
                 return false;
             }
 
             if (tabla.querySelectorAll("tr").length === 0) {
-                mostrarError("Debe agregar al menos un medicamento.");
+                mostrarValidacion(detalleError, "Debe agregar al menos un medicamento.", medicamentoBusqueda);
                 return false;
             }
 
-            for (const fila of tabla.querySelectorAll("tr")) {
-                if (!validarCantidadFila(fila)) {
-                    mostrarError("Una o mas cantidades superan el stock disponible.");
-                    return false;
-                }
+            if (!validarCantidadesDetalle(true, true)) {
+                return false;
             }
 
-            limpiarError();
+            limpiarValidaciones();
             return true;
         }
 
@@ -677,6 +760,7 @@
         tabla.addEventListener("input", function (event) {
             if (event.target.classList.contains("cantidad-input")) {
                 validarCantidadFila(event.target.closest("tr"));
+                validarCantidadesDetalle(true, false);
                 recalcular();
             }
         });
@@ -686,6 +770,7 @@
 
             event.target.closest("tr").remove();
             reindexar();
+            validarCantidadesDetalle(true, false);
             recalcular();
         });
 
