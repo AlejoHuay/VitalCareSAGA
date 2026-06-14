@@ -35,7 +35,7 @@
                 <input type="text"
                        name="filtro"
                        class="form-control"
-                       placeholder="Buscar por NIT, cliente o metodo de pago"
+                       placeholder="Buscar por cliente o metodo de pago"
                        value="@Model.Filtro" />
                 <button type="submit" class="btn btn-success btn-fixed">Buscar</button>
                 <a asp-page="/Ventas/Venta" class="btn btn-secondary btn-fixed">Limpiar</a>
@@ -48,12 +48,9 @@
             <thead class="table-success">
                 <tr>
                     <th>Fecha</th>
-                    <th>NIT</th>
                     <th>Cliente</th>
                     <th>Metodo de pago</th>
                     <th>Total (Bs)</th>
-                    <th>Estado</th>
-                    <th>Saga</th>
                     <th style="width:170px">Acciones</th>
                 </tr>
             </thead>
@@ -61,32 +58,20 @@
                 @if (Model.Ventas.Count == 0)
                 {
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">No hay ventas registradas.</td>
+                        <td colspan="5" class="text-center text-muted py-4">No hay ventas registradas.</td>
                     </tr>
                 }
                 @foreach (var venta in Model.Ventas)
                 {
-                    string nit = string.IsNullOrWhiteSpace(venta.Nit) ? "-" : venta.Nit;
                     string cliente = !string.IsNullOrWhiteSpace(venta.RazonSocial)
                         ? venta.RazonSocial
                         : venta.Cliente;
-                    string sagaClass = venta.EstadoSaga switch
-                    {
-                        "STOCK_CONFIRMADO" => "badge bg-success",
-                        "VENTA_COMPENSADA" => "badge bg-danger",
-                        _ => "badge bg-warning text-dark"
-                    };
 
                     <tr>
                         <td>@(ObtenerFechaVenta(venta).ToString("dd/MM/yyyy HH:mm"))</td>
-                        <td>@nit</td>
                         <td class="fw-semibold">@cliente</td>
                         <td>@venta.MetodoPago</td>
                         <td class="text-success fw-bold">@venta.Total.ToString("N2")</td>
-                        <td>@venta.Estado</td>
-                        <td>
-                            <span class="@sagaClass">@venta.EstadoSaga</span>
-                        </td>
                         <td>
                             <div class="d-flex gap-2">
                                 <a asp-page="/Ventas/VerVenta" asp-route-id="@venta.Id" class="btn btn-success btn-sm">Ver</a>
