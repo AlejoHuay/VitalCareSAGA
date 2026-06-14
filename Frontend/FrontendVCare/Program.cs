@@ -1,6 +1,7 @@
 using DotNetEnv;
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Adaptadores.Auth;
+using FrontendVCare.Adaptadores.Reportes;
 using FrontendVCare.Adaptadores.Ventas;
 using FrontendVCare.Dto;
 using FrontendVCare.Servicios;
@@ -74,6 +75,15 @@ builder.Services.AddHttpClient<VentaAdapter>(client =>
     string baseUrl = Environment.GetEnvironmentVariable("MSVENTAS_URL")
         ?? builder.Configuration["ApiUrls:MSVentas"]
         ?? "http://localhost:5069/";
+    client.BaseAddress = new Uri(baseUrl);
+})
+.AddHttpMessageHandler<JwtTokenHandler>();
+
+builder.Services.AddHttpClient<ReporteVentasAdapter>(client =>
+{
+    string baseUrl = Environment.GetEnvironmentVariable("MSREPORTES_URL")
+        ?? builder.Configuration["ApiUrls:MSReportes"]
+        ?? "http://localhost:5150/";
     client.BaseAddress = new Uri(baseUrl);
 })
 .AddHttpMessageHandler<JwtTokenHandler>();

@@ -12,7 +12,17 @@
             <h2 class="fw-bold text-success">Detalle de venta</h2>
             <p class="text-muted mb-0">Consulta los datos registrados y el detalle de medicamentos</p>
         </div>
-        <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary">Volver a ventas</a>
+        <div class="d-flex gap-2">
+            @if (venta != null && PuedeDescargarComprobante(venta))
+            {
+                <a asp-page-handler="DescargarComprobante"
+                   asp-route-id="@venta.Id"
+                   class="btn btn-success">
+                    Descargar comprobante
+                </a>
+            }
+            <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary">Volver a ventas</a>
+        </div>
     </div>
 
     @if (venta == null)
@@ -111,5 +121,11 @@
             return venta.RazonSocial;
 
         return string.IsNullOrWhiteSpace(venta.Cliente) ? "-" : venta.Cliente;
+    }
+
+    private static bool PuedeDescargarComprobante(FrontendVCare.Dto.Ventas.VentaDto venta)
+    {
+        return string.Equals(venta.Estado, "ACTIVA", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(venta.EstadoSaga, "STOCK_CONFIRMADO", StringComparison.OrdinalIgnoreCase);
     }
 }
