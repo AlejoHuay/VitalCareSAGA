@@ -23,25 +23,37 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
             this.httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<IEnumerable<ReporteVentasPorRolDto>> ObtenerVentasPorRolAsync()
+        public async Task<IEnumerable<ReporteVentasPorRolDto>> ObtenerVentasPorRolAsync(
+            DateTime? desde,
+            DateTime? hasta)
         {
-            await Task.CompletedTask;
+            List<VentaReporteDto> ventas = await ObtenerVentasConfirmadasAsync(desde, hasta);
+            Dictionary<int, string> rolesPorUsuario = new();
+            Dictionary<string, ReporteVentasPorRolDto> acumulado = new(StringComparer.OrdinalIgnoreCase);
 
-            return new List<ReporteVentasPorRolDto>
+            foreach (VentaReporteDto venta in ventas)
             {
-                new ReporteVentasPorRolDto
+                if (!rolesPorUsuario.TryGetValue(venta.IdUsuario, out string? rol))
                 {
-                    Rol = "Administrador",
-                    CantidadVentas = 10,
-                    TotalRecaudado = 1500
-                },
-                new ReporteVentasPorRolDto
-                {
-                    Rol = "Vendedor",
-                    CantidadVentas = 25,
-                    TotalRecaudado = 3800
+                    rol = await ObtenerRolUsuarioAsync(venta.IdUsuario);
+                    rolesPorUsuario[venta.IdUsuario] = rol;
                 }
-            };
+
+                if (!acumulado.TryGetValue(rol, out ReporteVentasPorRolDto? item))
+                {
+                    item = new ReporteVentasPorRolDto { Rol = rol };
+                    acumulado[rol] = item;
+                }
+
+                item.CantidadVentas++;
+                item.TotalRecaudado += venta.Total;
+            }
+
+            return acumulado.Values
+                .OrderByDescending(item => item.CantidadVentas)
+                .ThenByDescending(item => item.TotalRecaudado)
+                .ThenBy(item => item.Rol)
+                .ToList();
         }
 
         public async Task<ComprobanteVentaDto?> ObtenerComprobanteVentaAsync(int idVenta)
@@ -120,6 +132,56 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
             }
         }
 
+        private async Task<List<VentaReporteDto>> ObtenerVentasConfirmadasAsync(
+            DateTime? desde,
+            DateTime? hasta)
+        {
+            HttpClient ventasClient = CrearClienteAutenticado("MSVentas");
+            HttpResponseMessage response = await ventasClient.GetAsync("api/ventas");
+
+            response.EnsureSuccessStatusCode();
+
+            RespuestaVentasDto? respuestaVentas =
+                await response.Content.ReadFromJsonAsync<RespuestaVentasDto>(JsonOptions);
+
+            IEnumerable<VentaReporteDto> ventas = respuestaVentas?.Data ?? new List<VentaReporteDto>();
+            DateTime? desdeNormalizado = desde?.Date;
+            DateTime? hastaExclusivo = hasta?.Date.AddDays(1);
+
+            return ventas
+                .Where(venta => string.Equals(venta.Estado, "ACTIVA", StringComparison.OrdinalIgnoreCase))
+                .Where(venta => string.Equals(venta.EstadoSaga, "STOCK_CONFIRMADO", StringComparison.OrdinalIgnoreCase))
+                .Where(venta => !desdeNormalizado.HasValue || ObtenerFechaVenta(venta) >= desdeNormalizado.Value)
+                .Where(venta => !hastaExclusivo.HasValue || ObtenerFechaVenta(venta) < hastaExclusivo.Value)
+                .ToList();
+        }
+
+        private async Task<string> ObtenerRolUsuarioAsync(int idUsuario)
+        {
+            if (idUsuario <= 0)
+                return "Rol no identificado";
+
+            try
+            {
+                HttpClient usuariosClient = CrearClienteAutenticado("MSUsuarios");
+                HttpResponseMessage response =
+                    await usuariosClient.GetAsync($"api/usuarios/getUserById?id={idUsuario}");
+
+                if (!response.IsSuccessStatusCode)
+                    return "Rol no identificado";
+
+                RespuestaUsuarioDto? respuestaUsuario =
+                    await response.Content.ReadFromJsonAsync<RespuestaUsuarioDto>(JsonOptions);
+
+                string rol = NormalizarRol(respuestaUsuario?.Data?.Role);
+                return string.IsNullOrWhiteSpace(rol) ? "Rol no identificado" : rol;
+            }
+            catch
+            {
+                return "Rol no identificado";
+            }
+        }
+
         private async Task<string> ObtenerNombreUsuarioAsync(int idUsuario)
         {
             if (idUsuario <= 0)
@@ -179,6 +241,12 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
             public VentaReporteDto? Data { get; set; }
         }
 
+        private class RespuestaVentasDto
+        {
+            public string Mensaje { get; set; } = string.Empty;
+            public List<VentaReporteDto> Data { get; set; } = new();
+        }
+
         private class VentaReporteDto
         {
             public int Id { get; set; }
@@ -222,6 +290,31 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
             public string ApellidoPaterno { get; set; } = string.Empty;
             public string? ApellidoMaterno { get; set; }
             public string UserName { get; set; } = string.Empty;
+            public string Role { get; set; } = string.Empty;
+        }
+
+        private static DateTime ObtenerFechaVenta(VentaReporteDto venta)
+        {
+            return venta.FechaHora != default ? venta.FechaHora : venta.Fecha;
+        }
+
+        private static string NormalizarRol(string? rol)
+        {
+            if (string.IsNullOrWhiteSpace(rol))
+                return string.Empty;
+
+            string limpio = rol.Trim();
+            string normalizado = limpio
+                .Replace("í", "i")
+                .Replace("Í", "I")
+                .ToUpperInvariant();
+
+            return normalizado switch
+            {
+                "ADMIN" or "ADMINISTRADOR" => "Admin",
+                "BIOQUIMICO" => "Bioquimico",
+                _ => limpio
+            };
         }
     }
 }

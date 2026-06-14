@@ -15,40 +15,67 @@ namespace MSReportes.API.AdaptadoresDeInterfaz.Controladores
         }
 
         [HttpGet("por-rol")]
-        public async Task<IActionResult> ObtenerVentasPorRol()
+        public async Task<IActionResult> ObtenerVentasPorRol(
+            [FromQuery] DateTime? desde,
+            [FromQuery] DateTime? hasta)
         {
-            var resultado = await _reporteVentasInputPort.ObtenerVentasPorRolAsync();
-
-            return Ok(new
+            try
             {
-                mensaje = "Reporte de ventas por rol generado correctamente.",
-                fechaGeneracion = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
-                data = resultado
-            });
+                var resultado = await _reporteVentasInputPort.ObtenerVentasPorRolAsync(desde, hasta);
+
+                return Ok(new
+                {
+                    mensaje = "Reporte de ventas por rol generado correctamente.",
+                    fechaGeneracion = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
+                    data = resultado
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
         }
 
         [HttpGet("por-rol/pdf")]
-        public async Task<IActionResult> DescargarPdf()
+        public async Task<IActionResult> DescargarPdf(
+            [FromQuery] DateTime? desde,
+            [FromQuery] DateTime? hasta)
         {
-            var archivo = await _reporteVentasInputPort.GenerarPdfVentasPorRolAsync();
+            try
+            {
+                var archivo = await _reporteVentasInputPort.GenerarPdfVentasPorRolAsync(desde, hasta);
 
-            return File(
-                archivo.Contenido,
-                archivo.ContentType,
-                archivo.NombreArchivo
-            );
+                return File(
+                    archivo.Contenido,
+                    archivo.ContentType,
+                    archivo.NombreArchivo
+                );
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
         }
 
         [HttpGet("por-rol/excel")]
-        public async Task<IActionResult> DescargarExcel()
+        public async Task<IActionResult> DescargarExcel(
+            [FromQuery] DateTime? desde,
+            [FromQuery] DateTime? hasta)
         {
-            var archivo = await _reporteVentasInputPort.GenerarExcelVentasPorRolAsync();
+            try
+            {
+                var archivo = await _reporteVentasInputPort.GenerarExcelVentasPorRolAsync(desde, hasta);
 
-            return File(
-                archivo.Contenido,
-                archivo.ContentType,
-                archivo.NombreArchivo
-            );
+                return File(
+                    archivo.Contenido,
+                    archivo.ContentType,
+                    archivo.NombreArchivo
+                );
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
         }
 
         [HttpGet("{idVenta:int}/comprobante/pdf")]

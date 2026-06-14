@@ -27,14 +27,18 @@ namespace MSReportes.API.CasosDeUso.Interactores
             _reporteVentasPorRolBuilder = reporteVentasPorRolBuilder;
         }
 
-        public async Task<IEnumerable<ReporteVentasPorRolDto>> ObtenerVentasPorRolAsync()
+        public async Task<IEnumerable<ReporteVentasPorRolDto>> ObtenerVentasPorRolAsync(
+            DateTime? desde,
+            DateTime? hasta)
         {
-            return await _reporteVentasRepositorio.ObtenerVentasPorRolAsync();
+            ValidarRangoFechas(desde, hasta);
+            return await _reporteVentasRepositorio.ObtenerVentasPorRolAsync(desde, hasta);
         }
 
-        public async Task<ArchivoReporteDto> GenerarPdfVentasPorRolAsync()
+        public async Task<ArchivoReporteDto> GenerarPdfVentasPorRolAsync(DateTime? desde, DateTime? hasta)
         {
-            var datos = await _reporteVentasRepositorio.ObtenerVentasPorRolAsync();
+            ValidarRangoFechas(desde, hasta);
+            var datos = await _reporteVentasRepositorio.ObtenerVentasPorRolAsync(desde, hasta);
 
             var reporte = _reporteVentasPorRolBuilder
                 .ConEncabezado("VITALCARE", "REPORTE DE VENTAS POR ROL")
@@ -47,9 +51,10 @@ namespace MSReportes.API.CasosDeUso.Interactores
             return _reporteVentasPdfCreador.Crear(reporte);
         }
 
-        public async Task<ArchivoReporteDto> GenerarExcelVentasPorRolAsync()
+        public async Task<ArchivoReporteDto> GenerarExcelVentasPorRolAsync(DateTime? desde, DateTime? hasta)
         {
-            var datos = await _reporteVentasRepositorio.ObtenerVentasPorRolAsync();
+            ValidarRangoFechas(desde, hasta);
+            var datos = await _reporteVentasRepositorio.ObtenerVentasPorRolAsync(desde, hasta);
 
             var reporte = _reporteVentasPorRolBuilder
                 .ConEncabezado("VITALCARE", "REPORTE DE VENTAS POR ROL")
@@ -83,6 +88,12 @@ namespace MSReportes.API.CasosDeUso.Interactores
                 throw new InvalidOperationException("La venta no tiene detalle de medicamentos.");
 
             return _comprobanteVentaPdfCreador.Crear(comprobante);
+        }
+
+        private static void ValidarRangoFechas(DateTime? desde, DateTime? hasta)
+        {
+            if (desde.HasValue && hasta.HasValue && desde.Value.Date > hasta.Value.Date)
+                throw new ArgumentException("La fecha desde no puede ser mayor que la fecha hasta.");
         }
     }
 }

@@ -52,9 +52,6 @@ namespace MSReportes.API.CasosDeUso.Builders
             if (string.IsNullOrWhiteSpace(_reporte.Titulo))
                 throw new InvalidOperationException("El reporte debe tener un título.");
 
-            if (!_reporte.Detalle.Any())
-                throw new InvalidOperationException("El reporte debe tener datos para generar el detalle.");
-
             return _reporte;
         }
     }
