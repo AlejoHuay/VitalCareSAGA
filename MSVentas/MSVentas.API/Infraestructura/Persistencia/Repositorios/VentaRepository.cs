@@ -643,5 +643,61 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
 
             return Result.Ok();
         }
+
+        public Result ConfirmarReversionStockSaga(int idVenta)
+        {
+            const string query = @"
+                UPDATE venta
+                SET
+                    estado_saga = 'STOCK_REVERTIDO',
+                    motivo_fallo_saga = NULL,
+                    fecha_compensacion_saga = NOW(),
+                    ultima_actualizacion = NOW()
+                WHERE id = @idVenta
+                AND estado = 0
+                AND estado_saga = 'PENDIENTE_REVERSION_STOCK'";
+
+            using MySqlConnection connection = new MySqlConnection(connectionString);
+            using MySqlCommand command = new MySqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@idVenta", idVenta);
+
+            connection.Open();
+
+            int filas = command.ExecuteNonQuery();
+
+            if (filas <= 0)
+                return Result.Fail("No se pudo confirmar la reversion de stock de la venta.");
+
+            return Result.Ok();
+        }
+
+        public Result RegistrarFalloReversionStockSaga(int idVenta, string motivo)
+        {
+            const string query = @"
+                UPDATE venta
+                SET
+                    estado_saga = 'REVERSION_STOCK_FALLIDA',
+                    motivo_fallo_saga = @motivo,
+                    ultima_actualizacion = NOW()
+                WHERE id = @idVenta
+                AND estado = 0
+                AND estado_saga = 'PENDIENTE_REVERSION_STOCK'";
+
+            using MySqlConnection connection = new MySqlConnection(connectionString);
+            using MySqlCommand command = new MySqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@idVenta", idVenta);
+            command.Parameters.AddWithValue("@motivo", motivo);
+
+            connection.Open();
+
+            int filas = command.ExecuteNonQuery();
+
+            if (filas <= 0)
+                return Result.Fail("No se pudo registrar el fallo de reversion de stock.");
+
+            return Result.Ok();
+        }
     }
 }

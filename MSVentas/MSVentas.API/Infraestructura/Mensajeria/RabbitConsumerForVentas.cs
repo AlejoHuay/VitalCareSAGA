@@ -83,6 +83,18 @@ namespace MSVentas.Infraestructura.Mensajeria
                 routingKey: "stock.fallido"
             );
 
+            _channel.QueueBind(
+                queue: _queue,
+                exchange: _exchange,
+                routingKey: "stock.revertido"
+            );
+
+            _channel.QueueBind(
+                queue: _queue,
+                exchange: _exchange,
+                routingKey: "stock.reversion_fallida"
+            );
+
             EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
 
             consumer.Received += (sender, args) =>
@@ -98,6 +110,14 @@ namespace MSVentas.Infraestructura.Mensajeria
                     else if (args.RoutingKey == "stock.fallido")
                     {
                         ProcesarStockFallido(json);
+                    }
+                    else if (args.RoutingKey == "stock.revertido")
+                    {
+                        ProcesarStockRevertido(json);
+                    }
+                    else if (args.RoutingKey == "stock.reversion_fallida")
+                    {
+                        ProcesarStockReversionFallida(json);
                     }
 
                     _channel.BasicAck(args.DeliveryTag, false);
@@ -154,6 +174,47 @@ namespace MSVentas.Infraestructura.Mensajeria
                 scope.ServiceProvider.GetRequiredService<IVentaRepository>();
 
             Result resultado = repository.CompensarVentaPorFalloStock(
+                evento.IdVenta,
+                evento.Motivo
+            );
+
+            if (!resultado.IsSuccess)
+                throw new InvalidOperationException(resultado.Error);
+        }
+
+        private void ProcesarStockRevertido(string json)
+        {
+            StockActualizadoEvent? evento =
+                JsonSerializer.Deserialize<StockActualizadoEvent>(json);
+
+            if (evento == null)
+                throw new InvalidOperationException("Evento stock.revertido invalido.");
+
+            using IServiceScope scope = _serviceProvider.CreateScope();
+
+            IVentaRepository repository =
+                scope.ServiceProvider.GetRequiredService<IVentaRepository>();
+
+            Result resultado = repository.ConfirmarReversionStockSaga(evento.IdVenta);
+
+            if (!resultado.IsSuccess)
+                throw new InvalidOperationException(resultado.Error);
+        }
+
+        private void ProcesarStockReversionFallida(string json)
+        {
+            StockFallidoEvent? evento =
+                JsonSerializer.Deserialize<StockFallidoEvent>(json);
+
+            if (evento == null)
+                throw new InvalidOperationException("Evento stock.reversion_fallida invalido.");
+
+            using IServiceScope scope = _serviceProvider.CreateScope();
+
+            IVentaRepository repository =
+                scope.ServiceProvider.GetRequiredService<IVentaRepository>();
+
+            Result resultado = repository.RegistrarFalloReversionStockSaga(
                 evento.IdVenta,
                 evento.Motivo
             );

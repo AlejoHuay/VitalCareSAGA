@@ -20,5 +20,7 @@ namespace MSVentas.Dominio.Puertos.PuertoSalida
         Result ConfirmarStockSaga(int idVenta);
 
         Result CompensarVentaPorFalloStock(int idVenta, string motivo);
+        Result ConfirmarReversionStockSaga(int idVenta);
+        Result RegistrarFalloReversionStockSaga(int idVenta, string motivo);
     }
 }
