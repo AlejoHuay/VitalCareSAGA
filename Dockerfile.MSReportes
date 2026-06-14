@@ -1,0 +1,33 @@
+# Dockerfile para MSReportes.API
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+WORKDIR /src
+COPY ["MSReportes/MSReportes.API/MSReportes.API.csproj", "MSReportes/MSReportes.API/"]
+
+RUN dotnet restore "MSReportes/MSReportes.API/MSReportes.API.csproj"
+
+COPY . .
+WORKDIR "/src/MSReportes/MSReportes.API"
+
+RUN dotnet build "MSReportes.API.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "MSReportes.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+# ca-certificates para HTTPS + libfontconfig1/libfreetype6 requeridos por QuestPDF/SkiaSharp en Linux
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libfontconfig1 \
+    libfreetype6 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=publish /app/publish .
+
+EXPOSE 5150
+
+ENV ASPNETCORE_URLS=http://+:5150
+
+ENTRYPOINT ["dotnet", "MSReportes.API.dll"]
