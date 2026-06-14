@@ -106,6 +106,17 @@
         max-width: 420px;
     }
 
+    .add-medicine-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 130px;
+        gap: 12px;
+        align-items: end;
+    }
+
+    .quantity-cell {
+        max-width: 96px;
+    }
+
     .empty-detail {
         border: 1px dashed #c9d9d2;
         border-radius: 8px;
@@ -136,6 +147,10 @@
         .sale-actions {
             align-items: stretch;
             flex-direction: column;
+        }
+
+        .add-medicine-row {
+            grid-template-columns: 1fr;
         }
     }
 </style>
@@ -217,12 +232,11 @@
                         <div>
                             <span class="section-kicker">Medicamentos</span>
                             <h5 class="fw-bold mb-1">Detalle de la venta</h5>
-                            <p class="text-muted mb-0">Busca un medicamento, define la cantidad y agregalo a la venta.</p>
                         </div>
                     </div>
 
-                    <div class="row g-3 align-items-end">
-                        <div class="col-lg-7 position-relative">
+                    <div class="add-medicine-row">
+                        <div class="position-relative">
                             <label for="medicamentoBusqueda" class="form-label fw-semibold">Buscar medicamento</label>
                             <input type="text"
                                    id="medicamentoBusqueda"
@@ -231,15 +245,9 @@
                                    placeholder="Nombre o presentacion" />
                             <div id="medicamentoResultados" class="list-group position-absolute shadow-sm z-3 search-results"></div>
                         </div>
-                        <div class="col-sm-4 col-lg-2">
-                            <label for="cantidadAgregar" class="form-label fw-semibold">Cantidad</label>
-                            <input type="number" id="cantidadAgregar" class="form-control" min="1" value="1" />
-                        </div>
-                        <div class="col-sm-8 col-lg-3">
-                            <button type="button" class="btn btn-success w-100" id="agregarDetalle">
-                                Agregar
-                            </button>
-                        </div>
+                        <button type="button" class="btn btn-success" id="agregarDetalle">
+                            Agregar
+                        </button>
                     </div>
 
                     <div class="table-responsive mt-4">
@@ -358,7 +366,6 @@
 
         const medicamentoBusqueda = document.getElementById("medicamentoBusqueda");
         const medicamentoResultados = document.getElementById("medicamentoResultados");
-        const cantidadAgregar = document.getElementById("cantidadAgregar");
         const agregarDetalle = document.getElementById("agregarDetalle");
         const tabla = document.querySelector("#detalleVenta tbody");
         const detalleVacio = document.getElementById("detalleVacio");
@@ -571,11 +578,7 @@
                 return;
             }
 
-            const cantidad = Number(cantidadAgregar.value || 0);
-            if (cantidad <= 0) {
-                mostrarError("La cantidad debe ser mayor que cero.");
-                return;
-            }
+            const cantidad = 1;
 
             const filaExistente = Array.from(tabla.querySelectorAll("tr"))
                 .find(fila => Number(fila.dataset.idMedicamento) === Number(medicamentoSeleccionado.id));
@@ -602,7 +605,7 @@
                 </td>
                 <td>${medicamentoSeleccionado.stock}</td>
                 <td>
-                    <input type="number" min="1" class="form-control cantidad-input" value="${cantidad}">
+                    <input type="number" min="1" class="form-control cantidad-input quantity-cell" value="${cantidad}">
                 </td>
                 <td>
                     ${Number(medicamentoSeleccionado.precio || 0).toFixed(2)}
@@ -624,7 +627,6 @@
         function limpiarSeleccionMedicamento() {
             medicamentoSeleccionado = null;
             medicamentoBusqueda.value = "";
-            cantidadAgregar.value = "1";
             medicamentoResultados.innerHTML = "";
             limpiarError();
         }
