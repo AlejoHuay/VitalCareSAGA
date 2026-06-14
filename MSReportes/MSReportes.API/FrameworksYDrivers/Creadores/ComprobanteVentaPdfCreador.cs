@@ -105,18 +105,6 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
                                     col.Item().Text("Metodo de pago").FontColor(Colors.Grey.Darken1);
                                     col.Item().Text(comprobante.MetodoPago).SemiBold();
                                 });
-
-                                row.RelativeItem().Column(col =>
-                                {
-                                    col.Item().Text("Estado de venta").FontColor(Colors.Grey.Darken1);
-                                    col.Item().Text(comprobante.Estado).SemiBold();
-                                });
-
-                                row.RelativeItem().Column(col =>
-                                {
-                                    col.Item().Text("Estado de stock").FontColor(Colors.Grey.Darken1);
-                                    col.Item().Text(comprobante.EstadoSaga).SemiBold();
-                                });
                             });
                         });
 
