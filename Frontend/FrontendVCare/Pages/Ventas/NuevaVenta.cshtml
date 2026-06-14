@@ -25,10 +25,7 @@
 
 <style>
     .sale-shell {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 340px;
-        gap: 24px;
-        align-items: start;
+        max-width: 1120px;
     }
 
     .sale-card {
@@ -133,23 +130,6 @@
         color: #fff;
     }
 
-    .summary-card {
-        position: sticky;
-        top: 24px;
-    }
-
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 11px 0;
-        border-bottom: 1px solid #edf2ef;
-    }
-
-    .summary-row:last-child {
-        border-bottom: 0;
-    }
-
     .empty-detail {
         border: 1px dashed #c9d9d2;
         border-radius: 8px;
@@ -159,13 +139,27 @@
         text-align: center;
     }
 
-    @@media (max-width: 992px) {
-        .sale-shell {
-            grid-template-columns: 1fr;
-        }
+    .sale-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        background: #f8fbfa;
+        border-top: 1px solid #e7efeb;
+        padding: 20px 22px;
+    }
 
-        .summary-card {
-            position: static;
+    .sale-total {
+        color: #11844f;
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    @@media (max-width: 768px) {
+        .sale-actions {
+            align-items: stretch;
+            flex-direction: column;
         }
     }
 </style>
@@ -299,47 +293,21 @@
                         Aun no agregaste medicamentos a la venta.
                     </div>
                 </section>
-            </div>
 
-            <aside class="sale-card summary-card">
-                <section class="sale-section">
-                    <span class="section-kicker">Resumen</span>
-                    <h5 class="fw-bold mb-3">Venta actual</h5>
-
-                    <div class="summary-row">
-                        <span class="text-muted">Cliente</span>
-                        <strong class="text-end" id="resumenCliente">Consumidor Final</strong>
+                <div class="sale-actions">
+                    <div>
+                        <div class="text-muted fw-semibold">Total de la venta</div>
+                        <div class="sale-total">Bs <span id="totalVenta">0.00</span></div>
+                        <div class="text-muted small mt-2">La venta se registrara y la saga confirmara el stock.</div>
                     </div>
-                    <div class="summary-row">
-                        <span class="text-muted">NIT</span>
-                        <strong class="text-end" id="resumenNit">0</strong>
-                    </div>
-                    <div class="summary-row">
-                        <span class="text-muted">Pago</span>
-                        <strong class="text-end" id="resumenPago">Sin seleccionar</strong>
-                    </div>
-                    <div class="summary-row">
-                        <span class="text-muted">Items</span>
-                        <strong class="text-end" id="resumenItems">0</strong>
-                    </div>
-
-                    <div class="mt-4 p-3 bg-light rounded-2">
-                        <div class="text-muted fw-semibold">Total</div>
-                        <div class="display-6 fw-bold text-success">Bs <span id="totalVenta">0.00</span></div>
-                    </div>
-
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="button" class="btn btn-success btn-lg" id="btnPrepararVenta">
+                    <div class="d-flex gap-2 flex-wrap justify-content-end">
+                        <a asp-page="/Ventas/Venta" class="btn btn-secondary btn-lg">Cancelar</a>
+                        <button type="button" class="btn btn-success btn-lg px-4" id="btnPrepararVenta">
                             Registrar venta
                         </button>
-                        <a asp-page="/Ventas/Venta" class="btn btn-secondary btn-lg">Cancelar</a>
                     </div>
-
-                    <p class="text-muted small mt-3 mb-0">
-                        La venta se registrara y la saga confirmara el stock.
-                    </p>
-                </section>
-            </aside>
+                </div>
+            </div>
         </div>
 
         <div class="modal fade" id="modalConfirmarVenta" tabindex="-1" aria-hidden="true">
@@ -417,10 +385,6 @@
 
         const metodoPagoInput = document.getElementById("Venta_MetodoPago");
         const paymentButtons = document.querySelectorAll(".payment-button");
-        const resumenCliente = document.getElementById("resumenCliente");
-        const resumenNit = document.getElementById("resumenNit");
-        const resumenPago = document.getElementById("resumenPago");
-        const resumenItems = document.getElementById("resumenItems");
         const clienteConfirmacion = document.getElementById("clienteConfirmacion");
         const pagoConfirmacion = document.getElementById("pagoConfirmacion");
 
@@ -457,8 +421,6 @@
                 <div class="text-muted small">NIT / CI: ${cliente.nit || "-"}</div>
                 <div class="small text-success fw-semibold">${esConsumidorFinal ? "Consumidor final" : "Cliente registrado"}</div>
             `;
-            resumenCliente.textContent = cliente.razonSocial || "Sin razon social";
-            resumenNit.textContent = cliente.nit || "-";
             clienteConfirmacion.textContent = cliente.razonSocial || "Sin razon social";
         }
 
@@ -490,8 +452,6 @@
                 clienteActual = null;
                 clienteSeleccionado.classList.add("empty");
                 clienteSeleccionado.textContent = "No existe un cliente configurado como consumidor final.";
-                resumenCliente.textContent = "Consumidor Final";
-                resumenNit.textContent = "0";
                 mostrarError("No existe un cliente configurado como consumidor final.");
                 return;
             }
@@ -509,8 +469,6 @@
             clienteBusqueda.value = "";
             clienteSeleccionado.classList.add("empty");
             clienteSeleccionado.textContent = "Busca y selecciona un cliente registrado.";
-            resumenCliente.textContent = "Sin cliente";
-            resumenNit.textContent = "-";
             clienteConfirmacion.textContent = "Sin cliente";
         }
 
@@ -548,7 +506,6 @@
                 paymentButtons.forEach(item => item.classList.remove("active"));
                 this.classList.add("active");
                 metodoPagoInput.value = this.dataset.payment || "";
-                resumenPago.textContent = metodoPagoInput.value || "Sin seleccionar";
                 pagoConfirmacion.textContent = metodoPagoInput.value || "Sin seleccionar";
                 limpiarError();
             });
@@ -634,7 +591,6 @@
         function actualizarDetalleVacio() {
             const cantidadFilas = tabla.querySelectorAll("tr").length;
             detalleVacio.classList.toggle("d-none", cantidadFilas > 0);
-            resumenItems.textContent = cantidadFilas.toString();
         }
 
         function recalcular() {
