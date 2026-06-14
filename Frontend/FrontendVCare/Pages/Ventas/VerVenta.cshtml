@@ -1,0 +1,115 @@
+@page "{id:int}"
+@model FrontendVCare.Pages.Ventas.VerVentaModel
+
+@{
+    ViewData["Title"] = "Detalle de venta";
+    var venta = Model.Venta;
+}
+
+<div class="container mt-5 no-card-hover">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-success">Detalle de venta</h2>
+            <p class="text-muted mb-0">Consulta los datos registrados y el detalle de medicamentos</p>
+        </div>
+        <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary">Volver a ventas</a>
+    </div>
+
+    @if (venta == null)
+    {
+        <div class="alert alert-warning shadow-sm">No se encontraron datos de la venta.</div>
+    }
+    else
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white fw-semibold">
+                Datos de la venta
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <span class="text-muted d-block">Fecha</span>
+                        <strong>@ObtenerFechaVenta(venta).ToString("dd/MM/yyyy HH:mm")</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block">NIT / CI</span>
+                        <strong>@(string.IsNullOrWhiteSpace(venta.Nit) ? "-" : venta.Nit)</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block">Cliente</span>
+                        <strong>@ObtenerCliente(venta)</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block">Metodo de pago</span>
+                        <strong>@venta.MetodoPago</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block">Estado</span>
+                        <strong>@venta.Estado</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted d-block">Estado de stock</span>
+                        <strong>@venta.EstadoSaga</strong>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(venta.MotivoFalloSaga))
+                {
+                    <div class="alert alert-warning mt-4 mb-0">
+                        @venta.MotivoFalloSaga
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white fw-semibold">
+                Medicamentos
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-success">
+                        <tr>
+                            <th>Medicamento</th>
+                            <th style="width:140px">Cantidad</th>
+                            <th style="width:160px">Precio (Bs)</th>
+                            <th style="width:160px">Subtotal (Bs)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var detalle in venta.Detalles)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@detalle.Medicamento</td>
+                                <td>@detalle.Cantidad</td>
+                                <td>@detalle.PrecioUnitario.ToString("N2")</td>
+                                <td>@detalle.Subtotal.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">Total</th>
+                            <th class="text-success">Bs @venta.Total.ToString("N2")</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@functions {
+    private static DateTime ObtenerFechaVenta(FrontendVCare.Dto.Ventas.VentaDto venta)
+    {
+        return venta.FechaHora != default ? venta.FechaHora : venta.Fecha;
+    }
+
+    private static string ObtenerCliente(FrontendVCare.Dto.Ventas.VentaDto venta)
+    {
+        if (!string.IsNullOrWhiteSpace(venta.RazonSocial))
+            return venta.RazonSocial;
+
+        return string.IsNullOrWhiteSpace(venta.Cliente) ? "-" : venta.Cliente;
+    }
+}
