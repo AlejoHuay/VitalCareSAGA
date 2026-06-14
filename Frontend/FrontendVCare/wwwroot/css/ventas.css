@@ -1,0 +1,135 @@
+.sale-shell {
+    max-width: 1120px;
+}
+
+.sale-card {
+    border: 1px solid #dfe7e3;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(24, 45, 36, .08);
+}
+
+.sale-section {
+    padding: 22px;
+}
+
+.sale-section + .sale-section {
+    border-top: 1px solid #e7efeb;
+}
+
+.section-kicker {
+    color: #11844f;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.option-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.choice-card {
+    width: 100%;
+    min-height: 66px;
+    border: 1px solid #d7e6df;
+    border-radius: 8px;
+    background: #f8fbfa;
+    color: #1f2d2a;
+    padding: 10px 14px;
+    text-align: left;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.choice-card.active {
+    border-color: #11844f;
+    background: #edf8f3;
+    box-shadow: 0 0 0 3px rgba(17, 132, 79, .12);
+}
+
+.choice-card .title {
+    display: block;
+    font-weight: 800;
+    margin-bottom: 2px;
+}
+
+.choice-card .hint {
+    display: block;
+    color: #63756f;
+    font-size: .86rem;
+}
+
+.search-results {
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.cliente-status {
+    color: #11844f;
+    font-weight: 700;
+    min-height: 24px;
+    font-size: .9rem;
+}
+
+.payment-field {
+    max-width: 420px;
+}
+
+.validation-message {
+    color: #b42318;
+    font-size: .88rem;
+    font-weight: 600;
+}
+
+.add-medicine-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 130px;
+    gap: 12px;
+    align-items: end;
+}
+
+.quantity-cell {
+    max-width: 96px;
+}
+
+.empty-detail {
+    border: 1px dashed #c9d9d2;
+    border-radius: 8px;
+    background: #f9fcfb;
+    color: #64746f;
+    padding: 22px;
+    text-align: center;
+}
+
+.sale-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    background: #f8fbfa;
+    border-top: 1px solid #e7efeb;
+    padding: 20px 22px;
+}
+
+.sale-total {
+    color: #11844f;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+@media (max-width: 768px) {
+    .sale-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .add-medicine-row {
+        grid-template-columns: 1fr;
+    }
+}
