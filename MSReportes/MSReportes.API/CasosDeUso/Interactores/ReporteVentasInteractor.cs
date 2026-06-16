@@ -40,13 +40,7 @@ namespace MSReportes.API.CasosDeUso.Interactores
             ValidarRangoFechas(desde, hasta);
             var datos = await _reporteVentasRepositorio.ObtenerVentasPorRolAsync(desde, hasta);
 
-            var reporte = _reporteVentasPorRolBuilder
-                .ConEncabezado("VITALCARE", "REPORTE DE VENTAS POR ROL")
-                .ConUsuarioGenerador("Usuario del sistema")
-                .ConDetalle(datos)
-                .ConResumen()
-                .ConPiePagina("Reporte generado automáticamente por VitalCare.")
-                .Build();
+            var reporte = CrearReporteVentasPorRol(datos, desde, hasta);
 
             return _reporteVentasPdfCreador.Crear(reporte);
         }
@@ -56,13 +50,7 @@ namespace MSReportes.API.CasosDeUso.Interactores
             ValidarRangoFechas(desde, hasta);
             var datos = await _reporteVentasRepositorio.ObtenerVentasPorRolAsync(desde, hasta);
 
-            var reporte = _reporteVentasPorRolBuilder
-                .ConEncabezado("VITALCARE", "REPORTE DE VENTAS POR ROL")
-                .ConUsuarioGenerador("Usuario del sistema")
-                .ConDetalle(datos)
-                .ConResumen()
-                .ConPiePagina("Reporte generado automáticamente por VitalCare.")
-                .Build();
+            var reporte = CrearReporteVentasPorRol(datos, desde, hasta);
 
             return _reporteVentasExcelCreador.Crear(reporte);
         }
@@ -88,6 +76,21 @@ namespace MSReportes.API.CasosDeUso.Interactores
                 throw new InvalidOperationException("La venta no tiene detalle de medicamentos.");
 
             return _comprobanteVentaPdfCreador.Crear(comprobante);
+        }
+
+        private ReporteVentasPorRol CrearReporteVentasPorRol(
+            IEnumerable<ReporteVentasPorRolDto> datos,
+            DateTime? desde,
+            DateTime? hasta)
+        {
+            return _reporteVentasPorRolBuilder
+                .ConEncabezado("VITALCARE", "REPORTE DE VENTAS POR ROL")
+                .ConUsuarioGenerador("Usuario del sistema")
+                .ConPeriodo(desde, hasta)
+                .ConDetalle(datos)
+                .ConResumen()
+                .ConPiePagina("Reporte generado automaticamente por VitalCare.")
+                .Build();
         }
 
         private static void ValidarRangoFechas(DateTime? desde, DateTime? hasta)
