@@ -82,6 +82,33 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
                 .ToList();
         }
 
+        public async Task<IEnumerable<ReporteRecaudacionMedicamentoDto>> ObtenerRecaudacionPorMedicamentoAsync(
+            DateTime? desde,
+            DateTime? hasta)
+        {
+            HttpClient ventasClient = CrearClienteAutenticado("MSVentas");
+            HttpResponseMessage response = await ventasClient.GetAsync(
+                $"api/ventas/reportes/recaudacion-medicamentos{ConstruirQueryFechas(desde, hasta)}");
+
+            response.EnsureSuccessStatusCode();
+
+            RespuestaRecaudacionMedicamentosDto? respuesta =
+                await response.Content.ReadFromJsonAsync<RespuestaRecaudacionMedicamentosDto>(JsonOptions);
+
+            List<ReporteRecaudacionMedicamentoDto> datos = respuesta?.Data ?? new();
+
+            foreach (ReporteRecaudacionMedicamentoDto item in datos)
+            {
+                item.Medicamento = await ObtenerNombreMedicamentoAsync(item.IdMedicamento);
+            }
+
+            return datos
+                .OrderByDescending(item => item.TotalRecaudado)
+                .ThenByDescending(item => item.CantidadVendida)
+                .ThenBy(item => item.Medicamento)
+                .ToList();
+        }
+
         public async Task<ComprobanteVentaDto?> ObtenerComprobanteVentaAsync(int idVenta)
         {
             HttpClient ventasClient = CrearClienteAutenticado("MSVentas");
@@ -271,6 +298,12 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
             public List<VentaReporteDto> Data { get; set; } = new();
         }
 
+        private class RespuestaRecaudacionMedicamentosDto
+        {
+            public string Mensaje { get; set; } = string.Empty;
+            public List<ReporteRecaudacionMedicamentoDto> Data { get; set; } = new();
+        }
+
         private class VentaReporteDto
         {
             public int Id { get; set; }
@@ -322,6 +355,21 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
         private static DateTime ObtenerFechaVenta(VentaReporteDto venta)
         {
             return venta.FechaHora != default ? venta.FechaHora : venta.Fecha;
+        }
+
+        private static string ConstruirQueryFechas(DateTime? desde, DateTime? hasta)
+        {
+            List<string> parametros = new();
+
+            if (desde.HasValue)
+                parametros.Add($"desde={Uri.EscapeDataString(desde.Value.ToString("yyyy-MM-dd"))}");
+
+            if (hasta.HasValue)
+                parametros.Add($"hasta={Uri.EscapeDataString(hasta.Value.ToString("yyyy-MM-dd"))}");
+
+            return parametros.Count == 0
+                ? string.Empty
+                : $"?{string.Join("&", parametros)}";
         }
 
         private static string ConstruirNombreUsuario(
