@@ -285,7 +285,7 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                 }
 
                 transaction.Commit();
-                return Result.Ok();
+                return Result.Ok(idVenta);
             }
             catch (Exception ex)
             {

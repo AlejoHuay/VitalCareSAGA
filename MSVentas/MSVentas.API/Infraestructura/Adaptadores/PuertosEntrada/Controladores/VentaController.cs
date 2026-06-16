@@ -135,7 +135,11 @@ namespace MSVentas.Infraestructura.Adaptadores.PuertosEntrada.Controladores
 
             return StatusCode(StatusCodes.Status201Created, new
             {
-                mensaje = "Venta registrada correctamente."
+                mensaje = "Venta registrada correctamente.",
+                data = new
+                {
+                    idVenta = resultado.Id
+                }
             });
         }
 
