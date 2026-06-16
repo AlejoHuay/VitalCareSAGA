@@ -255,20 +255,20 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
                     await usuariosClient.GetAsync($"api/usuarios/getUserById?id={idUsuario}");
 
                 if (!response.IsSuccessStatusCode)
-                    return $"Usuario #{idUsuario}";
+                    return "Usuario no identificado";
 
                 RespuestaUsuarioDto? respuestaUsuario =
                     await response.Content.ReadFromJsonAsync<RespuestaUsuarioDto>(JsonOptions);
 
                 UsuarioReporteDto? usuario = respuestaUsuario?.Data;
                 if (usuario == null)
-                    return $"Usuario #{idUsuario}";
+                    return "Usuario no identificado";
 
-                return ConstruirNombreUsuario(usuario, idUsuario, incluirId: true);
+                return ConstruirNombreUsuario(usuario, idUsuario, incluirId: false);
             }
             catch
             {
-                return $"Usuario #{idUsuario}";
+                return "Usuario no identificado";
             }
         }
 
