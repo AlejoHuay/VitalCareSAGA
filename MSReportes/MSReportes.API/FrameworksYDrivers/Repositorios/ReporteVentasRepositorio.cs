@@ -28,28 +28,54 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
             DateTime? hasta)
         {
             List<VentaReporteDto> ventas = await ObtenerVentasConfirmadasAsync(desde, hasta);
-            Dictionary<int, string> rolesPorUsuario = new();
+            Dictionary<int, UsuarioReporteInfo> usuariosCache = new();
             Dictionary<string, ReporteVentasPorRolDto> acumulado = new(StringComparer.OrdinalIgnoreCase);
 
             foreach (VentaReporteDto venta in ventas)
             {
-                if (!rolesPorUsuario.TryGetValue(venta.IdUsuario, out string? rol))
+                if (!usuariosCache.TryGetValue(venta.IdUsuario, out UsuarioReporteInfo? usuario))
                 {
-                    rol = await ObtenerRolUsuarioAsync(venta.IdUsuario);
-                    rolesPorUsuario[venta.IdUsuario] = rol;
+                    usuario = await ObtenerUsuarioReporteAsync(venta.IdUsuario);
+                    usuariosCache[venta.IdUsuario] = usuario;
                 }
 
-                if (!acumulado.TryGetValue(rol, out ReporteVentasPorRolDto? item))
+                if (!acumulado.TryGetValue(usuario.Rol, out ReporteVentasPorRolDto? item))
                 {
-                    item = new ReporteVentasPorRolDto { Rol = rol };
-                    acumulado[rol] = item;
+                    item = new ReporteVentasPorRolDto { Rol = usuario.Rol };
+                    acumulado[usuario.Rol] = item;
                 }
 
                 item.CantidadVentas++;
                 item.TotalRecaudado += venta.Total;
+
+                ReporteVentasPorUsuarioDto? usuarioDetalle = item.Usuarios
+                    .FirstOrDefault(detalle => detalle.IdUsuario == venta.IdUsuario);
+
+                if (usuarioDetalle == null)
+                {
+                    usuarioDetalle = new ReporteVentasPorUsuarioDto
+                    {
+                        IdUsuario = venta.IdUsuario,
+                        NombreUsuario = usuario.Nombre
+                    };
+                    item.Usuarios.Add(usuarioDetalle);
+                }
+
+                usuarioDetalle.CantidadVentas++;
+                usuarioDetalle.TotalRecaudado += venta.Total;
             }
 
             return acumulado.Values
+                .Select(item =>
+                {
+                    item.Usuarios = item.Usuarios
+                        .OrderByDescending(usuario => usuario.CantidadVentas)
+                        .ThenByDescending(usuario => usuario.TotalRecaudado)
+                        .ThenBy(usuario => usuario.NombreUsuario)
+                        .ToList();
+
+                    return item;
+                })
                 .OrderByDescending(item => item.CantidadVentas)
                 .ThenByDescending(item => item.TotalRecaudado)
                 .ThenBy(item => item.Rol)
@@ -156,10 +182,10 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
                 .ToList();
         }
 
-        private async Task<string> ObtenerRolUsuarioAsync(int idUsuario)
+        private async Task<UsuarioReporteInfo> ObtenerUsuarioReporteAsync(int idUsuario)
         {
             if (idUsuario <= 0)
-                return "Rol no identificado";
+                return new UsuarioReporteInfo("Usuario no identificado", "Rol no identificado");
 
             try
             {
@@ -168,17 +194,25 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
                     await usuariosClient.GetAsync($"api/usuarios/getUserById?id={idUsuario}");
 
                 if (!response.IsSuccessStatusCode)
-                    return "Rol no identificado";
+                    return new UsuarioReporteInfo($"Usuario #{idUsuario}", "Rol no identificado");
 
                 RespuestaUsuarioDto? respuestaUsuario =
                     await response.Content.ReadFromJsonAsync<RespuestaUsuarioDto>(JsonOptions);
 
-                string rol = NormalizarRol(respuestaUsuario?.Data?.Role);
-                return string.IsNullOrWhiteSpace(rol) ? "Rol no identificado" : rol;
+                UsuarioReporteDto? usuario = respuestaUsuario?.Data;
+                if (usuario == null)
+                    return new UsuarioReporteInfo($"Usuario #{idUsuario}", "Rol no identificado");
+
+                string nombre = ConstruirNombreUsuario(usuario, idUsuario, incluirId: false);
+                string rol = NormalizarRol(usuario.Role);
+
+                return new UsuarioReporteInfo(
+                    nombre,
+                    string.IsNullOrWhiteSpace(rol) ? "Rol no identificado" : rol);
             }
             catch
             {
-                return "Rol no identificado";
+                return new UsuarioReporteInfo($"Usuario #{idUsuario}", "Rol no identificado");
             }
         }
 
@@ -203,17 +237,7 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
                 if (usuario == null)
                     return $"Usuario #{idUsuario}";
 
-                string nombre = string.Join(
-                    " ",
-                    new[] { usuario.Nombres, usuario.ApellidoPaterno, usuario.ApellidoMaterno }
-                        .Where(valor => !string.IsNullOrWhiteSpace(valor)));
-
-                if (string.IsNullOrWhiteSpace(nombre))
-                    nombre = string.IsNullOrWhiteSpace(usuario.UserName)
-                        ? $"Usuario #{idUsuario}"
-                        : usuario.UserName;
-
-                return $"{nombre} (ID: {idUsuario})";
+                return ConstruirNombreUsuario(usuario, idUsuario, incluirId: true);
             }
             catch
             {
@@ -293,9 +317,29 @@ namespace MSReportes.API.FrameworksYDrivers.Repositorios
             public string Role { get; set; } = string.Empty;
         }
 
+        private record UsuarioReporteInfo(string Nombre, string Rol);
+
         private static DateTime ObtenerFechaVenta(VentaReporteDto venta)
         {
             return venta.FechaHora != default ? venta.FechaHora : venta.Fecha;
+        }
+
+        private static string ConstruirNombreUsuario(
+            UsuarioReporteDto usuario,
+            int idUsuario,
+            bool incluirId)
+        {
+            string nombre = string.Join(
+                " ",
+                new[] { usuario.Nombres, usuario.ApellidoPaterno, usuario.ApellidoMaterno }
+                    .Where(valor => !string.IsNullOrWhiteSpace(valor)));
+
+            if (string.IsNullOrWhiteSpace(nombre))
+                nombre = string.IsNullOrWhiteSpace(usuario.UserName)
+                    ? $"Usuario #{idUsuario}"
+                    : usuario.UserName;
+
+            return incluirId ? $"{nombre} (ID: {idUsuario})" : nombre;
         }
 
         private static string NormalizarRol(string? rol)
