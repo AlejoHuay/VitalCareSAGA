@@ -9,9 +9,10 @@ namespace FrontendVCare.Pages.Proveedor
 {
     public class ProveedorEditModel : BasePageModel
     {
-        private static readonly Regex NombreRegex = new(@"^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$", RegexOptions.Compiled);
+        private static readonly Regex NombreRegex = new(@"^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?: [A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$", RegexOptions.Compiled);
         private static readonly Regex TelefonoRegex = new(@"^\d{8}$", RegexOptions.Compiled);
         private static readonly Regex CorreoRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex EspaciosMultiplesRegex = new(@"\s+", RegexOptions.Compiled);
 
         private readonly ProveedorApiAdapter _proveedorApiAdapter;
 
@@ -36,10 +37,10 @@ namespace FrontendVCare.Pages.Proveedor
             Proveedor = new ProveedorFormularioDto
             {
                 Id = proveedor.Id,
-                Nombre = proveedor.Nombre,
-                Telefono = proveedor.Telefono,
-                CorreoElectronico = proveedor.CorreoElectronico,
-                Direccion = proveedor.Direccion,
+                Nombre = NormalizarTexto(proveedor.Nombre),
+                Telefono = proveedor.Telefono?.Trim() ?? string.Empty,
+                CorreoElectronico = proveedor.CorreoElectronico?.Trim() ?? string.Empty,
+                Direccion = string.IsNullOrWhiteSpace(proveedor.Direccion) ? null : NormalizarTexto(proveedor.Direccion),
                 IdUsuario = proveedor.IdUsuario
             };
 
@@ -57,10 +58,7 @@ namespace FrontendVCare.Pages.Proveedor
                 return Page();
             }
 
-            Proveedor.Nombre = Proveedor.Nombre?.Trim() ?? string.Empty;
-            Proveedor.Telefono = Proveedor.Telefono?.Trim() ?? string.Empty; 
-            Proveedor.CorreoElectronico = Proveedor.CorreoElectronico?.Trim() ?? string.Empty;
-            Proveedor.Direccion = string.IsNullOrWhiteSpace(Proveedor.Direccion) ? null : Proveedor.Direccion.Trim();
+            NormalizarProveedor();
 
             if (!ValidarProveedor())
                 return Page();
@@ -77,11 +75,34 @@ namespace FrontendVCare.Pages.Proveedor
 
             if (!resultado.Exito)
             {
+                if (EsMensajeExitoso(resultado.Mensaje))
+                {
+                    return RedirectToPage("Proveedor", new { mensaje = resultado.Mensaje });
+                }
+
                 Estado.MensajeError = resultado.Mensaje;
                 return Page();
             }
 
             return RedirectToPage("Proveedor", new { mensaje = resultado.Mensaje });
+        }
+
+        private void NormalizarProveedor()
+        {
+            Proveedor.Nombre = NormalizarTexto(Proveedor.Nombre);
+            Proveedor.Telefono = Proveedor.Telefono?.Trim() ?? string.Empty;
+            Proveedor.CorreoElectronico = Proveedor.CorreoElectronico?.Trim() ?? string.Empty;
+            Proveedor.Direccion = string.IsNullOrWhiteSpace(Proveedor.Direccion)
+                ? null
+                : NormalizarTexto(Proveedor.Direccion);
+        }
+
+        private static string NormalizarTexto(string? texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto))
+                return string.Empty;
+
+            return EspaciosMultiplesRegex.Replace(texto.Trim(), " ");
         }
 
         private bool ValidarProveedor()
@@ -94,7 +115,7 @@ namespace FrontendVCare.Pages.Proveedor
 
             if (!NombreRegex.IsMatch(Proveedor.Nombre))
             {
-                Estado.MensajeError = "El nombre solo puede contener letras y espacios.";
+                Estado.MensajeError = "El nombre solo puede contener letras y un espacio entre palabras.";
                 return false;
             }
 
@@ -110,14 +131,13 @@ namespace FrontendVCare.Pages.Proveedor
                 return false;
             }
 
-            if (Proveedor.CorreoElectronico.EndsWith("@gmail", StringComparison.OrdinalIgnoreCase) || 
+            if (Proveedor.CorreoElectronico.EndsWith("@gmail", StringComparison.OrdinalIgnoreCase) ||
                 Proveedor.CorreoElectronico.EndsWith("@hotmail", StringComparison.OrdinalIgnoreCase))
             {
                 Estado.MensajeError = "El correo está incompleto. Asegúrese de incluir '.com'.";
                 return false;
             }
 
-            // Teléfono OBLIGATORIO
             if (string.IsNullOrWhiteSpace(Proveedor.Telefono))
             {
                 Estado.MensajeError = "El teléfono es un campo obligatorio.";
@@ -133,19 +153,28 @@ namespace FrontendVCare.Pages.Proveedor
             return true;
         }
 
+        private static bool EsMensajeExitoso(string? mensaje)
+        {
+            if (string.IsNullOrWhiteSpace(mensaje))
+                return false;
+
+            return mensaje.Contains("creado", StringComparison.OrdinalIgnoreCase) ||
+                   mensaje.Contains("registrado", StringComparison.OrdinalIgnoreCase) ||
+                   mensaje.Contains("actualizado", StringComparison.OrdinalIgnoreCase) ||
+                   mensaje.Contains("correctamente", StringComparison.OrdinalIgnoreCase);
+        }
+
         private int ObtenerIdUsuarioActual()
         {
             var claimId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("id");
+
             if (int.TryParse(claimId, out int id))
-            {
                 return id;
-            }
 
             int? sessionId = ObtenerIdUsuarioSesion();
+
             if (sessionId.HasValue)
-            {
                 return sessionId.Value;
-            }
 
             return 0;
         }

@@ -4,67 +4,115 @@
     ViewData["Title"] = "Editar Proveedor";
 }
 
-<div class="container py-5 medicamento-form-page">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8">
-            <div class="med-card shadow border-0" style="border-radius: 15px; overflow: hidden;">
-                <div class="med-card-header text-center bg-success text-white py-3">
-                    <h2 class="mb-0 fw-bold text-white">Actualizar Proveedor</h2>
-                    <p class="mb-0 small">Modifica los datos del proveedor</p>
-                </div>
+<div class="medicamento-form-page">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="med-card shadow border-0" style="border-radius: 15px; overflow: hidden;">
+                    <div class="med-card-header text-center bg-success text-white py-3">
+                        <h2 class="mb-0 fw-bold text-white">Actualizar Proveedor</h2>
+                        <p class="mb-0 small">Modifica los datos del proveedor</p>
+                    </div>
 
-                <div class="med-card-body p-4">
-                    <form method="post">
-                        <input type="hidden" asp-for="Proveedor.Id" />
+                    <div class="med-card-body p-4">
+                        <form method="post" id="formProveedorEdit">
+                            <input type="hidden" asp-for="Proveedor.Id" />
 
-                        <div class="form-floating mb-3">
-                            <input asp-for="Proveedor.Nombre"
-                                   class="form-control"
-                                   placeholder="Nombre"
-                                   pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$"
-                                   title="El nombre solo puede contener letras y espacios."
-                                   required />
-                            <label class="ms-2">Nombre *</label>
-                        </div>
+                            <div class="form-floating mb-3">
+                                <input asp-for="Proveedor.Nombre"
+                                       class="form-control proveedor-nombre"
+                                       placeholder="Nombre"
+                                       pattern="^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?: [A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$"
+                                       title="El nombre solo puede contener letras y un espacio entre palabras."
+                                       autocomplete="off"
+                                       required />
+                                <label class="ms-2">Nombre *</label>
+                            </div>
 
-                        <div class="form-floating mb-3">
-                            <input asp-for="Proveedor.Telefono"
-                                   class="form-control"
-                                   placeholder="Teléfono"
-                                   inputmode="numeric"
-                                   maxlength="8"
-                                   pattern="^\d{8}$"
-                                   title="El teléfono debe tener exactamente 8 dígitos."
-                                   required />
-                            <label class="ms-2">Teléfono *</label>
-                        </div>
+                            <div class="form-floating mb-3">
+                                <input asp-for="Proveedor.Telefono"
+                                       class="form-control proveedor-telefono"
+                                       placeholder="Teléfono"
+                                       inputmode="numeric"
+                                       maxlength="8"
+                                       pattern="^\d{8}$"
+                                       title="El teléfono debe tener exactamente 8 dígitos."
+                                       autocomplete="off"
+                                       required />
+                                <label class="ms-2">Teléfono *</label>
+                            </div>
 
-                        <div class="form-floating mb-3">
-                            <input asp-for="Proveedor.CorreoElectronico" 
-                                   type="email" 
-                                   class="form-control" 
-                                   placeholder="Correo electrónico" 
-                                   required />
-                            <label class="ms-2">Correo electrónico *</label>
-                        </div>
+                            <div class="form-floating mb-3">
+                                <input asp-for="Proveedor.CorreoElectronico"
+                                       type="email"
+                                       class="form-control proveedor-correo"
+                                       placeholder="Correo electrónico"
+                                       autocomplete="off"
+                                       required />
+                                <label class="ms-2">Correo electrónico *</label>
+                            </div>
 
-                        <div class="form-floating mb-3">
-                            <textarea asp-for="Proveedor.Direccion" class="form-control" style="height: 110px" placeholder="Dirección"></textarea>
-                            <label class="ms-2">Dirección</label>
-                        </div>
+                            <div class="form-floating mb-3">
+                                <textarea asp-for="Proveedor.Direccion"
+                                          class="form-control proveedor-direccion"
+                                          style="height: 110px"
+                                          placeholder="Dirección"></textarea>
+                                <label class="ms-2">Dirección</label>
+                            </div>
 
-                        @if (!string.IsNullOrEmpty(Model.Estado.MensajeError))
-                        {
-                            <div class="alert alert-danger">@Model.Estado.MensajeError</div>
-                        }
+                            @if (!string.IsNullOrEmpty(Model.Estado.MensajeError))
+                            {
+                                <div class="alert alert-danger">@Model.Estado.MensajeError</div>
+                            }
 
-                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                            <a asp-page="Proveedor" class="btn btn-secondary">Volver</a>
-                            <button type="submit" class="btn btn-success px-5 fw-bold shadow-sm">Actualizar</button>
-                        </div>
-                    </form>
+                            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                                <a asp-page="Proveedor" class="btn btn-secondary">Volver</a>
+                                <button type="submit" class="btn btn-success px-5 fw-bold shadow-sm">Actualizar</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+ </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("formProveedorEdit");
+
+        function normalizarEspacios(valor) {
+            return (valor || "").trim().replace(/\s+/g, " ");
+        }
+
+        function aplicarNormalizacion() {
+            const nombre = document.querySelector(".proveedor-nombre");
+            const telefono = document.querySelector(".proveedor-telefono");
+            const correo = document.querySelector(".proveedor-correo");
+            const direccion = document.querySelector(".proveedor-direccion");
+
+            if (nombre) nombre.value = normalizarEspacios(nombre.value);
+            if (telefono) telefono.value = telefono.value.trim();
+            if (correo) correo.value = correo.value.trim();
+            if (direccion) direccion.value = normalizarEspacios(direccion.value);
+        }
+
+        document.querySelectorAll(".proveedor-nombre, .proveedor-direccion").forEach(function (control) {
+            control.addEventListener("blur", function () {
+                control.value = normalizarEspacios(control.value);
+            });
+        });
+
+        document.querySelectorAll(".proveedor-telefono, .proveedor-correo").forEach(function (control) {
+            control.addEventListener("blur", function () {
+                control.value = control.value.trim();
+            });
+        });
+
+        if (form) {
+            form.addEventListener("submit", function () {
+                aplicarNormalizacion();
+            });
+        }
+    });
+</script>
