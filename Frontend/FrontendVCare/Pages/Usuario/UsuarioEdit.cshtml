@@ -13,7 +13,6 @@
                     <h2 class="mb-0 fw-bold text-white">
                         Editar Perfil de Usuario
                     </h2>
-                    <p class="mb-0 small">ID Sistema: #@Model.Input.IdUsuario</p>
                 </div>
 
                 <div class="card-body p-4">
@@ -28,25 +27,28 @@
                         <input type="hidden" asp-for="Input.UserName" />
                         <input type="hidden" asp-for="Input.MustChangePassword" />
 
-                        <div class="form-floating mb-3">
-                            <input asp-for="Input.Email" class="form-control" placeholder="Email" />
-                            <label class="ms-2">Correo Electronico</label>
+                        <!-- Campo Correo Electrónico -->
+                        <div class="mb-3">
+                            <label asp-for="Input.Email" class="form-label fw-semibold">Correo Electrónico</label>
+                            <input asp-for="Input.Email" class="form-control" placeholder="ejemplo@correo.com" />
                         </div>
 
-                        <div class="form-floating mb-3">
+                        <!-- Campo Rol / Privilegios -->
+                        <div class="mb-3">
+                            <label asp-for="Input.Role" class="form-label fw-semibold">Rol / Privilegios</label>
                             <select asp-for="Input.Role" class="form-select">
                                 <option value="Admin">Administrador</option>
-                                <option value="Bioquimico">Bioquimico</option>
+                                <option value="Bioquimico">Bioquímico</option>
                             </select>
-                            <label class="ms-2">Rol / Privilegios</label>
                         </div>
 
-                        <div class="form-floating mb-4">
+                        <!-- Campo Estado de Cuenta -->
+                        <div class="mb-4">
+                            <label asp-for="Input.Activo" class="form-label fw-semibold">Estado de Cuenta</label>
                             <select asp-for="Input.Activo" class="form-select">
                                 <option value="1">Habilitado</option>
                                 <option value="0">Deshabilitado (Baja)</option>
                             </select>
-                            <label class="ms-2">Estado de Cuenta</label>
                         </div>
 
                         @if (!string.IsNullOrWhiteSpace(Model.Estado.MensajeError))
