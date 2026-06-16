@@ -108,8 +108,29 @@ namespace MSUsuarios.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             if (!resultado.IsSuccess)
                 return BadRequest(new { mensaje = resultado.Error });
 
-            return Ok(new { mensaje = "Contraseña actualizada correctamente." });}
+            return Ok(new { mensaje = "Contraseña actualizada correctamente." });
         }
 
-}
+        [HttpPost("activar-cuenta")]
+        public IActionResult ActivarCuenta([FromBody] ActivarCuentaRequestDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Token))
+                return BadRequest(new { mensaje = "El token de activación es obligatorio." });
 
+            if (string.IsNullOrWhiteSpace(dto.NuevaPassword))
+                return BadRequest(new { mensaje = "La nueva contraseña es obligatoria." });
+
+            if (string.IsNullOrWhiteSpace(dto.ConfirmarPassword))
+                return BadRequest(new { mensaje = "La confirmación de contraseña es obligatoria." });
+
+            if (dto.NuevaPassword != dto.ConfirmarPassword)
+                return BadRequest(new { mensaje = "La contraseña y su confirmación no coinciden." });
+
+            Result resultado = _usuarioService.ActivarCuenta(dto);
+            if (!resultado.IsSuccess)
+                return BadRequest(new { mensaje = resultado.Error });
+
+            return Ok(new { mensaje = "Cuenta activada correctamente. Ahora puedes iniciar sesión." });
+        }
+    }
+}

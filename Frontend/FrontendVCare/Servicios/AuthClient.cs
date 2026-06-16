@@ -70,6 +70,12 @@ namespace FrontendVCare.Servicios
             return await LeerResultadoAsync(response, "Contraseña actualizada correctamente.");
         }
 
+        public async Task<OperacionApiDto> ActivarCuentaAsync(ActivarCuentaRequestDto request)
+        {
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/auth/activar-cuenta", request);
+            return await LeerResultadoAsync(response, "Cuenta activada correctamente. Ahora puedes iniciar sesión.");
+        }
+
         private async Task<OperacionApiDto> LeerResultadoAsync(HttpResponseMessage response, string mensajeExito)
         {
             string mensaje = await LeerMensajeAsync(response, mensajeExito);
