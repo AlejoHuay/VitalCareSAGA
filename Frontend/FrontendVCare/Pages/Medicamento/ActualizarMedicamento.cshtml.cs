@@ -21,6 +21,7 @@ namespace FrontendVCare.Pages.Medicamento
         }
 
         public MedicamentoDto? Medicamento { get; set; }
+
         public List<ClasificacionDto> Clasificaciones { get; set; } = new();
 
         [BindProperty]
@@ -66,7 +67,7 @@ namespace FrontendVCare.Pages.Medicamento
 
             if (!ModelState.IsValid)
             {
-                Medicamento = await _medicamentoAdapter.GetByIdAsync(Id);
+                ReconstruirMedicamentoDesdeFormulario();
                 MensajeError = "Revisa los datos del medicamento. Hay campos obligatorios o con formato incorrecto.";
                 return Page();
             }
@@ -74,7 +75,7 @@ namespace FrontendVCare.Pages.Medicamento
             string? mensajeValidacion = ValidarMedicamento();
             if (!string.IsNullOrEmpty(mensajeValidacion))
             {
-                Medicamento = await _medicamentoAdapter.GetByIdAsync(Id);
+                ReconstruirMedicamentoDesdeFormulario();
                 MensajeError = mensajeValidacion;
                 return Page();
             }
@@ -82,6 +83,7 @@ namespace FrontendVCare.Pages.Medicamento
             int? idUsuario = ObtenerIdUsuarioSesion();
             if (idUsuario == null || idUsuario.Value == 0)
             {
+                ReconstruirMedicamentoDesdeFormulario();
                 MensajeError = "No se encontró el usuario. Por favor, inicia sesión nuevamente.";
                 return Page();
             }
@@ -104,7 +106,7 @@ namespace FrontendVCare.Pages.Medicamento
                 return RedirectToPage("/Medicamento/Medicamento", new { mensaje = "Medicamento actualizado correctamente" });
             }
 
-            Medicamento = await _medicamentoAdapter.GetByIdAsync(Id);
+            ReconstruirMedicamentoDesdeFormulario();
             MensajeError = mensaje ?? "Error al actualizar el medicamento.";
             return Page();
         }
@@ -119,6 +121,9 @@ namespace FrontendVCare.Pages.Medicamento
 
             if (!Regex.IsMatch(Nombre.Trim(), @"^[\p{L}0-9\s]+$"))
                 return "El nombre del medicamento no debe contener signos ni caracteres especiales.";
+
+            if (string.IsNullOrWhiteSpace(Presentacion))
+                return "La presentación es obligatoria.";
 
             if (IdClasificacion <= 0)
                 return "La clasificación es obligatoria.";
@@ -144,6 +149,7 @@ namespace FrontendVCare.Pages.Medicamento
             }
 
             Clasificaciones = await _clasificacionAdapter.GetAllAsync();
+
             Id = Medicamento.Id;
             Nombre = Medicamento.Nombre;
             Presentacion = Medicamento.Presentacion;
@@ -153,6 +159,20 @@ namespace FrontendVCare.Pages.Medicamento
             Stock = Medicamento.Stock;
 
             return Page();
+        }
+
+        private void ReconstruirMedicamentoDesdeFormulario()
+        {
+            Medicamento = new MedicamentoDto
+            {
+                Id = Id,
+                Nombre = Nombre,
+                Presentacion = Presentacion,
+                IdClasificacion = IdClasificacion,
+                Concentracion = Concentracion,
+                Precio = Precio,
+                Stock = Stock
+            };
         }
     }
 }

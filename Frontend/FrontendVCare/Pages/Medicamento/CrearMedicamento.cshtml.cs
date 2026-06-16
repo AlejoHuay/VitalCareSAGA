@@ -81,6 +81,9 @@ namespace FrontendVCare.Pages.Medicamento
             if (!Regex.IsMatch(Medicamento.Nombre.Trim(), @"^[\p{L}0-9\s]+$"))
                 return "El nombre del medicamento no debe contener signos ni caracteres especiales.";
 
+            if (string.IsNullOrWhiteSpace(Medicamento.Presentacion))
+                return "La presentación es obligatoria.";
+
             if (Medicamento.IdClasificacion <= 0)
                 return "La clasificación es obligatoria.";
 

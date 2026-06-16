@@ -1,155 +1,156 @@
 @page
 @model FrontendVCare.Pages.Medicamento.CrearMedicamentoModel
 
-<div class="container py-5 medicamento-form-page">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8">
-            <div class="med-card shadow border-0" style="border-radius: 15px; overflow: hidden;">
-                <div class="med-card-header text-center bg-success text-white py-3">
-                    <h2 class="mb-0 fw-bold text-white">Nuevo Medicamento</h2>
-                    <p class="mb-0 small">Completa los datos del medicamento</p>
-                </div>
+<div class="medicamento-form-page">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="med-card shadow border-0" style="border-radius: 15px; overflow: hidden;">
+                    <div class="med-card-header text-center bg-success text-white py-3">
+                        <h2 class="mb-0 fw-bold text-white">Nuevo Medicamento</h2>
+                        <p class="mb-0 small">Completa los datos del medicamento</p>
+                    </div>
 
-                <div class="med-card-body p-4">
-                    <form method="post" asp-page-handler="CrearMedicamento">
+                    <div class="med-card-body p-4">
+                        <form method="post" asp-page-handler="CrearMedicamento">
 
-                        <!-- Nombre -->
-                        <!-- Nombre -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold mb-1">
-                                Nombre
-                            </label>
-
-                            <input asp-for="Medicamento.Nombre"
-                                   class="form-control"
-                                   placeholder="Ej: Mentisan"
-                                   pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 ]+"
-                                   required />
-                        </div>
-
-                        <!-- Presentación -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold mb-1">
-                                Presentación
-                            </label>
-
-                            <select asp-for="Medicamento.Presentacion"
-                                    class="form-select"
-                                    required>
-
-                                <option value="" disabled selected>
-                                    Seleccione una presentación
-                                </option>
-
-                                <option value="Cápsulas">Cápsulas</option>
-                                <option value="Crema">Crema</option>
-                                <option value="Gotas">Gotas</option>
-                                <option value="Inyectable">Inyectable</option>
-                                <option value="Jarabe">Jarabe</option>
-                                <option value="Polvo">Polvo</option>
-                                <option value="Pomada">Pomada</option>
-                                <option value="Suspensión">Suspensión</option>
-                                <option value="Tabletas">Tabletas</option>
-                            </select>
-                        </div>
-
-                        <!-- Clasificación -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold mb-1">
-                                Clasificación
-                            </label>
-
-                            <select asp-for="Medicamento.IdClasificacion"
-                                    class="form-select"
-                                    required>
-
-                                <option value="" disabled selected>
-                                    Seleccione una clasificación
-                                </option>
-
-                                @foreach (var clasificacion in Model.Clasificaciones)
-                                {
-                                    <option value="@clasificacion.Id">
-                                        @clasificacion.Nombre
-                                    </option>
-                                }
-                            </select>
-                        </div>
-
-                        <!-- Concentración -->
-                        <div class="mb-3">
-
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label class="form-label fw-semibold mb-0">
-                                    Concentración
+                            <!-- Nombre -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold mb-1">
+                                    Nombre
                                 </label>
 
-                                <small class="text-muted">
-                                    Ej: 500 mg, 5 ml o 0.9 %
-                                </small>
+                                <input asp-for="Medicamento.Nombre"
+                                       class="form-control"
+                                       placeholder="Ej: Mentisan"
+                                       pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 ]+"
+                                       required />
                             </div>
 
-                            <input asp-for="Medicamento.Concentracion"
-                                   class="form-control"
-                                   placeholder="Ingrese la concentración"
-                                   required />
-                        </div>
+                            <!-- Presentación -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold mb-1">
+                                    Presentación
+                                </label>
 
-                        <!-- Precio -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold mb-1">
-                                Precio
-                            </label>
+                                <select asp-for="Medicamento.Presentacion"
+                                        class="form-select"
+                                        required>
 
-                            <div class="input-group">
-                                <span class="input-group-text bg-light text-success fw-bold">
-                                    Bs.
-                                </span>
+                                    <option value="">
+                                        Seleccione una presentación
+                                    </option>
 
-                                <input asp-for="Medicamento.Precio"
+                                    <option value="Cápsulas">Cápsulas</option>
+                                    <option value="Crema">Crema</option>
+                                    <option value="Gotas">Gotas</option>
+                                    <option value="Inyectable">Inyectable</option>
+                                    <option value="Jarabe">Jarabe</option>
+                                    <option value="Polvo">Polvo</option>
+                                    <option value="Pomada">Pomada</option>
+                                    <option value="Suspensión">Suspensión</option>
+                                    <option value="Tabletas">Tabletas</option>
+                                </select>
+                            </div>
+
+                            <!-- Clasificación -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold mb-1">
+                                    Clasificación
+                                </label>
+
+                                <select asp-for="Medicamento.IdClasificacion"
+                                        class="form-select"
+                                        required>
+
+                                    <option value="0">
+                                        Seleccione una clasificación
+                                    </option>
+
+                                    @foreach (var clasificacion in Model.Clasificaciones)
+                                    {
+                                        <option value="@clasificacion.Id">
+                                            @clasificacion.Nombre
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Concentración -->
+                            <div class="mb-3">
+
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label fw-semibold mb-0">
+                                        Concentración
+                                    </label>
+
+                                    <small class="text-muted">
+                                        Ej: 500 mg, 5 ml o 0.9 %
+                                    </small>
+                                </div>
+
+                                <input asp-for="Medicamento.Concentracion"
                                        class="form-control"
-                                       placeholder="0.00"
+                                       placeholder="Ingrese la concentración"
+                                       required />
+                            </div>
+
+                            <!-- Precio -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold mb-1">
+                                    Precio
+                                </label>
+
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-success fw-bold">
+                                        Bs.
+                                    </span>
+
+                                    <input asp-for="Medicamento.Precio"
+                                           class="form-control"
+                                           placeholder="0.00"
+                                           type="number"
+                                           step="0.01"
+                                           min="0"
+                                           required />
+                                </div>
+                            </div>
+
+                            <!-- Stock -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold mb-1">
+                                    Stock
+                                </label>
+
+                                <input asp-for="Medicamento.Stock"
+                                       class="form-control"
+                                       placeholder="Cantidad disponible"
                                        type="number"
-                                       step="0.01"
                                        min="0"
                                        required />
                             </div>
-                        </div>
 
-                        <!-- Stock -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold mb-1">
-                                Stock
-                            </label>
+                            @if (!string.IsNullOrEmpty(Model.MensajeError))
+                            {
+                                <div class="alert alert-danger">
+                                    @Model.MensajeError
+                                </div>
+                            }
 
-                            <input asp-for="Medicamento.Stock"
-                                   class="form-control"
-                                   placeholder="Cantidad disponible"
-                                   type="number"
-                                   min="0"
-                                   required />
-                        </div>
+                            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                                <a asp-page="/Medicamento/Medicamento"
+                                   class="btn btn-outline-secondary">
+                                    Volver
+                                </a>
 
-                        @if (!string.IsNullOrEmpty(Model.MensajeError))
-                        {
-                            <div class="alert alert-danger">
-                                @Model.MensajeError
+                                <button type="submit"
+                                        class="btn btn-success px-5 fw-bold shadow-sm">
+                                    Crear
+                                </button>
                             </div>
-                        }
 
-                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                            <a asp-page="/Medicamento/Medicamento"
-                               class="btn btn-outline-secondary">
-                                Volver
-                            </a>
-
-                            <button type="submit"
-                                    class="btn btn-success px-5 fw-bold shadow-sm">
-                                Crear
-                            </button>
-                        </div>
-
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

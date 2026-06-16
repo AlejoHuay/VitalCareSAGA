@@ -44,6 +44,11 @@ namespace FrontendVCare.Adaptadores
             return await LeerResultadoAsync(response, "Cliente creado correctamente.");
         }
 
+        public async Task<HttpResponseMessage> CrearConRespuestaAsync(ClienteFormularioDto cliente)
+        {
+            return await httpClient.PostAsJsonAsync("api/clientes", cliente);
+        }
+
         public async Task<OperacionApiDto> ActualizarAsync(int id, ClienteFormularioDto cliente)
         {
             HttpResponseMessage response = await httpClient.PutAsJsonAsync($"api/clientes/{id}", cliente);
