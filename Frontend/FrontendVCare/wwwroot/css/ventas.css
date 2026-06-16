@@ -228,6 +228,60 @@
     border-top: 2px solid #cfe2da;
 }
 
+.report-role-toggle {
+    color: #10201a;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.report-role-toggle:hover {
+    color: #11844f;
+}
+
+.report-role-toggle[aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+.report-role-toggle .bi-chevron-down {
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform .15s ease;
+}
+
+.report-user-count {
+    color: #63756f;
+    display: block;
+    font-size: .82rem;
+    margin-left: 22px;
+    margin-top: 2px;
+}
+
+.report-user-row > td {
+    background: #f8fbfa;
+    border-top: 0;
+}
+
+.report-user-panel {
+    border-top: 1px solid #e4eee8;
+    padding: 12px 18px 18px;
+}
+
+.report-user-table {
+    border: 1px solid #dfe7e3;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.report-user-table thead th {
+    background: #edf8f3;
+    color: #10201a;
+    font-size: .88rem;
+}
+
+.report-user-table tfoot td {
+    background: #f1f7f4;
+}
+
 @media (max-width: 768px) {
     .sale-actions {
         align-items: stretch;

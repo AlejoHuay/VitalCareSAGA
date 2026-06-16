@@ -154,12 +154,69 @@
                         <td colspan="3" class="text-center text-muted py-4">No hay datos para mostrar.</td>
                     </tr>
                 }
-                @foreach (var item in Model.Reporte)
+                @for (int i = 0; i < Model.Reporte.Count; i++)
                 {
+                    var item = Model.Reporte[i];
+                    var collapseId = $"usuariosRol{i}";
+
                     <tr>
-                        <td class="fw-semibold">@item.Rol</td>
+                        <td class="fw-semibold">
+                            <button class="btn btn-link report-role-toggle p-0"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#@collapseId"
+                                    aria-expanded="false"
+                                    aria-controls="@collapseId">
+                                <i class="bi bi-chevron-down"></i>
+                                @item.Rol
+                            </button>
+                            <span class="report-user-count">@item.Usuarios.Count usuario(s)</span>
+                        </td>
                         <td>@item.CantidadVentas</td>
                         <td>@item.TotalRecaudado.ToString("N2")</td>
+                    </tr>
+                    <tr class="report-user-row">
+                        <td colspan="3" class="p-0">
+                            <div class="collapse" id="@collapseId">
+                                <div class="report-user-panel">
+                                    @if (item.Usuarios.Count == 0)
+                                    {
+                                        <div class="text-muted">No hay usuarios para este rol.</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm mb-0 align-middle report-user-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Usuario</th>
+                                                        <th>Cantidad de ventas</th>
+                                                        <th>Total vendido (Bs)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var usuario in item.Usuarios)
+                                                    {
+                                                        <tr>
+                                                            <td>@usuario.NombreUsuario</td>
+                                                            <td>@usuario.CantidadVentas</td>
+                                                            <td class="fw-semibold text-success">@usuario.TotalRecaudado.ToString("N2")</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td class="fw-bold">Total @item.Rol</td>
+                                                        <td class="fw-bold">@item.CantidadVentas</td>
+                                                        <td class="fw-bold text-success">@item.TotalRecaudado.ToString("N2")</td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 }
             </tbody>
