@@ -10,21 +10,30 @@ namespace MSReportes.API.CasosDeUso.Interactores
         private readonly IReporteVentasRepositorio _reporteVentasRepositorio;
         private readonly IReporteVentasPdfCreador _reporteVentasPdfCreador;
         private readonly IReporteVentasExcelCreador _reporteVentasExcelCreador;
+        private readonly IReporteRecaudacionMedicamentosPdfCreador _reporteRecaudacionMedicamentosPdfCreador;
+        private readonly IReporteRecaudacionMedicamentosExcelCreador _reporteRecaudacionMedicamentosExcelCreador;
         private readonly IComprobanteVentaPdfCreador _comprobanteVentaPdfCreador;
         private readonly IReporteVentasPorRolBuilder _reporteVentasPorRolBuilder;
+        private readonly IReporteRecaudacionMedicamentosBuilder _reporteRecaudacionMedicamentosBuilder;
 
         public ReporteVentasInteractor(
             IReporteVentasRepositorio reporteVentasRepositorio,
             IReporteVentasPdfCreador reporteVentasPdfCreador,
             IReporteVentasExcelCreador reporteVentasExcelCreador,
             IComprobanteVentaPdfCreador comprobanteVentaPdfCreador,
-            IReporteVentasPorRolBuilder reporteVentasPorRolBuilder)
+            IReporteVentasPorRolBuilder reporteVentasPorRolBuilder,
+            IReporteRecaudacionMedicamentosPdfCreador reporteRecaudacionMedicamentosPdfCreador,
+            IReporteRecaudacionMedicamentosExcelCreador reporteRecaudacionMedicamentosExcelCreador,
+            IReporteRecaudacionMedicamentosBuilder reporteRecaudacionMedicamentosBuilder)
         {
             _reporteVentasRepositorio = reporteVentasRepositorio;
             _reporteVentasPdfCreador = reporteVentasPdfCreador;
             _reporteVentasExcelCreador = reporteVentasExcelCreador;
             _comprobanteVentaPdfCreador = comprobanteVentaPdfCreador;
             _reporteVentasPorRolBuilder = reporteVentasPorRolBuilder;
+            _reporteRecaudacionMedicamentosPdfCreador = reporteRecaudacionMedicamentosPdfCreador;
+            _reporteRecaudacionMedicamentosExcelCreador = reporteRecaudacionMedicamentosExcelCreador;
+            _reporteRecaudacionMedicamentosBuilder = reporteRecaudacionMedicamentosBuilder;
         }
 
         public async Task<IEnumerable<ReporteVentasPorRolDto>> ObtenerVentasPorRolAsync(
@@ -53,6 +62,34 @@ namespace MSReportes.API.CasosDeUso.Interactores
             var reporte = CrearReporteVentasPorRol(datos, desde, hasta);
 
             return _reporteVentasExcelCreador.Crear(reporte);
+        }
+
+        public async Task<IEnumerable<ReporteRecaudacionMedicamentoDto>> ObtenerRecaudacionPorMedicamentoAsync(
+            DateTime? desde,
+            DateTime? hasta)
+        {
+            ValidarRangoFechas(desde, hasta);
+            return await _reporteVentasRepositorio.ObtenerRecaudacionPorMedicamentoAsync(desde, hasta);
+        }
+
+        public async Task<ArchivoReporteDto> GenerarPdfRecaudacionPorMedicamentoAsync(DateTime? desde, DateTime? hasta)
+        {
+            ValidarRangoFechas(desde, hasta);
+            var datos = await _reporteVentasRepositorio.ObtenerRecaudacionPorMedicamentoAsync(desde, hasta);
+
+            var reporte = CrearReporteRecaudacionMedicamentos(datos, desde, hasta);
+
+            return _reporteRecaudacionMedicamentosPdfCreador.Crear(reporte);
+        }
+
+        public async Task<ArchivoReporteDto> GenerarExcelRecaudacionPorMedicamentoAsync(DateTime? desde, DateTime? hasta)
+        {
+            ValidarRangoFechas(desde, hasta);
+            var datos = await _reporteVentasRepositorio.ObtenerRecaudacionPorMedicamentoAsync(desde, hasta);
+
+            var reporte = CrearReporteRecaudacionMedicamentos(datos, desde, hasta);
+
+            return _reporteRecaudacionMedicamentosExcelCreador.Crear(reporte);
         }
 
         public async Task<ArchivoReporteDto> GenerarComprobanteVentaPdfAsync(int idVenta)
@@ -85,6 +122,21 @@ namespace MSReportes.API.CasosDeUso.Interactores
         {
             return _reporteVentasPorRolBuilder
                 .ConEncabezado("VITALCARE", "REPORTE DE VENTAS POR ROL")
+                .ConUsuarioGenerador("Usuario del sistema")
+                .ConPeriodo(desde, hasta)
+                .ConDetalle(datos)
+                .ConResumen()
+                .ConPiePagina("Reporte generado automaticamente por VitalCare.")
+                .Build();
+        }
+
+        private ReporteRecaudacionMedicamentos CrearReporteRecaudacionMedicamentos(
+            IEnumerable<ReporteRecaudacionMedicamentoDto> datos,
+            DateTime? desde,
+            DateTime? hasta)
+        {
+            return _reporteRecaudacionMedicamentosBuilder
+                .ConEncabezado("VITALCARE", "REPORTE DE RECAUDACION POR MEDICAMENTOS")
                 .ConUsuarioGenerador("Usuario del sistema")
                 .ConPeriodo(desde, hasta)
                 .ConDetalle(datos)

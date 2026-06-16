@@ -78,6 +78,70 @@ namespace MSReportes.API.AdaptadoresDeInterfaz.Controladores
             }
         }
 
+        [HttpGet("recaudacion-medicamentos")]
+        public async Task<IActionResult> ObtenerRecaudacionPorMedicamento(
+            [FromQuery] DateTime? desde,
+            [FromQuery] DateTime? hasta)
+        {
+            try
+            {
+                var resultado = await _reporteVentasInputPort.ObtenerRecaudacionPorMedicamentoAsync(desde, hasta);
+
+                return Ok(new
+                {
+                    mensaje = "Reporte de recaudacion por medicamentos generado correctamente.",
+                    fechaGeneracion = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
+                    data = resultado
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
+
+        [HttpGet("recaudacion-medicamentos/pdf")]
+        public async Task<IActionResult> DescargarRecaudacionMedicamentosPdf(
+            [FromQuery] DateTime? desde,
+            [FromQuery] DateTime? hasta)
+        {
+            try
+            {
+                var archivo = await _reporteVentasInputPort.GenerarPdfRecaudacionPorMedicamentoAsync(desde, hasta);
+
+                return File(
+                    archivo.Contenido,
+                    archivo.ContentType,
+                    archivo.NombreArchivo
+                );
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
+
+        [HttpGet("recaudacion-medicamentos/excel")]
+        public async Task<IActionResult> DescargarRecaudacionMedicamentosExcel(
+            [FromQuery] DateTime? desde,
+            [FromQuery] DateTime? hasta)
+        {
+            try
+            {
+                var archivo = await _reporteVentasInputPort.GenerarExcelRecaudacionPorMedicamentoAsync(desde, hasta);
+
+                return File(
+                    archivo.Contenido,
+                    archivo.ContentType,
+                    archivo.NombreArchivo
+                );
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
+
         [HttpGet("{idVenta:int}/comprobante/pdf")]
         public async Task<IActionResult> DescargarComprobantePdf(int idVenta)
         {

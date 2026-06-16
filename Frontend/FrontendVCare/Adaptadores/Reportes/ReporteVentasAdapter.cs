@@ -52,6 +52,39 @@ namespace FrontendVCare.Adaptadores.Reportes
                 "reporte-ventas-por-rol.xlsx");
         }
 
+        public async Task<List<ReporteRecaudacionMedicamentoDto>> ObtenerReporteRecaudacionMedicamentosAsync(
+            DateTime? desde,
+            DateTime? hasta)
+        {
+            HttpResponseMessage response =
+                await httpClient.GetAsync($"api/reportes/ventas/recaudacion-medicamentos{ConstruirQueryFechas(desde, hasta)}");
+
+            response.EnsureSuccessStatusCode();
+
+            RespuestaReporteRecaudacionMedicamentosDto? respuesta =
+                await response.Content.ReadFromJsonAsync<RespuestaReporteRecaudacionMedicamentosDto>(JsonOptions);
+
+            return respuesta?.Data ?? new List<ReporteRecaudacionMedicamentoDto>();
+        }
+
+        public Task<ArchivoDescargaDto?> DescargarReporteRecaudacionMedicamentosPdfAsync(
+            DateTime? desde,
+            DateTime? hasta)
+        {
+            return DescargarArchivoAsync(
+                $"api/reportes/ventas/recaudacion-medicamentos/pdf{ConstruirQueryFechas(desde, hasta)}",
+                "reporte-recaudacion-medicamentos.pdf");
+        }
+
+        public Task<ArchivoDescargaDto?> DescargarReporteRecaudacionMedicamentosExcelAsync(
+            DateTime? desde,
+            DateTime? hasta)
+        {
+            return DescargarArchivoAsync(
+                $"api/reportes/ventas/recaudacion-medicamentos/excel{ConstruirQueryFechas(desde, hasta)}",
+                "reporte-recaudacion-medicamentos.xlsx");
+        }
+
         public async Task<ArchivoDescargaDto?> DescargarComprobanteVentaPdfAsync(int idVenta)
         {
             return await DescargarArchivoAsync(
@@ -107,6 +140,12 @@ namespace FrontendVCare.Adaptadores.Reportes
         {
             public string Mensaje { get; set; } = string.Empty;
             public List<ReporteVentasPorRolDto> Data { get; set; } = new();
+        }
+
+        private class RespuestaReporteRecaudacionMedicamentosDto
+        {
+            public string Mensaje { get; set; } = string.Empty;
+            public List<ReporteRecaudacionMedicamentoDto> Data { get; set; } = new();
         }
     }
 }
