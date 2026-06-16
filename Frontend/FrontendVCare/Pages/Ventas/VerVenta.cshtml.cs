@@ -28,6 +28,9 @@ public class VerVentaModel : BasePageModel
 
     public string? MensajeError { get; set; }
 
+    [BindProperty(SupportsGet = true)]
+    public bool DescargarComprobante { get; set; }
+
     public async Task<IActionResult> OnGetAsync(int id)
     {
         IActionResult? acceso = ValidarAcceso("Admin", "Bioquimico");

@@ -96,7 +96,18 @@ public class NuevaVentaModel : BasePageModel
 
         OperacionApiDto resultado = await ventaAdapter.RegistrarAsync(Venta);
         if (resultado.Exito)
+        {
+            if (resultado.Id.HasValue && resultado.Id.Value > 0)
+            {
+                return RedirectToPage("/Ventas/VerVenta", new
+                {
+                    id = resultado.Id.Value,
+                    descargarComprobante = true
+                });
+            }
+
             return RedirectToPage("/Ventas/Venta", new { mensaje = resultado.Mensaje });
+        }
 
         MensajeError = resultado.Mensaje;
         await CargarOpcionesAsync();

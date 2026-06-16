@@ -101,7 +101,7 @@ namespace FrontendVCare.Adaptadores.Ventas
                 : respuesta.Mensaje;
 
             return response.IsSuccessStatusCode
-                ? OperacionApiDto.Ok(mensaje)
+                ? OperacionApiDto.Ok(mensaje, respuesta?.Data?.IdVenta)
                 : OperacionApiDto.Error(mensaje);
         }
 

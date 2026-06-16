@@ -17,6 +17,7 @@
             {
                 <a asp-page-handler="DescargarComprobante"
                    asp-route-id="@venta.Id"
+                   id="descargarComprobanteLink"
                    class="btn btn-success">
                     Descargar comprobante
                 </a>
@@ -120,4 +121,20 @@
         return string.Equals(venta.Estado, "ACTIVA", StringComparison.OrdinalIgnoreCase)
             && string.Equals(venta.EstadoSaga, "STOCK_CONFIRMADO", StringComparison.OrdinalIgnoreCase);
     }
+}
+
+@if (venta != null && Model.DescargarComprobante && PuedeDescargarComprobante(venta))
+{
+    <script>
+        (() => {
+            const link = document.getElementById("descargarComprobanteLink");
+            if (!link) return;
+
+            window.setTimeout(() => link.click(), 500);
+
+            const url = new URL(window.location.href);
+            url.searchParams.delete("descargarComprobante");
+            window.history.replaceState({}, document.title, url.toString());
+        })();
+    </script>
 }
