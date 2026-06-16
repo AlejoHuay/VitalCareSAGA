@@ -99,10 +99,10 @@ public class NuevaVentaModel : BasePageModel
         {
             if (resultado.Id.HasValue && resultado.Id.Value > 0)
             {
-                return RedirectToPage("/Ventas/VerVenta", new
+                return RedirectToPage("/Ventas/Venta", new
                 {
-                    id = resultado.Id.Value,
-                    descargarComprobante = true
+                    mensaje = resultado.Mensaje,
+                    descargarComprobanteId = resultado.Id.Value
                 });
             }
 

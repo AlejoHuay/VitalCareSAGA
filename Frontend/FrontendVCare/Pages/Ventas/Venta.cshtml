@@ -92,6 +92,19 @@
     </div>
 </div>
 
+@if (Model.DescargarComprobanteId.HasValue && Model.DescargarComprobanteId.Value > 0)
+{
+    <iframe name="comprobanteDescargaFrame" class="d-none"></iframe>
+    <a asp-page="/Ventas/VerVenta"
+       asp-page-handler="DescargarComprobante"
+       asp-route-id="@Model.DescargarComprobanteId.Value"
+       target="comprobanteDescargaFrame"
+       id="descargaComprobanteAutomatica"
+       class="d-none">
+        Descargar comprobante
+    </a>
+}
+
 <div class="modal fade" id="modalAnularVenta" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow">
@@ -130,5 +143,14 @@
                     "Cliente: " + (this.dataset.cliente || "Sin nombre");
             });
         });
+
+        const descargaAutomatica = document.getElementById("descargaComprobanteAutomatica");
+        if (descargaAutomatica) {
+            window.setTimeout(() => descargaAutomatica.click(), 800);
+
+            const url = new URL(window.location.href);
+            url.searchParams.delete("descargarComprobanteId");
+            window.history.replaceState({}, document.title, url.toString());
+        }
     });
 </script>

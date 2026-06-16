@@ -21,6 +21,9 @@ namespace FrontendVCare.Pages.Ventas
         [BindProperty(SupportsGet = true)]
         public string Filtro { get; set; } = string.Empty;
 
+        [BindProperty(SupportsGet = true)]
+        public int? DescargarComprobanteId { get; set; }
+
         [TempData]
         public string? Mensaje { get; set; }
 
