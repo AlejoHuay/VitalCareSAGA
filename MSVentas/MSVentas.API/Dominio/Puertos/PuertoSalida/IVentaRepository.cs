@@ -8,6 +8,7 @@ namespace MSVentas.Dominio.Puertos.PuertoSalida
     {
         DataTable GetAll();
         DataTable GetAll(string filtro);
+        DataTable GetRecaudacionPorMedicamento(DateTime? desde, DateTime? hasta);
 
         Venta? GetById(int id);
         int Count();

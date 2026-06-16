@@ -37,6 +37,27 @@ namespace MSVentas.Infraestructura.Adaptadores.PuertosEntrada.Controladores
             });
         }
 
+        [HttpGet("reportes/recaudacion-medicamentos")]
+        public IActionResult ObtenerRecaudacionPorMedicamento(
+            [FromQuery] DateTime? desde,
+            [FromQuery] DateTime? hasta)
+        {
+            try
+            {
+                DataTable tabla = _ventaService.ObtenerRecaudacionPorMedicamento(desde, hasta);
+
+                return Ok(new
+                {
+                    mensaje = "Reporte de recaudacion por medicamentos obtenido correctamente.",
+                    data = ConvertirRecaudacionMedicamentos(tabla)
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
+
         [HttpGet("{idVenta:int}")]
         public IActionResult ObtenerPorId(int idVenta)
         {
@@ -265,6 +286,24 @@ namespace MSVentas.Infraestructura.Adaptadores.PuertosEntrada.Controladores
                 }
 
                 registros.Add(registro);
+            }
+
+            return registros;
+        }
+
+        private static List<ReporteRecaudacionMedicamentoDto> ConvertirRecaudacionMedicamentos(DataTable tabla)
+        {
+            List<ReporteRecaudacionMedicamentoDto> registros = new();
+
+            foreach (DataRow fila in tabla.Rows)
+            {
+                registros.Add(new ReporteRecaudacionMedicamentoDto
+                {
+                    IdMedicamento = Convert.ToInt32(fila["IdMedicamento"]),
+                    CantidadVendida = Convert.ToInt32(fila["CantidadVendida"]),
+                    CantidadVentas = Convert.ToInt32(fila["CantidadVentas"]),
+                    TotalRecaudado = Convert.ToDecimal(fila["TotalRecaudado"])
+                });
             }
 
             return registros;
