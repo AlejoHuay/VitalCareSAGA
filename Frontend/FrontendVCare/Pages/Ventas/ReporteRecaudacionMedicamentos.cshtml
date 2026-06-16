@@ -1,0 +1,188 @@
+@page
+@model FrontendVCare.Pages.Ventas.ReporteRecaudacionMedicamentosModel
+
+@{
+    ViewData["Title"] = "Reporte de recaudacion";
+}
+
+<div class="container mt-5 no-card-hover sales-report-shell">
+    <div class="report-header mb-4">
+        <div>
+            <h2 class="fw-bold text-success">Reporte de recaudacion por medicamentos</h2>
+            <p class="text-muted mb-1">Resumen de ingresos agrupados por medicamento vendido</p>
+            <span class="report-period">@Model.PeriodoTexto</span>
+        </div>
+        <div class="report-actions">
+            <a asp-page-handler="DescargarPdf"
+               asp-route-desde="@Model.Desde?.ToString("yyyy-MM-dd")"
+               asp-route-hasta="@Model.Hasta?.ToString("yyyy-MM-dd")"
+               class="btn btn-success">
+                <i class="bi bi-file-earmark-pdf"></i> Descargar PDF
+            </a>
+            <a asp-page-handler="DescargarExcel"
+               asp-route-desde="@Model.Desde?.ToString("yyyy-MM-dd")"
+               asp-route-hasta="@Model.Hasta?.ToString("yyyy-MM-dd")"
+               class="btn btn-outline-success">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Descargar Excel
+            </a>
+            <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary">Volver a ventas</a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            @Model.MensajeError
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form method="get" class="mb-4 report-filter">
+        <div class="card-module p-3">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label asp-for="Desde" class="form-label">Desde</label>
+                    <input asp-for="Desde" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Hasta" class="form-label">Hasta</label>
+                    <input asp-for="Hasta" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-success btn-fixed">Filtrar</button>
+                    <a asp-page="/Ventas/ReporteRecaudacionMedicamentos" class="btn btn-secondary btn-fixed">Limpiar</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm report-summary-card">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Medicamentos vendidos</p>
+                    <h3 class="fw-bold mb-0">@Model.TotalMedicamentos</h3>
+                    <span class="summary-hint">Con ventas confirmadas</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm report-summary-card">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Unidades vendidas</p>
+                    <h3 class="fw-bold mb-0">@Model.TotalUnidadesVendidas</h3>
+                    <span class="summary-hint">Cantidad acumulada</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm report-summary-card">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Total recaudado</p>
+                    <h3 class="fw-bold mb-0">Bs @Model.TotalRecaudado.ToString("N2")</h3>
+                    <span class="summary-hint">@Model.TotalVentasRelacionadas ventas relacionadas</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm report-summary-card">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Mayor recaudacion</p>
+                    <h3 class="fw-bold mb-0 summary-role">@((Model.MayorRecaudacion?.Medicamento) ?? "-")</h3>
+                    <span class="summary-hint">Bs @((Model.MayorRecaudacion?.TotalRecaudado.ToString("N2")) ?? "0.00")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4 report-visual-card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <span class="section-kicker">Grafico estadistico</span>
+                    <h4 class="fw-bold mb-1">Recaudacion por medicamento</h4>
+                    <p class="text-muted mb-0">Comparacion proporcional segun el total recaudado.</p>
+                </div>
+                @if (Model.TieneDatos)
+                {
+                    <span class="badge text-bg-success">Datos reales</span>
+                }
+            </div>
+
+            @if (!Model.TieneDatos)
+            {
+                <div class="empty-detail">No hay datos para graficar en el periodo seleccionado.</div>
+            }
+            else
+            {
+                <div class="report-bars">
+                    @foreach (var item in Model.Reporte)
+                    {
+                        var porcentaje = Model.MaximoRecaudado > 0
+                            ? Math.Max(6, (int)Math.Round(item.TotalRecaudado / Model.MaximoRecaudado * 100))
+                            : 0;
+
+                        <div class="report-bar-row">
+                            <div class="report-bar-label">
+                                <strong>@item.Medicamento</strong>
+                                <span>@item.CantidadVendida unidades</span>
+                            </div>
+                            <div class="report-bar-track">
+                                <div class="report-bar-fill" style="width:@porcentaje%"></div>
+                            </div>
+                            <div class="report-bar-value">Bs @item.TotalRecaudado.ToString("N2")</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm report-table-card">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-success">
+                <tr>
+                    <th>Medicamento</th>
+                    <th>Unidades vendidas</th>
+                    <th>Ventas relacionadas</th>
+                    <th>Total recaudado (Bs)</th>
+                    <th>Participacion</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.TieneDatos)
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">No hay datos para mostrar.</td>
+                    </tr>
+                }
+                @foreach (var item in Model.Reporte)
+                {
+                    var participacion = Model.TotalRecaudado > 0
+                        ? item.TotalRecaudado / Model.TotalRecaudado * 100
+                        : 0;
+
+                    <tr>
+                        <td class="fw-semibold">@item.Medicamento</td>
+                        <td>@item.CantidadVendida</td>
+                        <td>@item.CantidadVentas</td>
+                        <td class="fw-semibold text-success">@item.TotalRecaudado.ToString("N2")</td>
+                        <td>@participacion.ToString("N1")%</td>
+                    </tr>
+                }
+            </tbody>
+            @if (Model.TieneDatos)
+            {
+                <tfoot>
+                    <tr>
+                        <td class="fw-bold">TOTAL</td>
+                        <td class="fw-bold">@Model.TotalUnidadesVendidas</td>
+                        <td class="fw-bold">@Model.TotalVentasRelacionadas</td>
+                        <td class="fw-bold text-success">@Model.TotalRecaudado.ToString("N2")</td>
+                        <td class="fw-bold">100%</td>
+                    </tr>
+                </tfoot>
+            }
+        </table>
+    </div>
+</div>

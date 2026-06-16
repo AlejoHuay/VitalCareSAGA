@@ -9,6 +9,7 @@ namespace MSVentas.App.Interfaces
     {
         DataTable ObtenerTodos();
         DataTable ObtenerTodos(string filtro);
+        DataTable ObtenerRecaudacionPorMedicamento(DateTime? desde, DateTime? hasta);
 
         Venta? ObtenerPorId(int id);
         List<DetalleVenta> ObtenerDetallesPorVenta(int idVenta);

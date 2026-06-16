@@ -39,6 +39,14 @@ namespace MSVentas.App.Servicios
                 : _repository.GetAll(filtro);
         }
 
+        public DataTable ObtenerRecaudacionPorMedicamento(DateTime? desde, DateTime? hasta)
+        {
+            if (desde.HasValue && hasta.HasValue && desde.Value.Date > hasta.Value.Date)
+                throw new InvalidOperationException("La fecha desde no puede ser mayor que la fecha hasta.");
+
+            return _repository.GetRecaudacionPorMedicamento(desde, hasta);
+        }
+
         public Venta? ObtenerPorId(int id)
         {
             if (id <= 0)

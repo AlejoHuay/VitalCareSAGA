@@ -46,8 +46,11 @@ builder.Services.AddScoped<IReporteVentasInputPort, ReporteVentasInteractor>();
 builder.Services.AddScoped<IReporteVentasRepositorio, ReporteVentasRepositorio>();
 builder.Services.AddScoped<IReporteVentasPdfCreador, ReporteVentasPorRolPdfCreador>();
 builder.Services.AddScoped<IReporteVentasExcelCreador, ReporteVentasPorRolExcelCreador>();
+builder.Services.AddScoped<IReporteRecaudacionMedicamentosPdfCreador, ReporteRecaudacionMedicamentosPdfCreador>();
+builder.Services.AddScoped<IReporteRecaudacionMedicamentosExcelCreador, ReporteRecaudacionMedicamentosExcelCreador>();
 builder.Services.AddScoped<IComprobanteVentaPdfCreador, ComprobanteVentaPdfCreador>();
 builder.Services.AddScoped<IReporteVentasPorRolBuilder, ReporteVentasPorRolBuilder>();
+builder.Services.AddScoped<IReporteRecaudacionMedicamentosBuilder, ReporteRecaudacionMedicamentosBuilder>();
 
 // CORS para que el frontend pueda consumir el microservicio
 builder.Services.AddCors(options =>

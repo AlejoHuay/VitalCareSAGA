@@ -76,6 +76,46 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
             return tabla;
         }
 
+        public DataTable GetRecaudacionPorMedicamento(DateTime? desde, DateTime? hasta)
+        {
+            DataTable tabla = new DataTable();
+
+            string query = @"
+                SELECT
+                    dv.id_medicamento AS IdMedicamento,
+                    SUM(dv.cantidad) AS CantidadVendida,
+                    COUNT(DISTINCT v.id) AS CantidadVentas,
+                    SUM(dv.cantidad * dv.precio_unitario) AS TotalRecaudado
+                FROM venta v
+                INNER JOIN detalle_venta dv ON dv.id_venta = v.id
+                WHERE v.estado = 1
+                AND COALESCE(v.estado_saga, 'PENDIENTE_STOCK') = 'STOCK_CONFIRMADO'";
+
+            if (desde.HasValue)
+                query += " AND v.fecha_hora >= @desde";
+
+            if (hasta.HasValue)
+                query += " AND v.fecha_hora < @hastaExclusivo";
+
+            query += @"
+                GROUP BY dv.id_medicamento
+                ORDER BY TotalRecaudado DESC, CantidadVendida DESC, dv.id_medicamento";
+
+            using MySqlConnection connection = new MySqlConnection(connectionString);
+            using MySqlCommand command = new MySqlCommand(query, connection);
+
+            if (desde.HasValue)
+                command.Parameters.AddWithValue("@desde", desde.Value.Date);
+
+            if (hasta.HasValue)
+                command.Parameters.AddWithValue("@hastaExclusivo", hasta.Value.Date.AddDays(1));
+
+            using MySqlDataAdapter adapter = new MySqlDataAdapter(command);
+            adapter.Fill(tabla);
+
+            return tabla;
+        }
+
         public Venta? GetById(int id)
         {
             const string query = @"
