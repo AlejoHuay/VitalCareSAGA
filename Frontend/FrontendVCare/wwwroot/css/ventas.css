@@ -123,6 +123,111 @@
     line-height: 1;
 }
 
+.sales-report-shell {
+    max-width: 1180px;
+}
+
+.report-header {
+    align-items: center;
+    display: flex;
+    gap: 18px;
+    justify-content: space-between;
+}
+
+.report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.report-period {
+    color: #11844f;
+    font-size: .88rem;
+    font-weight: 700;
+}
+
+.report-filter .card-module {
+    border: 0;
+    border-radius: 8px;
+    box-shadow: 0 12px 30px rgba(24, 45, 36, .08);
+}
+
+.report-summary-card {
+    border: 1px solid #dfe7e3;
+    border-radius: 8px;
+    min-height: 132px;
+}
+
+.report-summary-card h3 {
+    color: #10201a;
+    font-size: 1.75rem;
+}
+
+.report-summary-card .summary-role {
+    font-size: 1.25rem;
+}
+
+.summary-hint {
+    color: #63756f;
+    display: block;
+    font-size: .84rem;
+    margin-top: 8px;
+}
+
+.report-visual-card,
+.report-table-card {
+    border: 1px solid #dfe7e3;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.report-bars {
+    display: grid;
+    gap: 14px;
+}
+
+.report-bar-row {
+    align-items: center;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: minmax(150px, 220px) minmax(120px, 1fr) minmax(115px, auto);
+}
+
+.report-bar-label {
+    display: grid;
+    gap: 2px;
+}
+
+.report-bar-label span {
+    color: #63756f;
+    font-size: .86rem;
+}
+
+.report-bar-track {
+    background: #edf3f0;
+    border-radius: 999px;
+    height: 14px;
+    overflow: hidden;
+}
+
+.report-bar-fill {
+    background: linear-gradient(90deg, #0ba84a, #11844f);
+    border-radius: inherit;
+    height: 100%;
+}
+
+.report-bar-value {
+    color: #11844f;
+    font-weight: 800;
+    text-align: right;
+}
+
+.report-table-card tfoot td {
+    background: #f8fbfa;
+    border-top: 2px solid #cfe2da;
+}
+
 @media (max-width: 768px) {
     .sale-actions {
         align-items: stretch;
@@ -131,5 +236,22 @@
 
     .add-medicine-row {
         grid-template-columns: 1fr;
+    }
+
+    .report-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .report-actions {
+        justify-content: flex-start;
+    }
+
+    .report-bar-row {
+        grid-template-columns: 1fr;
+    }
+
+    .report-bar-value {
+        text-align: left;
     }
 }
