@@ -29,7 +29,7 @@
             <h2 class="fw-bold text-success">Nueva venta</h2>
             <p class="text-muted mb-0">Registra el cliente, los medicamentos y el pago de la venta</p>
         </div>
-        <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary">Volver a ventas</a>
+        <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary d-flex align-items-center justify-content-center">Volver a ventas</a>
     </div>
 
     @if (!string.IsNullOrEmpty(Model.MensajeError))
@@ -51,11 +51,11 @@
                     <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
                         <div>
                             <span class="section-kicker">Cliente</span>
-                            <h5 class="fw-bold mb-1">Datos de facturacion</h5>
+                            <h5 class="fw-bold mb-1">Datos de facturación</h5>
                             <p class="text-muted mb-0">Elige consumidor final o busca un cliente registrado.</p>
                         </div>
                         <button type="button"
-                                class="btn btn-outline-success"
+                                class="btn btn-outline-success d-flex align-items-center justify-content-center"
                                 data-bs-toggle="modal"
                                 data-bs-target="#modalClienteRapido">
                             Agregar cliente
@@ -65,11 +65,11 @@
                     <div class="option-grid mb-3">
                         <button type="button" class="choice-card active" id="btnConsumidorFinal">
                             <span class="title">Consumidor final</span>
-                            <span class="hint">Completa NIT y razon social automaticamente.</span>
+                            <span class="hint">Completa NIT y razón social automáticamente.</span>
                         </button>
                         <button type="button" class="choice-card" id="btnClienteRegistrado">
                             <span class="title">Cliente registrado</span>
-                            <span class="hint">Busca por NIT o razon social.</span>
+                            <span class="hint">Busca por NIT o razón social.</span>
                         </button>
                     </div>
 
@@ -80,13 +80,13 @@
                                    id="clienteBusqueda"
                                    class="form-control"
                                    autocomplete="off"
-                                   placeholder="NIT o razon social" />
+                                   placeholder="NIT o razón social" />
                             <div id="clienteResultados" class="list-group position-absolute shadow-sm z-3 search-results"></div>
                             <div class="cliente-status mt-2" id="clienteSeleccionado"></div>
                             <div class="validation-message mt-1 d-none" id="clienteError"></div>
                         </div>
                         <div class="col-lg-5" id="metodoPagoWrap">
-                            <label asp-for="Venta.MetodoPago" class="form-label fw-semibold">Metodo de pago</label>
+                            <label asp-for="Venta.MetodoPago" class="form-label fw-semibold">Método de pago</label>
                             <select asp-for="Venta.MetodoPago" class="form-select payment-field" id="Venta_MetodoPago" required>
                                 <option value="">Seleccionar</option>
                                 <option value="Efectivo">Efectivo</option>
@@ -112,11 +112,11 @@
                                    id="medicamentoBusqueda"
                                    class="form-control"
                                    autocomplete="off"
-                                   placeholder="Nombre o presentacion" />
+                                   placeholder="Nombre o presentación" />
                             <div id="medicamentoResultados" class="list-group position-absolute shadow-sm z-3 search-results"></div>
                             <div class="validation-message mt-1 d-none" id="medicamentoError"></div>
                         </div>
-                        <button type="button" class="btn btn-success" id="agregarDetalle">
+                        <button type="button" class="btn btn-success d-flex align-items-center justify-content-center" id="agregarDetalle">
                             Agregar
                         </button>
                     </div>
@@ -138,7 +138,7 @@
                     </div>
 
                     <div class="empty-detail mt-3" id="detalleVacio">
-                        Aun no agregaste medicamentos a la venta.
+                        Aún no agregaste medicamentos a la venta.
                     </div>
                     <div class="validation-message mt-2 d-none" id="detalleError"></div>
                 </section>
@@ -149,8 +149,8 @@
                         <div class="sale-total">Bs <span id="totalVenta">0.00</span></div>
                     </div>
                     <div class="d-flex gap-2 flex-wrap justify-content-end">
-                        <a asp-page="/Ventas/Venta" class="btn btn-secondary btn-lg">Cancelar</a>
-                        <button type="button" class="btn btn-success btn-lg px-4" id="btnPrepararVenta">
+                        <a asp-page="/Ventas/Venta" class="btn btn-secondary btn-lg d-flex align-items-center justify-content-center">Cancelar</a>
+                        <button type="button" class="btn btn-success btn-lg px-4 d-flex align-items-center justify-content-center" id="btnPrepararVenta">
                             Registrar venta
                         </button>
                     </div>
@@ -172,8 +172,8 @@
                         <p class="fw-bold mb-0">Total: Bs <span id="totalConfirmacion">0.00</span></p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success" id="btnConfirmarVenta">Confirmar venta</button>
+                        <button type="button" class="btn btn-secondary d-flex align-items-center justify-content-center" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success d-flex align-items-center justify-content-center" id="btnConfirmarVenta">Confirmar venta</button>
                     </div>
                 </div>
             </div>
@@ -197,17 +197,17 @@
                         <input id="clienteModalNit" name="clienteModalNit" class="form-control" maxlength="20" required />
                     </div>
                     <div class="mb-3">
-                        <label for="clienteModalRazonSocial" class="form-label">Razon social</label>
+                        <label for="clienteModalRazonSocial" class="form-label">Razón social</label>
                         <input id="clienteModalRazonSocial" name="clienteModalRazonSocial" class="form-control" maxlength="80" required />
                     </div>
                     <div>
-                        <label for="clienteModalCorreoElectronico" class="form-label">Correo electronico</label>
+                        <label for="clienteModalCorreoElectronico" class="form-label">Correo electrónico</label>
                         <input id="clienteModalCorreoElectronico" name="clienteModalCorreoElectronico" type="email" class="form-control" maxlength="80" />
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success" id="btnGuardarClienteRapido">Guardar cliente</button>
+                    <button type="button" class="btn btn-secondary d-flex align-items-center justify-content-center" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success d-flex align-items-center justify-content-center" id="btnGuardarClienteRapido">Guardar cliente</button>
                 </div>
             </form>
         </div>
@@ -215,6 +215,7 @@
 </div>
 
 @section Scripts {
+    <!-- El script JavaScript se mantiene igual -->
     <script>
         (() => {
             const clientes = @Html.Raw(clientesJson);
@@ -291,8 +292,8 @@
             }
 
             function pintarCliente(cliente, esConsumidorFinal) {
-                clienteSeleccionado.textContent = `${esConsumidorFinal ? "Consumidor final" : "Cliente"}: ${cliente.razonSocial || "Sin razon social"} | NIT / CI: ${cliente.nit || "-"}`;
-                clienteConfirmacion.textContent = cliente.razonSocial || "Sin razon social";
+                clienteSeleccionado.textContent = `${esConsumidorFinal ? "Consumidor final" : "Cliente"}: ${cliente.razonSocial || "Sin razón social"} | NIT / CI: ${cliente.nit || "-"}`;
+                clienteConfirmacion.textContent = cliente.razonSocial || "Sin razón social";
             }
 
             function seleccionarCliente(cliente, esConsumidorFinal = false) {
@@ -530,7 +531,7 @@
                     </td>
                     <td class="subtotal-cell fw-semibold">0.00</td>
                     <td>
-                        <button type="button" class="btn btn-outline-danger btn-sm quitar-detalle">Quitar</button>
+                        <button type="button" class="btn btn-outline-danger btn-sm quitar-detalle d-flex align-items-center justify-content-center">Quitar</button>
                     </td>
                 `;
 
@@ -560,7 +561,7 @@
                 }
 
                 if (cantidad > stock) {
-                    return "Una o mas cantidades superan el stock disponible.";
+                    return "Una o más cantidades superan el stock disponible.";
                 }
 
                 return "";
@@ -605,12 +606,12 @@
                     const focoCliente = clienteBusquedaWrap.classList.contains("d-none")
                         ? btnConsumidorFinal
                         : clienteBusqueda;
-                    mostrarValidacion(clienteError, "Debe seleccionar un cliente valido.", focoCliente);
+                    mostrarValidacion(clienteError, "Debe seleccionar un cliente válido.", focoCliente);
                     return false;
                 }
 
                 if (!metodoPagoInput.value) {
-                    mostrarValidacion(pagoError, "Debe seleccionar un metodo de pago.", metodoPagoInput);
+                    mostrarValidacion(pagoError, "Debe seleccionar un método de pago.", metodoPagoInput);
                     return false;
                 }
 

@@ -17,11 +17,11 @@
             {
                 <a asp-page-handler="DescargarComprobante"
                    asp-route-id="@venta.Id"
-                   class="btn btn-success">
+                   class="btn btn-success d-flex align-items-center justify-content-center">
                     Descargar comprobante
                 </a>
             }
-            <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary">Volver a ventas</a>
+            <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary d-flex align-items-center justify-content-center">Volver a ventas</a>
         </div>
     </div>
 
@@ -50,7 +50,7 @@
                         <strong>@ObtenerCliente(venta)</strong>
                     </div>
                     <div class="col-md-4">
-                        <span class="text-muted d-block">Metodo de pago</span>
+                        <span class="text-muted d-block">Método de pago</span>
                         <strong>@venta.MetodoPago</strong>
                     </div>
                 </div>
