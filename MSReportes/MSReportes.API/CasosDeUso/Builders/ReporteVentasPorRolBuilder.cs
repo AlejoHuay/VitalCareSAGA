@@ -22,6 +22,14 @@ namespace MSReportes.API.CasosDeUso.Builders
             return this;
         }
 
+        public IReporteVentasPorRolBuilder ConPeriodo(DateTime? desde, DateTime? hasta)
+        {
+            _reporte.Desde = desde;
+            _reporte.Hasta = hasta;
+
+            return this;
+        }
+
         public IReporteVentasPorRolBuilder ConDetalle(IEnumerable<ReporteVentasPorRolDto> detalle)
         {
             _reporte.Detalle = detalle.ToList();
@@ -50,10 +58,7 @@ namespace MSReportes.API.CasosDeUso.Builders
         public ReporteVentasPorRol Build()
         {
             if (string.IsNullOrWhiteSpace(_reporte.Titulo))
-                throw new InvalidOperationException("El reporte debe tener un título.");
-
-            if (!_reporte.Detalle.Any())
-                throw new InvalidOperationException("El reporte debe tener datos para generar el detalle.");
+                throw new InvalidOperationException("El reporte debe tener un titulo.");
 
             return _reporte;
         }

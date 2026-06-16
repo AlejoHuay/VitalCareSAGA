@@ -246,9 +246,17 @@ services:
       - JWT_ISSUER=${JWT_ISSUER}
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+      - MSVENTAS_URL=${MSVENTAS_URL}
+      - MSPRODUCTOS_URL=${MSPRODUCTOS_URL}
+      - MSUSUARIOS_URL=${MSUSUARIOS_URL}
 
     ports:
       - "${MSREPORTES_PORT}:${MSREPORTES_PORT}"
+
+    depends_on:
+      - msventas
+      - msproductos
+      - msusuarios
 
     networks:
       - vitalcare-network

@@ -1,13 +1,9 @@
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text.Json;
 using FrontendVCare.Adaptadores;
 using FrontendVCare.Adaptadores.Ventas;
 using FrontendVCare.Dto;
 using FrontendVCare.Dto.MedicamentoDtos;
 using FrontendVCare.Dto.Ventas;
 using FrontendVCare.Pages.Base;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FrontendVCare.Pages.Ventas;
@@ -32,10 +28,6 @@ public class NuevaVentaModel : BasePageModel
 
     public List<MedicamentoDto> Medicamentos { get; set; } = new();
 
-    public List<string> MetodosPago { get; set; } = new();
-
-    public int? IdUsuarioActual { get; set; }
-
     [BindProperty]
     public VentaFormularioDto Venta { get; set; } = new();
 
@@ -47,7 +39,6 @@ public class NuevaVentaModel : BasePageModel
         if (acceso != null)
             return acceso;
 
-        IdUsuarioActual = ObtenerIdUsuarioSesion();
         await CargarOpcionesAsync();
         return Page();
     }
@@ -59,8 +50,6 @@ public class NuevaVentaModel : BasePageModel
             return acceso;
 
         int? idUsuario = ObtenerIdUsuarioSesion();
-        IdUsuarioActual = idUsuario;
-
         if (idUsuario == null || idUsuario.Value == 0)
         {
             MensajeError = "No se encontro el usuario. Inicia sesion nuevamente.";
@@ -73,13 +62,6 @@ public class NuevaVentaModel : BasePageModel
             .Where(detalle => detalle.IdMedicamento > 0 && detalle.Cantidad > 0)
             .ToList();
 
-        if (string.IsNullOrWhiteSpace(Venta.MetodoPago))
-        {
-            MensajeError = "Selecciona el método de pago.";
-            await CargarOpcionesAsync();
-            return Page();
-        }
-
         if (Venta.IdCliente <= 0 || Venta.Detalles.Count == 0)
         {
             MensajeError = "Selecciona un cliente y al menos un medicamento.";
@@ -87,19 +69,139 @@ public class NuevaVentaModel : BasePageModel
             return Page();
         }
 
+        if (string.IsNullOrWhiteSpace(Venta.MetodoPago))
+        {
+            MensajeError = "Debe seleccionar un metodo de pago.";
+            await CargarOpcionesAsync();
+            return Page();
+        }
+
+        if (!EsMetodoPagoValido(Venta.MetodoPago))
+        {
+            MensajeError = "El metodo de pago seleccionado no es valido.";
+            await CargarOpcionesAsync();
+            return Page();
+        }
+
+        ClienteDto? cliente = await ObtenerClienteSeleccionadoAsync(Venta.IdCliente);
+        if (cliente == null)
+        {
+            MensajeError = "No se pudo obtener los datos del cliente seleccionado.";
+            await CargarOpcionesAsync();
+            return Page();
+        }
+
+        Venta.Nit = cliente.Nit;
+        Venta.RazonSocial = cliente.RazonSocial;
+
         OperacionApiDto resultado = await ventaAdapter.RegistrarAsync(Venta);
         if (resultado.Exito)
+        {
+            if (resultado.Id.HasValue && resultado.Id.Value > 0)
+            {
+                return RedirectToPage("/Ventas/Venta", new
+                {
+                    mensaje = resultado.Mensaje,
+                    descargarComprobanteId = resultado.Id.Value
+                });
+            }
+
             return RedirectToPage("/Ventas/Venta", new { mensaje = resultado.Mensaje });
+        }
 
         MensajeError = resultado.Mensaje;
         await CargarOpcionesAsync();
         return Page();
     }
 
+    public async Task<IActionResult> OnPostCrearClienteRapidoAsync(
+        string clienteModalNit,
+        string clienteModalRazonSocial,
+        string? clienteModalCorreoElectronico)
+    {
+        int? idUsuario = ObtenerIdUsuarioSesion();
+        if (idUsuario == null || idUsuario.Value == 0)
+        {
+            return new JsonResult(new
+            {
+                success = false,
+                error = "No se encontro el usuario. Inicia sesion nuevamente."
+            })
+            { StatusCode = StatusCodes.Status401Unauthorized };
+        }
+
+        clienteModalNit = clienteModalNit?.Trim() ?? string.Empty;
+        clienteModalRazonSocial = clienteModalRazonSocial?.Trim() ?? string.Empty;
+        clienteModalCorreoElectronico = clienteModalCorreoElectronico?.Trim();
+
+        if (string.IsNullOrWhiteSpace(clienteModalNit) ||
+            string.IsNullOrWhiteSpace(clienteModalRazonSocial))
+        {
+            return new JsonResult(new
+            {
+                success = false,
+                error = "Debe ingresar NIT / CI y razon social."
+            })
+            { StatusCode = StatusCodes.Status400BadRequest };
+        }
+
+        try
+        {
+            List<ClienteDto> existentes = await clienteAdapter.ObtenerTodosAsync(clienteModalNit);
+            ClienteDto? existente = existentes.FirstOrDefault(cliente =>
+                cliente.Nit.Equals(clienteModalNit, StringComparison.OrdinalIgnoreCase));
+
+            if (existente != null)
+                return CrearRespuestaCliente(existente);
+
+            ClienteFormularioDto clienteFormulario = new()
+            {
+                Nit = clienteModalNit,
+                RazonSocial = clienteModalRazonSocial,
+                CorreoElectronico = clienteModalCorreoElectronico ?? string.Empty,
+                IdUsuario = idUsuario.Value
+            };
+
+            OperacionApiDto resultado = await clienteAdapter.CrearAsync(clienteFormulario);
+            if (!resultado.Exito)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    error = resultado.Mensaje ?? "No se pudo registrar el cliente."
+                })
+                { StatusCode = StatusCodes.Status400BadRequest };
+            }
+
+            List<ClienteDto> actualizados = await clienteAdapter.ObtenerTodosAsync(clienteModalNit);
+            ClienteDto? creado = actualizados.FirstOrDefault(cliente =>
+                cliente.Nit.Equals(clienteModalNit, StringComparison.OrdinalIgnoreCase));
+
+            if (creado == null)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    error = "Cliente creado, pero no se pudo recuperar para seleccionarlo."
+                })
+                { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+
+            return CrearRespuestaCliente(creado);
+        }
+        catch (Exception ex)
+        {
+            return new JsonResult(new
+            {
+                success = false,
+                error = ex.Message
+            })
+            { StatusCode = StatusCodes.Status500InternalServerError };
+        }
+    }
+
     private async Task CargarOpcionesAsync()
     {
-        MetodosPago = ObtenerMetodosPago();
-
         try
         {
             Clientes = await clienteAdapter.ObtenerTodosAsync(string.Empty);
@@ -125,14 +227,41 @@ public class NuevaVentaModel : BasePageModel
         }
     }
 
-    private static List<string> ObtenerMetodosPago()
+    private async Task<ClienteDto?> ObtenerClienteSeleccionadoAsync(int idCliente)
     {
-        return new List<string>
+        ClienteDto? cliente = Clientes.FirstOrDefault(c => c.IdCliente == idCliente);
+        if (cliente != null)
+            return cliente;
+
+        try
         {
-            "Efectivo",
-            "Tarjeta",
-            "Transferencia"
-        };
+            return await clienteAdapter.ObtenerPorIdAsync(idCliente);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static bool EsMetodoPagoValido(string metodoPago)
+    {
+        return metodoPago.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)
+            || metodoPago.Equals("QR", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static JsonResult CrearRespuestaCliente(ClienteDto cliente)
+    {
+        return new JsonResult(new
+        {
+            success = true,
+            cliente = new
+            {
+                id = cliente.IdCliente,
+                nit = cliente.Nit,
+                razonSocial = cliente.RazonSocial,
+                esConsumidorFinal = cliente.EsConsumidorFinal
+            }
+        });
     }
 
     private static List<ClienteDto> ObtenerClientesDePrueba()
@@ -199,59 +328,4 @@ public class NuevaVentaModel : BasePageModel
             }
         ];
     }
-
-    public async Task<IActionResult> OnPostCrearClienteAsync()
-    {
-        IActionResult? acceso = ValidarAcceso("Admin", "Bioquimico");
-        if (acceso != null)
-            return new JsonResult(new { exito = false, mensaje = "Acceso denegado." }) { StatusCode = StatusCodes.Status403Forbidden };
-
-        ClienteFormularioDto? cliente;
-        try
-        {
-            cliente = await JsonSerializer.DeserializeAsync<ClienteFormularioDto>(Request.Body, JsonOptions);
-        }
-        catch
-        {
-            return BadRequest(new { exito = false, mensaje = "Datos de cliente inválidos." });
-        }
-
-        if (cliente == null)
-            return BadRequest(new { exito = false, mensaje = "Datos de cliente inválidos." });
-
-        if (cliente.IdUsuario == null || cliente.IdUsuario <= 0)
-            return BadRequest(new { exito = false, mensaje = "Identificador de usuario inválido." });
-
-        HttpResponseMessage response = await clienteAdapter.CrearConRespuestaAsync(cliente);
-        if (!response.IsSuccessStatusCode)
-        {
-            var error = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>(JsonOptions);
-            return BadRequest(new { exito = false, mensaje = error? ["mensaje"] ?? "No se pudo crear el cliente." });
-        }
-
-        var contenido = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOptions);
-        if (!contenido.TryGetProperty("data", out JsonElement dataElement))
-            return BadRequest(new { exito = false, mensaje = "Cliente creado, pero no se devolvió información." });
-
-        ClienteDto? clienteCreado = dataElement.Deserialize<ClienteDto>(JsonOptions);
-        if (clienteCreado == null)
-            return BadRequest(new { exito = false, mensaje = "Cliente creado, pero no se devolvió información válida." });
-
-        return new JsonResult(new
-        {
-            exito = true,
-            mensaje = "Cliente creado correctamente.",
-            data = new
-            {
-                idCliente = clienteCreado.IdCliente,
-                razonSocial = clienteCreado.RazonSocial,
-                nit = clienteCreado.Nit
-            }
-        });
-    }
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true
-    };
 }

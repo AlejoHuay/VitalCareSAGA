@@ -18,13 +18,19 @@ namespace FrontendVCare.Pages.Ventas
 
         public List<VentaDto> Ventas { get; set; } = new();
 
+        [BindProperty(SupportsGet = true)]
+        public string Filtro { get; set; } = string.Empty;
+
+        [BindProperty(SupportsGet = true)]
+        public int? DescargarComprobanteId { get; set; }
+
         [TempData]
         public string? Mensaje { get; set; }
 
         [TempData]
         public string? MensajeError { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string filtro = "", string? mensaje = null, string? error = null)
+        public async Task<IActionResult> OnGetAsync(string? mensaje = null, string? error = null)
         {
             IActionResult? acceso = ValidarAcceso("Admin", "Bioquimico");
             if (acceso != null)
@@ -33,7 +39,7 @@ namespace FrontendVCare.Pages.Ventas
             Mensaje = mensaje;
             MensajeError = error;
 
-            await CargarDatosAsync(filtro);
+            await CargarDatosAsync(Filtro);
             return Page();
         }
 

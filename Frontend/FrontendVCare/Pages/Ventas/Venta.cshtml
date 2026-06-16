@@ -35,7 +35,8 @@
                 <input type="text"
                        name="filtro"
                        class="form-control"
-                       placeholder="Buscar por cliente, usuario o estado" />
+                       placeholder="Buscar por cliente o metodo de pago"
+                       value="@Model.Filtro" />
                 <button type="submit" class="btn btn-success btn-fixed">Buscar</button>
                 <a asp-page="/Ventas/Venta" class="btn btn-secondary btn-fixed">Limpiar</a>
             </div>
@@ -48,31 +49,41 @@
                 <tr>
                     <th>Fecha</th>
                     <th>Cliente</th>
-                    <th>Usuario</th>
+                    <th>Metodo de pago</th>
                     <th>Total (Bs)</th>
-                    <th>Estado</th>
-                    <th style="width:120px">Acciones</th>
+                    <th style="width:170px">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @if (Model.Ventas.Count == 0)
                 {
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">No hay ventas registradas.</td>
+                        <td colspan="5" class="text-center text-muted py-4">No hay ventas registradas.</td>
                     </tr>
                 }
                 @foreach (var venta in Model.Ventas)
                 {
+                    string cliente = !string.IsNullOrWhiteSpace(venta.RazonSocial)
+                        ? venta.RazonSocial
+                        : venta.Cliente;
+
                     <tr>
-                        <td>@venta.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td class="fw-semibold">@venta.Cliente</td>
-                        <td>@venta.Usuario</td>
-                        <td>@venta.Total.ToString("N2")</td>
-                        <td>@venta.Estado</td>
+                        <td>@(ObtenerFechaVenta(venta).ToString("dd/MM/yyyy HH:mm"))</td>
+                        <td class="fw-semibold">@cliente</td>
+                        <td>@venta.MetodoPago</td>
+                        <td class="text-success fw-bold">@venta.Total.ToString("N2")</td>
                         <td>
-                            <form method="post" asp-page-handler="Anular" asp-route-id="@venta.Id">
-                                <button type="submit" class="btn btn-danger btn-sm">Anular</button>
-                            </form>
+                            <div class="d-flex gap-2">
+                                <a asp-page="/Ventas/VerVenta" asp-route-id="@venta.Id" class="btn btn-success btn-sm">Ver</a>
+                                <button type="button"
+                                        class="btn btn-danger btn-sm btn-anular"
+                                        data-id="@venta.Id"
+                                        data-cliente="@cliente"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalAnularVenta">
+                                    Anular
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 }
@@ -80,3 +91,66 @@
         </table>
     </div>
 </div>
+
+@if (Model.DescargarComprobanteId.HasValue && Model.DescargarComprobanteId.Value > 0)
+{
+    <iframe name="comprobanteDescargaFrame" class="d-none"></iframe>
+    <a asp-page="/Ventas/VerVenta"
+       asp-page-handler="DescargarComprobante"
+       asp-route-id="@Model.DescargarComprobanteId.Value"
+       target="comprobanteDescargaFrame"
+       id="descargaComprobanteAutomatica"
+       class="d-none">
+        Descargar comprobante
+    </a>
+}
+
+<div class="modal fade" id="modalAnularVenta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Confirmar anulacion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1">Esta accion anulara la venta seleccionada.</p>
+                <p class="fw-bold mb-0" id="clienteVentaAnular"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" asp-page-handler="Anular">
+                    <input type="hidden" id="idVentaAnular" name="id" />
+                    <button type="submit" class="btn btn-danger">Anular venta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private static DateTime ObtenerFechaVenta(FrontendVCare.Dto.Ventas.VentaDto venta)
+    {
+        return venta.FechaHora != default ? venta.FechaHora : venta.Fecha;
+    }
+}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".btn-anular").forEach((button) => {
+            button.addEventListener("click", function () {
+                document.getElementById("idVentaAnular").value = this.dataset.id || "";
+                document.getElementById("clienteVentaAnular").textContent =
+                    "Cliente: " + (this.dataset.cliente || "Sin nombre");
+            });
+        });
+
+        const descargaAutomatica = document.getElementById("descargaComprobanteAutomatica");
+        if (descargaAutomatica) {
+            window.setTimeout(() => descargaAutomatica.click(), 800);
+
+            const url = new URL(window.location.href);
+            url.searchParams.delete("descargarComprobanteId");
+            window.history.replaceState({}, document.title, url.toString());
+        }
+    });
+</script>

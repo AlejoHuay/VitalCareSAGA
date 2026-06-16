@@ -8,6 +8,8 @@ namespace MSReportes.API.CasosDeUso.Builders
 
         IReporteVentasPorRolBuilder ConUsuarioGenerador(string usuarioGenerador);
 
+        IReporteVentasPorRolBuilder ConPeriodo(DateTime? desde, DateTime? hasta);
+
         IReporteVentasPorRolBuilder ConDetalle(IEnumerable<ReporteVentasPorRolDto> detalle);
 
         IReporteVentasPorRolBuilder ConResumen();

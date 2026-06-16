@@ -32,7 +32,10 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                 SELECT
                     v.id AS Id,
                     v.fecha_hora AS Fecha,
+                    v.fecha_hora AS FechaHora,
                     v.Cliente_idCliente AS IdCliente,
+                    COALESCE(v.nit, '') AS Nit,
+                    COALESCE(v.razon_social, '') AS RazonSocial,
                     CONCAT(
                         COALESCE(v.nit, ''),
                         ' - ',
@@ -40,11 +43,16 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                     ) AS Cliente,
                     v.usuario_idUsuario AS IdUsuario,
                     CAST(v.usuario_idUsuario AS CHAR) AS Usuario,
+                    v.metodo_pago AS MetodoPago,
                     v.total AS Total,
                     CASE
                         WHEN v.estado = 1 THEN 'ACTIVA'
                         ELSE 'ANULADA'
-                    END AS Estado
+                    END AS Estado,
+                    COALESCE(v.estado_saga, 'PENDIENTE_STOCK') AS EstadoSaga,
+                    v.motivo_fallo_saga AS MotivoFalloSaga,
+                    v.fecha_confirmacion_saga AS FechaConfirmacionSaga,
+                    v.fecha_compensacion_saga AS FechaCompensacionSaga
                 FROM venta v
                 WHERE v.estado = 1";
 
@@ -277,7 +285,7 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                 }
 
                 transaction.Commit();
-                return Result.Ok();
+                return Result.Ok(idVenta);
             }
             catch (Exception ex)
             {
@@ -443,10 +451,12 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
                     UPDATE venta
                     SET
                         estado = 0,
+                        estado_saga = 'PENDIENTE_REVERSION_STOCK',
                         ultima_actualizacion = NOW(),
                         Id_usuario_editor = @idUsuarioEditor
                     WHERE id = @idVenta
-                    AND estado = 1";
+                    AND estado = 1
+                    AND estado_saga = 'STOCK_CONFIRMADO'";
 
                 using MySqlCommand command = new MySqlCommand(
                     query,
@@ -630,6 +640,62 @@ namespace MSVentas.Infraestructura.Persistencia.Repositorios
 
             if (filas <= 0)
                 return Result.Fail("No se pudo compensar la venta.");
+
+            return Result.Ok();
+        }
+
+        public Result ConfirmarReversionStockSaga(int idVenta)
+        {
+            const string query = @"
+                UPDATE venta
+                SET
+                    estado_saga = 'STOCK_REVERTIDO',
+                    motivo_fallo_saga = NULL,
+                    fecha_compensacion_saga = NOW(),
+                    ultima_actualizacion = NOW()
+                WHERE id = @idVenta
+                AND estado = 0
+                AND estado_saga = 'PENDIENTE_REVERSION_STOCK'";
+
+            using MySqlConnection connection = new MySqlConnection(connectionString);
+            using MySqlCommand command = new MySqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@idVenta", idVenta);
+
+            connection.Open();
+
+            int filas = command.ExecuteNonQuery();
+
+            if (filas <= 0)
+                return Result.Fail("No se pudo confirmar la reversion de stock de la venta.");
+
+            return Result.Ok();
+        }
+
+        public Result RegistrarFalloReversionStockSaga(int idVenta, string motivo)
+        {
+            const string query = @"
+                UPDATE venta
+                SET
+                    estado_saga = 'REVERSION_STOCK_FALLIDA',
+                    motivo_fallo_saga = @motivo,
+                    ultima_actualizacion = NOW()
+                WHERE id = @idVenta
+                AND estado = 0
+                AND estado_saga = 'PENDIENTE_REVERSION_STOCK'";
+
+            using MySqlConnection connection = new MySqlConnection(connectionString);
+            using MySqlCommand command = new MySqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@idVenta", idVenta);
+            command.Parameters.AddWithValue("@motivo", motivo);
+
+            connection.Open();
+
+            int filas = command.ExecuteNonQuery();
+
+            if (filas <= 0)
+                return Result.Fail("No se pudo registrar el fallo de reversion de stock.");
 
             return Result.Ok();
         }

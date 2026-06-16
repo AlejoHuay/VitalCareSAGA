@@ -61,6 +61,12 @@ namespace MSProductos.Infraestructura.Mensajeria
                 routingKey: "venta.creada"
             );
 
+            _channel.QueueBind(
+                queue: _queue,
+                exchange: _exchange,
+                routingKey: "venta.anulada"
+            );
+
             EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
 
             consumer.Received += (sender, args) =>
@@ -68,15 +74,30 @@ namespace MSProductos.Infraestructura.Mensajeria
                 try
                 {
                     string json = Encoding.UTF8.GetString(args.Body.ToArray());
-                    VentaCreadaEvent? evento = JsonSerializer.Deserialize<VentaCreadaEvent>(json);
-
-                    if (evento == null)
+                    if (args.RoutingKey == "venta.creada")
                     {
-                        _channel.BasicAck(args.DeliveryTag, false);
-                        return;
-                    }
+                        VentaCreadaEvent? evento = JsonSerializer.Deserialize<VentaCreadaEvent>(json);
 
-                    ProcesarVentaCreada(evento);
+                        if (evento == null)
+                        {
+                            _channel.BasicAck(args.DeliveryTag, false);
+                            return;
+                        }
+
+                        ProcesarVentaCreada(evento);
+                    }
+                    else if (args.RoutingKey == "venta.anulada")
+                    {
+                        VentaAnuladaEvent? evento = JsonSerializer.Deserialize<VentaAnuladaEvent>(json);
+
+                        if (evento == null)
+                        {
+                            _channel.BasicAck(args.DeliveryTag, false);
+                            return;
+                        }
+
+                        ProcesarVentaAnulada(evento);
+                    }
 
                     _channel.BasicAck(args.DeliveryTag, false);
                 }
@@ -140,6 +161,46 @@ namespace MSProductos.Infraestructura.Mensajeria
             }
 
             eventPublisher.Publish("stock.actualizado", new
+            {
+                evento.IdVenta,
+                evento.IdUsuario,
+                Fecha = DateTime.Now,
+                Detalles = evento.Detalles
+            });
+        }
+
+        private void ProcesarVentaAnulada(VentaAnuladaEvent evento)
+        {
+            using IServiceScope scope = _serviceProvider.CreateScope();
+
+            IMedicamentoRepository medicamentoRepository =
+                scope.ServiceProvider.GetRequiredService<IMedicamentoRepository>();
+
+            IEventPublisher eventPublisher =
+                scope.ServiceProvider.GetRequiredService<IEventPublisher>();
+
+            foreach (DetalleVentaAnuladaEvent detalle in evento.Detalles)
+            {
+                int filas = medicamentoRepository.RevertirStock(
+                    detalle.IdMedicamento,
+                    detalle.Cantidad,
+                    evento.IdUsuario
+                );
+
+                if (filas <= 0)
+                {
+                    eventPublisher.Publish("stock.reversion_fallida", new
+                    {
+                        evento.IdVenta,
+                        Motivo = $"No se pudo revertir el stock. Medicamento: {detalle.IdMedicamento}",
+                        Fecha = DateTime.Now
+                    });
+
+                    return;
+                }
+            }
+
+            eventPublisher.Publish("stock.revertido", new
             {
                 evento.IdVenta,
                 evento.IdUsuario,

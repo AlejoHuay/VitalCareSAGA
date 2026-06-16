@@ -1,0 +1,311 @@
+.sale-shell {
+    max-width: 1120px;
+}
+
+.sale-card {
+    border: 1px solid #dfe7e3;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(24, 45, 36, .08);
+}
+
+.sale-section {
+    padding: 22px;
+}
+
+.sale-section + .sale-section {
+    border-top: 1px solid #e7efeb;
+}
+
+.section-kicker {
+    color: #11844f;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.option-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.choice-card {
+    width: 100%;
+    min-height: 66px;
+    border: 1px solid #d7e6df;
+    border-radius: 8px;
+    background: #f8fbfa;
+    color: #1f2d2a;
+    padding: 10px 14px;
+    text-align: left;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.choice-card.active {
+    border-color: #11844f;
+    background: #edf8f3;
+    box-shadow: 0 0 0 3px rgba(17, 132, 79, .12);
+}
+
+.choice-card .title {
+    display: block;
+    font-weight: 800;
+    margin-bottom: 2px;
+}
+
+.choice-card .hint {
+    display: block;
+    color: #63756f;
+    font-size: .86rem;
+}
+
+.search-results {
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.cliente-status {
+    color: #11844f;
+    font-weight: 700;
+    min-height: 24px;
+    font-size: .9rem;
+}
+
+.payment-field {
+    max-width: 420px;
+}
+
+.validation-message {
+    color: #b42318;
+    font-size: .88rem;
+    font-weight: 600;
+}
+
+.add-medicine-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 130px;
+    gap: 12px;
+    align-items: end;
+}
+
+.quantity-cell {
+    max-width: 96px;
+}
+
+.empty-detail {
+    border: 1px dashed #c9d9d2;
+    border-radius: 8px;
+    background: #f9fcfb;
+    color: #64746f;
+    padding: 22px;
+    text-align: center;
+}
+
+.sale-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    background: #f8fbfa;
+    border-top: 1px solid #e7efeb;
+    padding: 20px 22px;
+}
+
+.sale-total {
+    color: #11844f;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.sales-report-shell {
+    max-width: 1180px;
+}
+
+.report-header {
+    align-items: center;
+    display: flex;
+    gap: 18px;
+    justify-content: space-between;
+}
+
+.report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.report-period {
+    color: #11844f;
+    font-size: .88rem;
+    font-weight: 700;
+}
+
+.report-filter .card-module {
+    border: 0;
+    border-radius: 8px;
+    box-shadow: 0 12px 30px rgba(24, 45, 36, .08);
+}
+
+.report-summary-card {
+    border: 1px solid #dfe7e3;
+    border-radius: 8px;
+    min-height: 132px;
+}
+
+.report-summary-card h3 {
+    color: #10201a;
+    font-size: 1.75rem;
+}
+
+.report-summary-card .summary-role {
+    font-size: 1.25rem;
+}
+
+.summary-hint {
+    color: #63756f;
+    display: block;
+    font-size: .84rem;
+    margin-top: 8px;
+}
+
+.report-visual-card,
+.report-table-card {
+    border: 1px solid #dfe7e3;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.report-bars {
+    display: grid;
+    gap: 14px;
+}
+
+.report-bar-row {
+    align-items: center;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: minmax(150px, 220px) minmax(120px, 1fr) minmax(115px, auto);
+}
+
+.report-bar-label {
+    display: grid;
+    gap: 2px;
+}
+
+.report-bar-label span {
+    color: #63756f;
+    font-size: .86rem;
+}
+
+.report-bar-track {
+    background: #edf3f0;
+    border-radius: 999px;
+    height: 14px;
+    overflow: hidden;
+}
+
+.report-bar-fill {
+    background: linear-gradient(90deg, #0ba84a, #11844f);
+    border-radius: inherit;
+    height: 100%;
+}
+
+.report-bar-value {
+    color: #11844f;
+    font-weight: 800;
+    text-align: right;
+}
+
+.report-table-card tfoot td {
+    background: #f8fbfa;
+    border-top: 2px solid #cfe2da;
+}
+
+.report-role-toggle {
+    color: #10201a;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.report-role-toggle:hover {
+    color: #11844f;
+}
+
+.report-role-toggle[aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+.report-role-toggle .bi-chevron-down {
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform .15s ease;
+}
+
+.report-user-count {
+    color: #63756f;
+    display: block;
+    font-size: .82rem;
+    margin-left: 22px;
+    margin-top: 2px;
+}
+
+.report-user-row > td {
+    background: #f8fbfa;
+    border-top: 0;
+}
+
+.report-user-panel {
+    border-top: 1px solid #e4eee8;
+    padding: 12px 18px 18px;
+}
+
+.report-user-table {
+    border: 1px solid #dfe7e3;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.report-user-table thead th {
+    background: #edf8f3;
+    color: #10201a;
+    font-size: .88rem;
+}
+
+.report-user-table tfoot td {
+    background: #f1f7f4;
+}
+
+@media (max-width: 768px) {
+    .sale-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .add-medicine-row {
+        grid-template-columns: 1fr;
+    }
+
+    .report-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .report-actions {
+        justify-content: flex-start;
+    }
+
+    .report-bar-row {
+        grid-template-columns: 1fr;
+    }
+
+    .report-bar-value {
+        text-align: left;
+    }
+}

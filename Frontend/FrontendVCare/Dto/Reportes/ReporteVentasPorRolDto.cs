@@ -1,4 +1,4 @@
-namespace MSReportes.API.Entidades
+namespace FrontendVCare.Dto.Reportes
 {
     public class ReporteVentasPorRolDto
     {
