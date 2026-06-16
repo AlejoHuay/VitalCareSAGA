@@ -11,7 +11,7 @@
             <h2 class="fw-bold text-success">Ventas</h2>
             <p class="text-muted mb-0">Consulta y administra el historial de ventas</p>
         </div>
-        <a asp-page="/Ventas/NuevaVenta" class="btn btn-success">+ Agregar venta</a>
+        <a asp-page="/Ventas/NuevaVenta" class="btn btn-success d-flex align-items-center justify-content-center">+ Agregar venta</a>
     </div>
 
     @if (!string.IsNullOrEmpty(Model.Mensaje))
@@ -35,10 +35,10 @@
                 <input type="text"
                        name="filtro"
                        class="form-control"
-                       placeholder="Buscar por cliente o metodo de pago"
+                       placeholder="Buscar por cliente o método de pago"
                        value="@Model.Filtro" />
-                <button type="submit" class="btn btn-success btn-fixed">Buscar</button>
-                <a asp-page="/Ventas/Venta" class="btn btn-secondary btn-fixed">Limpiar</a>
+                <button type="submit" class="btn btn-success btn-fixed d-flex align-items-center justify-content-center">Buscar</button>
+                <a asp-page="/Ventas/Venta" class="btn btn-secondary btn-fixed d-flex align-items-center justify-content-center">Limpiar</a>
             </div>
         </div>
     </form>
@@ -49,7 +49,7 @@
                 <tr>
                     <th>Fecha</th>
                     <th>Cliente</th>
-                    <th>Metodo de pago</th>
+                    <th>Método de pago</th>
                     <th>Total (Bs)</th>
                     <th style="width:170px">Acciones</th>
                 </tr>
@@ -74,9 +74,9 @@
                         <td class="text-success fw-bold">@venta.Total.ToString("N2")</td>
                         <td>
                             <div class="d-flex gap-2">
-                                <a asp-page="/Ventas/VerVenta" asp-route-id="@venta.Id" class="btn btn-success btn-sm">Ver</a>
+                                <a asp-page="/Ventas/VerVenta" asp-route-id="@venta.Id" class="btn btn-success btn-sm d-flex align-items-center justify-content-center">Ver</a>
                                 <button type="button"
-                                        class="btn btn-danger btn-sm btn-anular"
+                                        class="btn btn-danger btn-sm btn-anular d-flex align-items-center justify-content-center"
                                         data-id="@venta.Id"
                                         data-cliente="@cliente"
                                         data-bs-toggle="modal"
@@ -109,18 +109,18 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">Confirmar anulacion</h5>
+                <h5 class="modal-title">Confirmar Anulación</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="mb-1">Esta accion anulara la venta seleccionada.</p>
+                <p class="mb-1">Esta acción anulará la venta seleccionada.</p>
                 <p class="fw-bold mb-0" id="clienteVentaAnular"></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-secondary d-flex align-items-center justify-content-center" data-bs-dismiss="modal">Cancelar</button>
                 <form method="post" asp-page-handler="Anular">
                     <input type="hidden" id="idVentaAnular" name="id" />
-                    <button type="submit" class="btn btn-danger">Anular venta</button>
+                    <button type="submit" class="btn btn-danger d-flex align-items-center justify-content-center">Anular venta</button>
                 </form>
             </div>
         </div>

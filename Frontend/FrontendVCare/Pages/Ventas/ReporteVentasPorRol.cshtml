@@ -16,16 +16,16 @@
             <a asp-page-handler="DescargarPdf"
                asp-route-desde="@Model.Desde?.ToString("yyyy-MM-dd")"
                asp-route-hasta="@Model.Hasta?.ToString("yyyy-MM-dd")"
-               class="btn btn-success">
+               class="btn btn-success d-flex align-items-center justify-content-center">
                 <i class="bi bi-file-earmark-pdf"></i> Descargar PDF
             </a>
             <a asp-page-handler="DescargarExcel"
                asp-route-desde="@Model.Desde?.ToString("yyyy-MM-dd")"
                asp-route-hasta="@Model.Hasta?.ToString("yyyy-MM-dd")"
-               class="btn btn-outline-success">
+               class="btn btn-outline-success d-flex align-items-center justify-content-center">
                 <i class="bi bi-file-earmark-spreadsheet"></i> Descargar Excel
             </a>
-            <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary">Volver a ventas</a>
+            <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary d-flex align-items-center justify-content-center">Volver a ventas</a>
         </div>
     </div>
 
@@ -49,8 +49,8 @@
                     <input asp-for="Hasta" type="date" class="form-control" />
                 </div>
                 <div class="col-md-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-success btn-fixed">Filtrar</button>
-                    <a asp-page="/Ventas/ReporteVentasPorRol" class="btn btn-secondary btn-fixed">Limpiar</a>
+                    <button type="submit" class="btn btn-success btn-fixed d-flex align-items-center justify-content-center">Filtrar</button>
+                    <a asp-page="/Ventas/ReporteVentasPorRol" class="btn btn-secondary btn-fixed d-flex align-items-center justify-content-center">Limpiar</a>
                 </div>
             </div>
         </div>
@@ -78,7 +78,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm report-summary-card">
                 <div class="card-body">
-                    <p class="text-muted mb-1">Rol con mas ventas</p>
+                    <p class="text-muted mb-1">Rol con más ventas</p>
                     <h3 class="fw-bold mb-0 summary-role">@((Model.RolConMasVentas?.Rol) ?? "-")</h3>
                     <span class="summary-hint">@((Model.RolConMasVentas?.CantidadVentas.ToString()) ?? "0") ventas</span>
                 </div>
@@ -87,7 +87,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm report-summary-card">
                 <div class="card-body">
-                    <p class="text-muted mb-1">Mayor recaudacion</p>
+                    <p class="text-muted mb-1">Mayor recaudación</p>
                     <h3 class="fw-bold mb-0 summary-role">@((Model.RolConMasRecaudacion?.Rol) ?? "-")</h3>
                     <span class="summary-hint">Bs @((Model.RolConMasRecaudacion?.TotalRecaudado.ToString("N2")) ?? "0.00")</span>
                 </div>
@@ -99,9 +99,9 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
-                    <span class="section-kicker">Visualizacion</span>
+                    <span class="section-kicker">Visualización</span>
                     <h4 class="fw-bold mb-1">Ventas por rol</h4>
-                    <p class="text-muted mb-0">Comparacion proporcional segun el total vendido.</p>
+                    <p class="text-muted mb-0">Comparación proporcional según el total vendido.</p>
                 </div>
                 @if (Model.TieneDatos)
                 {

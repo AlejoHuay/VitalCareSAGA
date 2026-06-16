@@ -2,13 +2,13 @@
 @model FrontendVCare.Pages.Ventas.ReporteRecaudacionMedicamentosModel
 
 @{
-    ViewData["Title"] = "Reporte de recaudacion";
+    ViewData["Title"] = "Reporte de recaudación";
 }
 
 <div class="container mt-5 no-card-hover sales-report-shell">
     <div class="report-header mb-4">
         <div>
-            <h2 class="fw-bold text-success">Reporte de recaudacion por medicamentos</h2>
+            <h2 class="fw-bold text-success">Reporte de recaudación por medicamentos</h2>
             <p class="text-muted mb-1">Resumen de ingresos agrupados por medicamento vendido</p>
             <span class="report-period">@Model.PeriodoTexto</span>
         </div>
@@ -16,16 +16,16 @@
             <a asp-page-handler="DescargarPdf"
                asp-route-desde="@Model.Desde?.ToString("yyyy-MM-dd")"
                asp-route-hasta="@Model.Hasta?.ToString("yyyy-MM-dd")"
-               class="btn btn-success">
+               class="btn btn-success d-flex align-items-center justify-content-center">
                 <i class="bi bi-file-earmark-pdf"></i> Descargar PDF
             </a>
             <a asp-page-handler="DescargarExcel"
                asp-route-desde="@Model.Desde?.ToString("yyyy-MM-dd")"
                asp-route-hasta="@Model.Hasta?.ToString("yyyy-MM-dd")"
-               class="btn btn-outline-success">
+               class="btn btn-outline-success d-flex align-items-center justify-content-center">
                 <i class="bi bi-file-earmark-spreadsheet"></i> Descargar Excel
             </a>
-            <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary">Volver a ventas</a>
+            <a asp-page="/Ventas/Venta" class="btn btn-outline-secondary d-flex align-items-center justify-content-center">Volver a ventas</a>
         </div>
     </div>
 
@@ -49,8 +49,8 @@
                     <input asp-for="Hasta" type="date" class="form-control" />
                 </div>
                 <div class="col-md-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-success btn-fixed">Filtrar</button>
-                    <a asp-page="/Ventas/ReporteRecaudacionMedicamentos" class="btn btn-secondary btn-fixed">Limpiar</a>
+                    <button type="submit" class="btn btn-success btn-fixed d-flex align-items-center justify-content-center">Filtrar</button>
+                    <a asp-page="/Ventas/ReporteRecaudacionMedicamentos" class="btn btn-secondary btn-fixed d-flex align-items-center justify-content-center">Limpiar</a>
                 </div>
             </div>
         </div>
@@ -87,7 +87,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm report-summary-card">
                 <div class="card-body">
-                    <p class="text-muted mb-1">Mayor recaudacion</p>
+                    <p class="text-muted mb-1">Mayor recaudación</p>
                     <h3 class="fw-bold mb-0 summary-role">@((Model.MayorRecaudacion?.Medicamento) ?? "-")</h3>
                     <span class="summary-hint">Bs @((Model.MayorRecaudacion?.TotalRecaudado.ToString("N2")) ?? "0.00")</span>
                 </div>
@@ -99,9 +99,9 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
-                    <span class="section-kicker">Grafico estadistico</span>
-                    <h4 class="fw-bold mb-1">Recaudacion por medicamento</h4>
-                    <p class="text-muted mb-0">Comparacion proporcional segun el total recaudado.</p>
+                    <span class="section-kicker">Gráfico estadístico</span>
+                    <h4 class="fw-bold mb-1">Recaudación por medicamento</h4>
+                    <p class="text-muted mb-0">Comparación proporcional según el total recaudado.</p>
                 </div>
                 @if (Model.TieneDatos)
                 {
@@ -146,7 +146,7 @@
                     <th>Unidades vendidas</th>
                     <th>Ventas relacionadas</th>
                     <th>Total recaudado (Bs)</th>
-                    <th>Participacion</th>
+                    <th>Participación</th>
                 </tr>
             </thead>
             <tbody>
