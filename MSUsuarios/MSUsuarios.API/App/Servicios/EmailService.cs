@@ -56,12 +56,14 @@ namespace MSUsuarios.App.Servicios
             string emailDestino,
             string nombres,
             string userName,
-            string passwordTemporal)
+            string passwordTemporal,
+            string tokenActivacion)
         {
             emailDestino = emailDestino?.Trim() ?? string.Empty;
             nombres = nombres?.Trim() ?? string.Empty;
             userName = userName?.Trim() ?? string.Empty;
             passwordTemporal = passwordTemporal?.Trim() ?? string.Empty;
+            tokenActivacion = tokenActivacion?.Trim() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(emailDestino))
                 return Result.Fail("El correo destino es obligatorio.");
@@ -72,13 +74,17 @@ namespace MSUsuarios.App.Servicios
             if (string.IsNullOrWhiteSpace(passwordTemporal))
                 return Result.Fail("La contraseña temporal es obligatoria para el correo.");
 
+            if (string.IsNullOrWhiteSpace(tokenActivacion))
+                return Result.Fail("El token de activación es obligatorio para el correo.");
+
             try
             {
                 string asunto = "Activación de cuenta - Farmacia VitalCare";
                 string cuerpoHtml = ConstruirHtmlActivacionCuenta(
                     nombres,
                     userName,
-                    passwordTemporal
+                    passwordTemporal,
+                    tokenActivacion
                 );
 
                 using MailMessage message = new MailMessage();
@@ -118,9 +124,11 @@ namespace MSUsuarios.App.Servicios
         private string ConstruirHtmlActivacionCuenta(
             string nombres,
             string userName,
-            string passwordTemporal)
+            string passwordTemporal,
+            string tokenActivacion)
         {
             string saludo = string.IsNullOrWhiteSpace(nombres) ? "Estimado usuario" : $"Estimado/a {nombres}";
+            string urlActivacion = $"http://localhost:5081/Auth/ActivarCuenta?token={Uri.EscapeDataString(tokenActivacion)}";
 
             return $@"
         <!DOCTYPE html>
@@ -149,7 +157,11 @@ namespace MSUsuarios.App.Servicios
         <p style='font-size:16px;'>{saludo},</p>
 
         <p style='color:#4b5563; line-height:1.6;'>
-        Tu cuenta ha sido registrada correctamente. Estas son tus credenciales:
+        Tu cuenta ha sido registrada correctamente en Farmacia VitalCare. Para completar tu registro y poder acceder al sistema, debes activar tu cuenta.
+        </p>
+
+        <p style='color:#4b5563; line-height:1.6;'>
+        <strong>Tus credenciales temporales:</strong>
         </p>
 
         <table width='100%' style='margin:20px 0; background:#ecfdf5; border:1px solid #bbf7d0; border-radius:10px;'>
@@ -159,24 +171,33 @@ namespace MSUsuarios.App.Servicios
         <p><strong>Usuario:</strong>
         <span style='color:#065f46;'>{userName}</span></p>
 
-        <p><strong>Contraseña:</strong>
+        <p><strong>Contraseña temporal:</strong>
         <span style='color:#b91c1c; font-weight:bold;'>{passwordTemporal}</span></p>
 
         </td>
         </tr>
         </table>
 
-        <p style='color:#4b5563;'>
-        Utiliza estas credenciales para iniciar sesión en el sistema. Por tu seguridad, te recomendamos cambiar tu contraseña al primer acceso.
+        <p style='color:#4b5563; margin-top:30px;'>
+        <strong>Importante:</strong> Por favor, activa tu cuenta haciendo clic en el botón de abajo. Luego podrás establecer una nueva contraseña segura.
         </p>
 
         <div style='text-align:center; margin:30px 0;'>
-            <a href='http://localhost:5081/Auth/Login' style='display:inline-block; background-color:#1f7a63; color:white; padding:12px 30px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:16px;'>
-                Ir al Login
+            <a href='{urlActivacion}' style='display:inline-block; background-color:#1f7a63; color:white; padding:14px 40px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:16px;'>
+                Activar mi cuenta
             </a>
         </div>
 
-        <p>Atentamente,<br><strong>Farmacia VitalCare</strong></p>
+        <p style='color:#6b7280; font-size:14px; margin-top:30px;'>
+        Si el botón anterior no funciona, copia y pega este enlace en tu navegador:<br>
+        <span style='word-break:break-all; color:#4b5563;'>{urlActivacion}</span>
+        </p>
+
+        <p style='color:#4b5563; margin-top:20px;'>
+        Este enlace expirará en 24 horas. Si no activas tu cuenta dentro de ese tiempo, deberás solicitar un nuevo enlace de activación.
+        </p>
+
+        <p style='margin-top:30px;'>Atentamente,<br><strong>Farmacia VitalCare</strong></p>
 
         </td>
         </tr>

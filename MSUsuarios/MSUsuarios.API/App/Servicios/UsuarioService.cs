@@ -17,6 +17,7 @@ namespace MSUsuarios.App.Servicios
         private readonly ValidadorCambioContraseña _validadorCambioContraseña;
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
+        private readonly IUsuarioTokenService _usuarioTokenService;
         private readonly string _frontendBaseUrl;
 
         public UsuarioService(
@@ -26,6 +27,7 @@ namespace MSUsuarios.App.Servicios
             ValidadorCambioContraseña validadorCambioContraseña,
             ITokenService tokenService,
             IEmailService emailService,
+            IUsuarioTokenService usuarioTokenService,
             IConfiguration configuration)
         {
             _repository = repository;
@@ -34,6 +36,7 @@ namespace MSUsuarios.App.Servicios
             _validadorCambioContraseña = validadorCambioContraseña;
             _tokenService = tokenService;
             _emailService = emailService;
+            _usuarioTokenService = usuarioTokenService;
             _frontendBaseUrl = Environment.GetEnvironmentVariable("FRONTEND_BASE_URL")
                 ?? configuration["Frontend:BaseUrl"]?.TrimEnd('/')
                 ?? "http://localhost:5081";
@@ -69,11 +72,27 @@ namespace MSUsuarios.App.Servicios
                 if (usuarioRegistrado == null)
                     return Result.Fail("El usuario fue registrado, pero no se pudo recuperar su informacion.");
 
+                // Generar token de activación
+                UsuarioTokenGeneracionDto tokenDto = new UsuarioTokenGeneracionDto
+                {
+                    IdUsuario = usuarioRegistrado.IdUsuario,
+                    TipoToken = "ACTIVAR_CUENTA",
+                    MinutosExpiracion = 1440 // 24 horas
+                };
+
+                Result resultadoToken = _usuarioTokenService.GenerarToken(tokenDto, out string tokenPlano);
+                if (!resultadoToken.IsSuccess)
+                {
+                    Console.WriteLine($"Advertencia al generar token: {resultadoToken.Error}");
+                    return Result.Ok($"Usuario registrado. Nota: No se pudo generar el enlace de activación. {resultadoToken.Error}");
+                }
+
                 Result resultadoEmail = _emailService.EnviarCorreoActivacionCuenta(
                     usuarioRegistrado.Email,
                     usuarioRegistrado.Nombres,
                     usuarioRegistrado.UserName,
-                    passwordTemporal
+                    passwordTemporal,
+                    tokenPlano
                 );
 
                 // El registro es exitoso incluso si el email falla (se notifica en la respuesta)
@@ -187,6 +206,52 @@ namespace MSUsuarios.App.Servicios
             int filasAfectadas = _repository.CambiarPassword(usuario.IdUsuario, passwordHash, false, idUsuarioAuditoria);
             if (filasAfectadas <= 0)
                 return Result.Fail("No se pudo actualizar la contrasena.");
+
+            return Result.Ok();
+        }
+
+        public Result ActivarCuenta(ActivarCuentaRequestDto dto)
+        {
+            // Validar datos de entrada
+            if (string.IsNullOrWhiteSpace(dto.Token))
+                return Result.Fail("El token de activación es obligatorio.");
+
+            if (string.IsNullOrWhiteSpace(dto.NuevaPassword))
+                return Result.Fail("La nueva contraseña es obligatoria.");
+
+            if (string.IsNullOrWhiteSpace(dto.ConfirmarPassword))
+                return Result.Fail("La confirmación de contraseña es obligatoria.");
+
+            if (dto.NuevaPassword != dto.ConfirmarPassword)
+                return Result.Fail("La contraseña y su confirmación no coinciden.");
+
+            // Validar token
+            UsuarioToken? token = _usuarioTokenService.ValidarToken(dto.Token, "ACTIVAR_CUENTA");
+            if (token == null)
+                return Result.Fail("El token de activación es inválido o ha expirado.");
+
+            // Obtener usuario
+            Usuario? usuario = _repository.GetById(token.UsuarioIdUsuario);
+            if (usuario == null)
+                return Result.Fail("El usuario no existe.");
+
+            // Validar complejidad de contraseña
+            Result resultadoValidacion = _validadorContraseña.ValidarComplexidad(dto.NuevaPassword);
+            if (!resultadoValidacion.IsSuccess)
+                return resultadoValidacion;
+
+            // Hash de la nueva contraseña
+            string passwordHash = PasswordHelper.Hash(dto.NuevaPassword);
+
+            // Actualizar contraseña y marcar must_change_password como 0
+            int filasAfectadas = _repository.CambiarPassword(usuario.IdUsuario, passwordHash, false, usuario.IdUsuario);
+            if (filasAfectadas <= 0)
+                return Result.Fail("No se pudo activar la cuenta.");
+
+            // Marcar token como usado
+            Result resultadoMarcarUsado = _usuarioTokenService.MarcarComoUsado(token.IdUsuarioToken);
+            if (!resultadoMarcarUsado.IsSuccess)
+                Console.WriteLine($"Advertencia: No se pudo marcar el token como usado: {resultadoMarcarUsado.Error}");
 
             return Result.Ok();
         }

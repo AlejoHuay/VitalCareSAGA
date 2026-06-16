@@ -1,0 +1,575 @@
+@page "/Auth/ActivarCuenta"
+@model FrontendVCare.Pages.Auth.ActivarCuentaModel
+
+@{
+    ViewData["Title"] = "Activar Cuenta";
+}
+
+<link rel="stylesheet"
+      href="~/css/activar-cuenta.css"
+      asp-append-version="true" />
+
+<main class="activation-page">
+    <section class="activation-card">
+
+        @if (!string.IsNullOrWhiteSpace(Model.MensajeExito))
+        {
+            <div class="success-state" role="status">
+                <div class="success-icon" aria-hidden="true">
+                    ✓
+                </div>
+
+                <h1>Cuenta activada correctamente</h1>
+
+                <p>@Model.MensajeExito</p>
+
+                <a href="/Auth/Login"
+                   class="btn-activate success-link">
+                    Ir al inicio de sesión
+                </a>
+            </div>
+        }
+        else
+        {
+            <header class="activation-header">
+                <div class="activation-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"
+                         width="30"
+                         height="30"
+                         fill="currentColor">
+                        <path d="M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V6Zm7 13H7v-9h10v9Z" />
+                    </svg>
+                </div>
+
+                <span class="activation-step">
+                    ACTIVACIÓN DE CUENTA
+                </span>
+
+                <h1>Crea tu nueva contraseña</h1>
+
+                <p>
+                    Ingresa una contraseña segura para completar
+                    la activación de tu cuenta.
+                </p>
+            </header>
+
+            @if (!string.IsNullOrWhiteSpace(Model.MensajeError))
+            {
+                <div class="activation-alert" role="alert">
+                    <span class="alert-icon" aria-hidden="true">!</span>
+
+                    <div>
+                        <strong>No se pudo activar la cuenta</strong>
+                        <p>@Model.MensajeError</p>
+                    </div>
+                </div>
+            }
+
+            <form method="post"
+                  id="activationForm"
+                  class="activation-form"
+                  novalidate>
+
+                <div asp-validation-summary="ModelOnly"
+                     class="validation-summary">
+                </div>
+
+                <!-- Nueva contraseña -->
+                <div class="activation-form-group">
+
+                    <label for="nuevaPassword"
+                           class="activation-label">
+                        Nueva contraseña
+                    </label>
+
+                    <div id="newPasswordContainer"
+                         class="password-container">
+
+                        <span class="password-lock-icon"
+                              aria-hidden="true">
+
+                            <svg viewBox="0 0 24 24"
+                                 width="19"
+                                 height="19"
+                                 fill="currentColor">
+                                <path d="M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V6Zm7 13H7v-9h10v9Z" />
+                            </svg>
+                        </span>
+
+                        <input asp-for="ActivarRequest.NuevaPassword"
+                               id="nuevaPassword"
+                               type="password"
+                               class="password-input"
+                               placeholder="Ingresa tu nueva contraseña"
+                               autocomplete="new-password"
+                               aria-describedby="passwordMessage"
+                               required />
+
+                        <button type="button"
+                                class="toggle-password"
+                                data-target="nuevaPassword"
+                                aria-label="Mostrar contraseña">
+
+                            <svg class="eye-open"
+                                 viewBox="0 0 24 24"
+                                 width="21"
+                                 height="21"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round"
+                                 aria-hidden="true">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+
+                            <svg class="eye-closed is-hidden"
+                                 viewBox="0 0 24 24"
+                                 width="21"
+                                 height="21"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round"
+                                 aria-hidden="true">
+                                <path d="M3 3l18 18" />
+                                <path d="M10.6 10.7a2 2 0 0 0 2.7 2.7" />
+                                <path d="M9.9 4.2A10.7 10.7 0 0 1 12 4c6.5 0 10 8 10 8a17.5 17.5 0 0 1-3 4.1" />
+                                <path d="M6.6 6.7C3.7 8.7 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 4.1-.9" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div id="passwordMessage"
+                         class="field-message"
+                         aria-live="polite">
+                    </div>
+
+                    <span asp-validation-for="ActivarRequest.NuevaPassword"
+                          class="server-validation">
+                    </span>
+                </div>
+
+                <!-- Confirmar contraseña -->
+                <div class="activation-form-group">
+
+                    <label for="confirmarPassword"
+                           class="activation-label">
+                        Confirmar contraseña
+                    </label>
+
+                    <div id="confirmPasswordContainer"
+                         class="password-container">
+
+                        <span class="password-lock-icon"
+                              aria-hidden="true">
+
+                            <svg viewBox="0 0 24 24"
+                                 width="19"
+                                 height="19"
+                                 fill="currentColor">
+                                <path d="M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V6Zm7 13H7v-9h10v9Z" />
+                            </svg>
+                        </span>
+
+                        <input asp-for="ActivarRequest.ConfirmarPassword"
+                               id="confirmarPassword"
+                               type="password"
+                               class="password-input"
+                               placeholder="Repite tu nueva contraseña"
+                               autocomplete="new-password"
+                               aria-describedby="confirmMessage"
+                               required />
+
+                        <button type="button"
+                                class="toggle-password"
+                                data-target="confirmarPassword"
+                                aria-label="Mostrar contraseña">
+
+                            <svg class="eye-open"
+                                 viewBox="0 0 24 24"
+                                 width="21"
+                                 height="21"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round"
+                                 aria-hidden="true">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+
+                            <svg class="eye-closed is-hidden"
+                                 viewBox="0 0 24 24"
+                                 width="21"
+                                 height="21"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round"
+                                 aria-hidden="true">
+                                <path d="M3 3l18 18" />
+                                <path d="M10.6 10.7a2 2 0 0 0 2.7 2.7" />
+                                <path d="M9.9 4.2A10.7 10.7 0 0 1 12 4c6.5 0 10 8 10 8a17.5 17.5 0 0 1-3 4.1" />
+                                <path d="M6.6 6.7C3.7 8.7 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 4.1-.9" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div id="confirmMessage"
+                         class="field-message"
+                         aria-live="polite">
+                    </div>
+
+                    <span asp-validation-for="ActivarRequest.ConfirmarPassword"
+                          class="server-validation">
+                    </span>
+                </div>
+
+                <input type="hidden"
+                       asp-for="ActivarRequest.Token" />
+
+                <button type="submit"
+                        id="activateButton"
+                        class="btn-activate"
+                        disabled>
+
+                    <span id="buttonText">
+                        Activar mi cuenta
+                    </span>
+
+                    <span aria-hidden="true">→</span>
+                </button>
+            </form>
+
+            <div class="back-login">
+                <span>¿Ya activaste tu cuenta?</span>
+
+                <a href="/Auth/Login">
+                    Volver al inicio de sesión
+                </a>
+            </div>
+        }
+    </section>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("activationForm");
+
+            if (!form) {
+                return;
+            }
+
+            const passwordInput =
+                document.getElementById("nuevaPassword");
+
+            const confirmInput =
+                document.getElementById("confirmarPassword");
+
+            const passwordContainer =
+                document.getElementById("newPasswordContainer");
+
+            const confirmContainer =
+                document.getElementById("confirmPasswordContainer");
+
+            const passwordMessage =
+                document.getElementById("passwordMessage");
+
+            const confirmMessage =
+                document.getElementById("confirmMessage");
+
+            const activateButton =
+                document.getElementById("activateButton");
+
+            const buttonText =
+                document.getElementById("buttonText");
+
+            let passwordStarted = false;
+            let confirmationStarted = false;
+
+            function evaluatePassword(password) {
+                return {
+                    length: password.length >= 8,
+                    uppercase: /[A-Z]/.test(password),
+                    lowercase: /[a-z]/.test(password),
+                    number: /[0-9]/.test(password)
+                };
+            }
+
+            function getMissingRequirements(rules) {
+                const missing = [];
+
+                if (!rules.length) {
+                    missing.push("mínimo 8 caracteres");
+                }
+
+                if (!rules.uppercase) {
+                    missing.push("una letra mayúscula");
+                }
+
+                if (!rules.lowercase) {
+                    missing.push("una letra minúscula");
+                }
+
+                if (!rules.number) {
+                    missing.push("un número");
+                }
+
+                return missing;
+            }
+
+            function clearValidation(container, message) {
+                container.classList.remove(
+                    "is-valid",
+                    "is-invalid"
+                );
+
+                message.classList.remove(
+                    "is-valid",
+                    "is-invalid"
+                );
+
+                message.textContent = "";
+            }
+
+            function validatePassword() {
+                const password = passwordInput.value;
+                const rules = evaluatePassword(password);
+
+                const isValid =
+                    rules.length &&
+                    rules.uppercase &&
+                    rules.lowercase &&
+                    rules.number;
+
+                if (!passwordStarted && password.length === 0) {
+                    clearValidation(
+                        passwordContainer,
+                        passwordMessage
+                    );
+
+                    return false;
+                }
+
+                const missingRequirements =
+                    getMissingRequirements(rules);
+
+                passwordContainer.classList.toggle(
+                    "is-valid",
+                    isValid
+                );
+
+                passwordContainer.classList.toggle(
+                    "is-invalid",
+                    !isValid
+                );
+
+                passwordMessage.classList.toggle(
+                    "is-valid",
+                    isValid
+                );
+
+                passwordMessage.classList.toggle(
+                    "is-invalid",
+                    !isValid
+                );
+
+                if (isValid) {
+                    passwordMessage.textContent =
+                        "La contraseña cumple todos los requisitos.";
+                } else {
+                    passwordMessage.textContent =
+                        "Falta: " +
+                        missingRequirements.join(", ") +
+                        ".";
+                }
+
+                return isValid;
+            }
+
+            function validateConfirmation() {
+                const password = passwordInput.value;
+                const confirmation = confirmInput.value;
+
+                const passwordsMatch =
+                    confirmation.length > 0 &&
+                    password === confirmation;
+
+                if (!confirmationStarted &&
+                    confirmation.length === 0) {
+
+                    clearValidation(
+                        confirmContainer,
+                        confirmMessage
+                    );
+
+                    return false;
+                }
+
+                confirmContainer.classList.toggle(
+                    "is-valid",
+                    passwordsMatch
+                );
+
+                confirmContainer.classList.toggle(
+                    "is-invalid",
+                    !passwordsMatch
+                );
+
+                confirmMessage.classList.toggle(
+                    "is-valid",
+                    passwordsMatch
+                );
+
+                confirmMessage.classList.toggle(
+                    "is-invalid",
+                    !passwordsMatch
+                );
+
+                if (confirmation.length === 0) {
+                    confirmMessage.textContent =
+                        "Debes confirmar la contraseña.";
+                } else if (passwordsMatch) {
+                    confirmMessage.textContent =
+                        "Las contraseñas coinciden.";
+                } else {
+                    confirmMessage.textContent =
+                        "Las contraseñas no coinciden.";
+                }
+
+                return passwordsMatch;
+            }
+
+            function updateButtonState() {
+                const rules =
+                    evaluatePassword(passwordInput.value);
+
+                const validPassword =
+                    rules.length &&
+                    rules.uppercase &&
+                    rules.lowercase &&
+                    rules.number;
+
+                const samePasswords =
+                    confirmInput.value.length > 0 &&
+                    passwordInput.value === confirmInput.value;
+
+                activateButton.disabled =
+                    !(validPassword && samePasswords);
+            }
+
+            passwordInput.addEventListener("input", function () {
+                passwordStarted = true;
+
+                validatePassword();
+
+                if (confirmInput.value.length > 0) {
+                    confirmationStarted = true;
+                    validateConfirmation();
+                }
+
+                updateButtonState();
+            });
+
+            passwordInput.addEventListener("blur", function () {
+                passwordStarted = true;
+                validatePassword();
+                updateButtonState();
+            });
+
+            confirmInput.addEventListener("input", function () {
+                confirmationStarted = true;
+                validateConfirmation();
+                updateButtonState();
+            });
+
+            confirmInput.addEventListener("blur", function () {
+                confirmationStarted = true;
+                validateConfirmation();
+                updateButtonState();
+            });
+
+            document.querySelectorAll(".toggle-password")
+                .forEach(function (button) {
+                    button.addEventListener("click", function () {
+                        const targetId =
+                            button.dataset.target;
+
+                        const input =
+                            document.getElementById(targetId);
+
+                        const eyeOpen =
+                            button.querySelector(".eye-open");
+
+                        const eyeClosed =
+                            button.querySelector(".eye-closed");
+
+                        const shouldShow =
+                            input.type === "password";
+
+                        input.type =
+                            shouldShow
+                                ? "text"
+                                : "password";
+
+                        eyeOpen.classList.toggle(
+                            "is-hidden",
+                            shouldShow
+                        );
+
+                        eyeClosed.classList.toggle(
+                            "is-hidden",
+                            !shouldShow
+                        );
+
+                        button.setAttribute(
+                            "aria-label",
+                            shouldShow
+                                ? "Ocultar contraseña"
+                                : "Mostrar contraseña"
+                        );
+                    });
+                });
+
+            form.addEventListener("submit", function (event) {
+                passwordStarted = true;
+                confirmationStarted = true;
+
+                const validPassword =
+                    validatePassword();
+
+                const validConfirmation =
+                    validateConfirmation();
+
+                if (!validPassword ||
+                    !validConfirmation ||
+                    !form.checkValidity()) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    if (!validPassword) {
+                        passwordInput.focus();
+                    } else {
+                        confirmInput.focus();
+                    }
+
+                    updateButtonState();
+                    return;
+                }
+
+                activateButton.disabled = true;
+                buttonText.textContent =
+                    "Activando cuenta...";
+            });
+        });
+    </script>
+}
