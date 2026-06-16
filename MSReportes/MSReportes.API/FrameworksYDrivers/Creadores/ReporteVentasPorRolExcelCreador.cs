@@ -105,44 +105,65 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
             worksheet.Range("A2:D2").Merge().Style.Font.FontColor = XLColor.FromHtml("#64748B");
 
             worksheet.Cell("A4").Value = "Rol";
-            worksheet.Cell("B4").Value = "Cantidad de ventas";
-            worksheet.Cell("C4").Value = "Total vendido (Bs)";
-            worksheet.Cell("D4").Value = "Participacion";
-            AplicarEncabezado(worksheet.Range("A4:D4"));
+            worksheet.Cell("B4").Value = "Usuario";
+            worksheet.Cell("C4").Value = "Cantidad de ventas";
+            worksheet.Cell("D4").Value = "Total vendido (Bs)";
+            worksheet.Cell("E4").Value = "Participacion";
+            AplicarEncabezado(worksheet.Range("A4:E4"));
 
             int fila = 5;
 
             foreach (ReporteVentasPorRolDto item in reporte.Detalle)
             {
-                decimal participacion = reporte.Resumen.TotalRecaudado > 0
+                decimal participacionRol = reporte.Resumen.TotalRecaudado > 0
                     ? item.TotalRecaudado / reporte.Resumen.TotalRecaudado
                     : 0;
 
                 worksheet.Cell(fila, 1).Value = item.Rol;
-                worksheet.Cell(fila, 2).Value = item.CantidadVentas;
-                worksheet.Cell(fila, 3).Value = item.TotalRecaudado;
-                worksheet.Cell(fila, 4).Value = participacion;
-                worksheet.Cell(fila, 3).Style.NumberFormat.Format = "#,##0.00";
-                worksheet.Cell(fila, 4).Style.NumberFormat.Format = "0.0%";
+                worksheet.Cell(fila, 2).Value = "Total del rol";
+                worksheet.Cell(fila, 3).Value = item.CantidadVentas;
+                worksheet.Cell(fila, 4).Value = item.TotalRecaudado;
+                worksheet.Cell(fila, 5).Value = participacionRol;
+                worksheet.Range(fila, 1, fila, 5).Style.Font.SetBold();
+                worksheet.Range(fila, 1, fila, 5).Style.Fill.BackgroundColor = XLColor.FromHtml("#F8FAFC");
+                worksheet.Cell(fila, 4).Style.NumberFormat.Format = "#,##0.00";
+                worksheet.Cell(fila, 5).Style.NumberFormat.Format = "0.0%";
                 fila++;
+
+                foreach (ReporteVentasPorUsuarioDto usuario in item.Usuarios)
+                {
+                    decimal participacionUsuario = item.TotalRecaudado > 0
+                        ? usuario.TotalRecaudado / item.TotalRecaudado
+                        : 0;
+
+                    worksheet.Cell(fila, 1).Value = item.Rol;
+                    worksheet.Cell(fila, 2).Value = usuario.NombreUsuario;
+                    worksheet.Cell(fila, 3).Value = usuario.CantidadVentas;
+                    worksheet.Cell(fila, 4).Value = usuario.TotalRecaudado;
+                    worksheet.Cell(fila, 5).Value = participacionUsuario;
+                    worksheet.Cell(fila, 4).Style.NumberFormat.Format = "#,##0.00";
+                    worksheet.Cell(fila, 5).Style.NumberFormat.Format = "0.0%";
+                    fila++;
+                }
             }
 
             worksheet.Cell(fila, 1).Value = "TOTAL";
-            worksheet.Cell(fila, 2).Value = reporte.Resumen.TotalVentas;
-            worksheet.Cell(fila, 3).Value = reporte.Resumen.TotalRecaudado;
-            worksheet.Cell(fila, 4).Value = reporte.Resumen.TotalRecaudado > 0 ? 1 : 0;
-            worksheet.Range(fila, 1, fila, 4).Style.Font.SetBold();
-            worksheet.Range(fila, 1, fila, 4).Style.Fill.BackgroundColor = XLColor.FromHtml("#F1F5F9");
-            worksheet.Cell(fila, 3).Style.NumberFormat.Format = "#,##0.00";
-            worksheet.Cell(fila, 4).Style.NumberFormat.Format = "0.0%";
+            worksheet.Cell(fila, 2).Value = "Todos los roles";
+            worksheet.Cell(fila, 3).Value = reporte.Resumen.TotalVentas;
+            worksheet.Cell(fila, 4).Value = reporte.Resumen.TotalRecaudado;
+            worksheet.Cell(fila, 5).Value = reporte.Resumen.TotalRecaudado > 0 ? 1 : 0;
+            worksheet.Range(fila, 1, fila, 5).Style.Font.SetBold();
+            worksheet.Range(fila, 1, fila, 5).Style.Fill.BackgroundColor = XLColor.FromHtml("#F1F5F9");
+            worksheet.Cell(fila, 4).Style.NumberFormat.Format = "#,##0.00";
+            worksheet.Cell(fila, 5).Style.NumberFormat.Format = "0.0%";
 
-            var usedRange = worksheet.Range(4, 1, fila, 4);
+            var usedRange = worksheet.Range(4, 1, fila, 5);
             usedRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
             usedRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
             usedRange.Style.Border.OutsideBorderColor = XLColor.FromHtml("#CBD5E1");
             usedRange.Style.Border.InsideBorderColor = XLColor.FromHtml("#CBD5E1");
 
-            worksheet.Columns("A:D").AdjustToContents();
+            worksheet.Columns("A:E").AdjustToContents();
         }
 
         private static void AgregarTarjetaResumen(IXLWorksheet worksheet, string celda, string titulo, string valor)

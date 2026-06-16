@@ -141,7 +141,7 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
 
                             table.Header(header =>
                             {
-                                AgregarCeldaEncabezado(header.Cell(), "Rol");
+                                AgregarCeldaEncabezado(header.Cell(), "Rol / Usuario");
                                 AgregarCeldaEncabezado(header.Cell(), "Ventas");
                                 AgregarCeldaEncabezado(header.Cell(), "Total vendido");
                                 AgregarCeldaEncabezado(header.Cell(), "Participacion");
@@ -153,10 +153,22 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
                                     ? item.TotalRecaudado / reporte.Resumen.TotalRecaudado * 100
                                     : 0;
 
-                                AgregarCelda(table.Cell(), item.Rol);
-                                AgregarCeldaCentrada(table.Cell(), item.CantidadVentas.ToString());
-                                AgregarCeldaDerecha(table.Cell(), $"Bs {item.TotalRecaudado:N2}");
-                                AgregarCeldaDerecha(table.Cell(), $"{participacion:N1}%");
+                                AgregarCeldaGrupo(table.Cell(), item.Rol);
+                                AgregarCeldaGrupoCentrada(table.Cell(), item.CantidadVentas.ToString());
+                                AgregarCeldaGrupoDerecha(table.Cell(), $"Bs {item.TotalRecaudado:N2}");
+                                AgregarCeldaGrupoDerecha(table.Cell(), $"{participacion:N1}%");
+
+                                foreach (ReporteVentasPorUsuarioDto usuario in item.Usuarios)
+                                {
+                                    decimal participacionUsuario = item.TotalRecaudado > 0
+                                        ? usuario.TotalRecaudado / item.TotalRecaudado * 100
+                                        : 0;
+
+                                    AgregarCeldaDetalle(table.Cell(), usuario.NombreUsuario);
+                                    AgregarCeldaDetalleCentrada(table.Cell(), usuario.CantidadVentas.ToString());
+                                    AgregarCeldaDetalleDerecha(table.Cell(), $"Bs {usuario.TotalRecaudado:N2}");
+                                    AgregarCeldaDetalleDerecha(table.Cell(), $"{participacionUsuario:N1}% del rol");
+                                }
                             }
 
                             AgregarCeldaTotal(table.Cell(), "TOTAL");
@@ -212,17 +224,32 @@ namespace MSReportes.API.FrameworksYDrivers.Creadores
                 .SemiBold();
         }
 
-        private static void AgregarCelda(IContainer container, string texto)
+        private static void AgregarCeldaGrupo(IContainer container, string texto)
         {
-            container.Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Text(texto);
+            container.Background(Colors.Grey.Lighten5).Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Text(texto).Bold();
         }
 
-        private static void AgregarCeldaCentrada(IContainer container, string texto)
+        private static void AgregarCeldaGrupoCentrada(IContainer container, string texto)
+        {
+            container.Background(Colors.Grey.Lighten5).Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).AlignCenter().Text(texto).Bold();
+        }
+
+        private static void AgregarCeldaGrupoDerecha(IContainer container, string texto)
+        {
+            container.Background(Colors.Grey.Lighten5).Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).AlignRight().Text(texto).Bold();
+        }
+
+        private static void AgregarCeldaDetalle(IContainer container, string texto)
+        {
+            container.Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).PaddingLeft(16).Text(texto);
+        }
+
+        private static void AgregarCeldaDetalleCentrada(IContainer container, string texto)
         {
             container.Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).AlignCenter().Text(texto);
         }
 
-        private static void AgregarCeldaDerecha(IContainer container, string texto)
+        private static void AgregarCeldaDetalleDerecha(IContainer container, string texto)
         {
             container.Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).AlignRight().Text(texto);
         }
